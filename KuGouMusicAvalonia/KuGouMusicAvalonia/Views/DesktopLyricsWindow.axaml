@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+        xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="760" d:DesignHeight="150"
+        x:Class="KuGouMusicAvalonia.Views.DesktopLyricsWindow"
+        x:DataType="vm:DesktopLyricsViewModel"
+        x:CompileBindings="True"
+        Width="760"
+        Height="150"
+        MinWidth="420"
+        MinHeight="112"
+        CanResize="True"
+        Topmost="True"
+        ShowInTaskbar="False"
+        WindowDecorations="None"
+        WindowStartupLocation="CenterScreen"
+        TransparencyLevelHint="AcrylicBlur,Transparent"
+        Background="Transparent">
+  <Border CornerRadius="24" Background="#CC141010" BorderBrush="#55FFFFFF" BorderThickness="1" BoxShadow="0 10 32 #AA000000" PointerPressed="OnDragWindow">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="22,16,22,14">
+      <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+        <Grid ColumnDefinitions="Auto,*,140" ColumnSpacing="10" VerticalAlignment="Center" ClipToBounds="True">
+          <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource MusicPrimaryBrush}" />
+          <lumina:LuminaAutoScrollText Grid.Column="1" Text="{Binding Player.CurrentTitle}" FontSize="13" FontWeight="Bold" Foreground="#E8FFFFFF" HorizontalAlignment="Stretch" />
+          <lumina:LuminaAutoScrollText Grid.Column="2" Text="{Binding Player.CurrentArtist}" FontSize="12" Foreground="#99FFFFFF" HorizontalAlignment="Stretch" />
+        </Grid>
+        <TextBlock Grid.Column="1" Text="拖动调整位置" FontSize="11" Foreground="#66FFFFFF" VerticalAlignment="Center" />
+        <Button Grid.Column="2" Width="28" Height="28" CornerRadius="14" Padding="0" Background="#22FFFFFF" BorderThickness="0" Click="OnCloseWindow" ToolTip.Tip="关闭">
+          <icons:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="#CCFFFFFF" />
+        </Button>
+      </Grid>
+
+      <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="6">
+        <TextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="30" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" />
+        <TextBlock Text="{Binding Lyrics.NextLineText}" FontSize="16" FontWeight="Bold" Foreground="#B8FFFFFF" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" />
+      </StackPanel>
+
+      <Border Grid.Row="2" Height="2" CornerRadius="1" Background="#24FFFFFF">
+        <ProgressBar Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress}" Height="2" Background="Transparent" Foreground="{DynamicResource MusicPrimaryBrush}" />
+      </Border>
+    </Grid>
+  </Border>
+</Window>

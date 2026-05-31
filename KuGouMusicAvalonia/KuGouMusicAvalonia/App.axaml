@@ -1,0 +1,98 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:KuGouMusicAvalonia.Converters"
+             xmlns:local="using:KuGouMusicAvalonia"
+             xmlns:lumina="clr-namespace:LuminaUI;assembly=LuminaUI"
+             xmlns:luminactrls="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="KuGouMusicAvalonia.App"
+             RequestedThemeVariant="Dark">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <converters:EmptyStringToNullConverter x:Key="EmptyStringToNullConverter" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://KuGouMusicAvalonia/Styles/MusicTheme.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <lumina:LuminaTheme />
+        <icons:MaterialIconStyles />
+        <Style Selector="icons|MaterialIcon">
+            <Setter Property="Width" Value="26" />
+            <Setter Property="Height" Value="26" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button StackPanel">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button icons|MaterialIcon">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBox.MusicPillInput">
+            <Setter Property="Background" Value="{DynamicResource MusicSurfaceHighBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MusicOutlineBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource MusicTextBrush}" />
+            <Setter Property="PlaceholderForeground" Value="{DynamicResource MusicTextMutedBrush}" />
+        </Style>
+        <Style Selector="TextBox.MusicPillInput:pointerover /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="{DynamicResource MusicSurfaceHighBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MusicPrimaryBrush}" />
+        </Style>
+        <Style Selector="TextBox.MusicPillInput:focus /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="{DynamicResource MusicPrimaryBrush}" />
+            <Setter Property="BoxShadow" Value="0 0 0 3 #33FE5552" />
+        </Style>
+        <Style Selector="TextBox.MusicSearchBox">
+            <Setter Property="MinHeight" Value="48" />
+            <Setter Property="CornerRadius" Value="24" />
+            <Setter Property="FontSize" Value="15" />
+        </Style>
+        <Style Selector="luminactrls|LuminaAutoScrollText">
+            <Setter Property="MinHeight" Value="18" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="luminactrls|LuminaAutoScrollText.CompactLine">
+            <Setter Property="MinHeight" Value="16" />
+        </Style>
+        <Style Selector="luminactrls|LuminaAutoScrollText /template/ TextBlock#PART_PrimaryText">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="luminactrls|LuminaAutoScrollText /template/ TextBlock#PART_SecondaryText">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="luminactrls|LuminaAutoScrollText.CenterWhenIdle /template/ StackPanel#PART_Track">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="luminactrls|LuminaAutoScrollText.CenterWhenIdle:scrolling /template/ StackPanel#PART_Track">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style Selector="Border.spinning-cover.playing">
+            <Style.Animations>
+                <Animation Duration="0:0:18"
+                           IterationCount="Infinite"
+                           PlaybackDirection="Normal">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="RotateTransform.Angle" Value="0" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="RotateTransform.Angle" Value="360" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </Application.Styles>
+</Application>

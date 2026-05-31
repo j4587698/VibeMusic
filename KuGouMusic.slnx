@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="KuGouLiteSdk/KuGouLiteSdk.csproj" />
+  <Project Path="KuGouMusicAvalonia/KuGouMusicAvalonia/KuGouMusicAvalonia.csproj" />
+  <Project Path="KuGouMusicAvalonia/KuGouMusicAvalonia.Desktop/KuGouMusicAvalonia.Desktop.csproj" />
+  <Project Path="KuGouMusicAvalonia/KuGouMusicAvalonia.Android/KuGouMusicAvalonia.Android.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="KuGouMusicAvalonia/KuGouMusicAvalonia.iOS/KuGouMusicAvalonia.iOS.csproj">
+    <Deploy />
+  </Project>
+</Solution>

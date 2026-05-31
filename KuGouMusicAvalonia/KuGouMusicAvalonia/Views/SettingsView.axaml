@@ -1,0 +1,360 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="760"
+             x:Class="KuGouMusicAvalonia.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel"
+             x:CompileBindings="True">
+  <Grid>
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="20,20,20,30" Spacing="18">
+      <Border IsVisible="{Binding IsLoginPromptVisible}" CornerRadius="22" MinHeight="170" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="22" Margin="24">
+          <lumina:LuminaAvatar Content="K" Size="96" Background="{DynamicResource MusicPrimaryGradient}" Foreground="#68000A" FontSize="34" FontWeight="Black" />
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="10">
+            <TextBlock Text="酷狗账号" FontSize="30" FontWeight="Black" Foreground="White" />
+            <TextBlock Text="登录后同步头像、歌单、云盘和最近播放" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+            <Button Classes="Primary" Command="{Binding StartLoginCommand}" Height="42" CornerRadius="21" Background="{DynamicResource MusicPrimaryGradient}" Foreground="#68000A" Padding="18,0" HorizontalAlignment="Left">
+              <StackPanel Orientation="Horizontal" Spacing="9">
+                <icons:MaterialIcon Kind="Login" Width="24" Height="24" Foreground="#68000A" />
+                <TextBlock Text="登录" FontWeight="Black" Foreground="#68000A" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Grid IsVisible="{Binding IsLoggedInPanelVisible}">
+        <Border IsVisible="{Binding IsWideLayout}" CornerRadius="22" MinHeight="190" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
+          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="22" Margin="24">
+            <Border Width="104" Height="104" CornerRadius="52" Background="{DynamicResource MusicPrimaryGradient}" ClipToBounds="True">
+              <Grid>
+                <TextBlock Text="K" FontSize="38" FontWeight="Black" Foreground="#68000A" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <lumina:LuminaImage Source="{Binding UserAvatarUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+              </Grid>
+            </Border>
+
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8">
+              <lumina:LuminaAutoScrollText Text="{Binding UserDisplayName}" FontSize="30" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+              <TextBlock Text="{Binding UserIdText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              <TextBlock Text="{Binding UserExpireText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding UserProfileStatus}" FontSize="13" Foreground="{DynamicResource MusicTextMutedBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="10">
+              <Button Classes="Ghost Icon" Command="{Binding RefreshUserDataCommand}" Width="44" Height="44" ToolTip.Tip="同步资料">
+                <icons:MaterialIcon Kind="Sync" Width="25" Height="25" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              </Button>
+              <Button Classes="Outline" Command="{Binding ClearLoginCommand}" Height="38" CornerRadius="19" BorderBrush="#44FFFFFF" Background="#22000000" Padding="14,0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <icons:MaterialIcon Kind="Logout" Width="24" Height="24" Foreground="White" />
+                  <TextBlock Text="登出" Foreground="White" FontWeight="Bold" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <Border IsVisible="{Binding IsCompactLayout}" CornerRadius="22" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
+          <Grid RowDefinitions="Auto,Auto" RowSpacing="16" Margin="18">
+            <Grid ColumnDefinitions="82,*" ColumnSpacing="14">
+              <Border Width="78" Height="78" CornerRadius="39" Background="{DynamicResource MusicPrimaryGradient}" ClipToBounds="True" VerticalAlignment="Top">
+                <Grid>
+                  <TextBlock Text="K" FontSize="28" FontWeight="Black" Foreground="#68000A" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <lumina:LuminaImage Source="{Binding UserAvatarUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                </Grid>
+              </Border>
+
+              <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center" MinWidth="0">
+                <lumina:LuminaAutoScrollText Text="{Binding UserDisplayName}" FontSize="24" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+                <TextBlock Text="{Binding UserIdText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding UserExpireText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
+                <TextBlock Text="{Binding UserProfileStatus}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" TextWrapping="Wrap" MaxLines="2" />
+              </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+              <Button Classes="Ghost Icon" Command="{Binding RefreshUserDataCommand}" Width="42" Height="42" ToolTip.Tip="同步资料">
+                <icons:MaterialIcon Kind="Sync" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              </Button>
+              <Button Classes="Outline" Command="{Binding ClearLoginCommand}" Height="38" CornerRadius="19" BorderBrush="#44FFFFFF" Background="#22000000" Padding="14,0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <icons:MaterialIcon Kind="Logout" Width="23" Height="23" Foreground="White" />
+                  <TextBlock Text="登出" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </Grid>
+
+      <Border IsVisible="{Binding IsLoggedInPanelVisible}" CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
+        <StackPanel Spacing="16">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock Text="我的资料" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <TextBlock Text="歌单、云盘/收藏和最近播放会随登录态刷新" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+            <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsProfileBusy}" Width="120" Height="4" VerticalAlignment="Center" />
+          </Grid>
+
+          <UniformGrid Columns="3">
+            <StackPanel Spacing="3" Margin="0,0,10,0">
+              <TextBlock Text="{Binding UserPlaylistCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              <TextBlock Text="歌单" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </StackPanel>
+            <StackPanel Spacing="3" Margin="0,0,10,0">
+              <TextBlock Text="{Binding UserCollectionCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              <TextBlock Text="云盘/收藏" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </StackPanel>
+            <StackPanel Spacing="3">
+              <TextBlock Text="{Binding UserHistoryCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              <TextBlock Text="最近播放" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </StackPanel>
+          </UniformGrid>
+
+          <StackPanel IsVisible="{Binding IsCompactLayout}" Spacing="10">
+            <TextBlock Text="最近同步内容" FontSize="16" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+            <ItemsControl ItemsSource="{Binding UserLibraryPreview}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:UserLibraryItem">
+                  <Grid ColumnDefinitions="42,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
+                    <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                      <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
+                      <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                      <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
+                    </StackPanel>
+                    <Border Grid.Column="2" CornerRadius="10" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="8,3" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Category}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                    </Border>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <Grid IsVisible="{Binding IsWideLayout}" ColumnDefinitions="*,*,*" ColumnSpacing="14">
+            <StackPanel Spacing="8">
+              <TextBlock Text="我的歌单" FontSize="16" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding UserPlaylists}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:UserLibraryItem">
+                      <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
+                        <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                          <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                          <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                          <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Spacing="8">
+              <TextBlock Text="云盘/收藏" FontSize="16" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding UserCollections}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:UserLibraryItem">
+                      <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
+                        <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                          <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                          <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                          <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Spacing="8">
+              <TextBlock Text="最近播放" FontSize="16" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding UserHistory}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:UserLibraryItem">
+                      <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
+                        <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                          <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                          <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                          <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
+                        </StackPanel>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <Border CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
+        <Grid RowDefinitions="Auto,Auto" RowSpacing="14">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock Text="畅听与 VIP 权益" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <TextBlock Text="{Binding VipStatus}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+            <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsVipBusy}" Width="120" Height="4" VerticalAlignment="Center" />
+          </Grid>
+
+          <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+            <CheckBox IsChecked="{Binding AutoReceiveVipBeforePlayback, Mode=TwoWay}" VerticalAlignment="Center">
+              <TextBlock Text="播放前自动检查并领取今日畅听/VIP" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
+            </CheckBox>
+            <Button Grid.Column="1" Classes="Outline" Command="{Binding RefreshVipStateCommand}" Height="40" CornerRadius="20" Padding="16,0">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="Refresh" Width="24" Height="24" Foreground="{DynamicResource MusicTextBrush}" />
+                <TextBlock Text="刷新" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" />
+              </StackPanel>
+            </Button>
+            <Button Grid.Column="2" Classes="Primary" Command="{Binding ClaimVipCommand}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Foreground="#68000A" Padding="16,0">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="Crown" Width="24" Height="24" Foreground="#68000A" />
+                <TextBlock Text="获取" Foreground="#68000A" FontWeight="Black" />
+              </StackPanel>
+            </Button>
+          </Grid>
+        </Grid>
+      </Border>
+
+      <Border CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
+        <StackPanel Spacing="16">
+          <TextBlock Text="设置" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+
+          <Grid ColumnDefinitions="180,*" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+            <TextBlock Text="主题" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeModeOptions}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}" Height="40" />
+
+            <TextBlock Grid.Row="1" Text="边播边存" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+            <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding StreamWhileDownloading, Mode=TwoWay}" VerticalAlignment="Center">
+              <TextBlock Text="已下载歌曲优先本地播放；未下载时边播边保存" Foreground="{DynamicResource MusicTextBrush}" />
+            </CheckBox>
+
+            <TextBlock Grid.Row="2" Text="存储位置" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+            <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+              <TextBox Grid.Column="0" Classes="Pill MusicPillInput" Text="{Binding DownloadDirectory, Mode=TwoWay}" Height="40" />
+              <Button Grid.Column="1" Classes="Outline" Height="40" CornerRadius="20" Padding="14,0" Command="{Binding PickDownloadDirectoryCommand}" ToolTip.Tip="选择下载目录">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                  <icons:MaterialIcon Kind="FolderOpen" Width="20" Height="20" Foreground="{DynamicResource MusicTextBrush}" />
+                  <TextBlock Text="选择" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </Grid>
+
+            <TextBlock Grid.Row="3" Text="默认播放比特率" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+            <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding PlaybackQualityOptions}" SelectedItem="{Binding DefaultPlaybackQuality, Mode=TwoWay}" Height="40" />
+          </Grid>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+
+  <Grid IsVisible="{Binding IsLoginDialogOpen}" ZIndex="40">
+    <Border Background="#A6000000" lumina:LuminaCommand.TappedCommand="{Binding CloseLoginDialogCommand}" />
+    <Border Width="{Binding LoginDialogWidth}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            CornerRadius="22"
+            Background="{DynamicResource MusicSurfaceBrush}"
+            BorderBrush="{DynamicResource MusicOutlineBrush}"
+            BorderThickness="1"
+            BoxShadow="{DynamicResource MusicFloatingShadow}"
+            ClipToBounds="True">
+      <Grid RowDefinitions="Auto,*">
+        <Grid Margin="18,16,12,10" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+          <StackPanel Spacing="2">
+            <TextBlock Text="登录酷狗账号" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+            <TextBlock Text="{Binding LoginStatus}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" TextWrapping="Wrap" MaxLines="2" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="Ghost Icon" Command="{Binding CloseLoginDialogCommand}" Width="38" Height="38" ToolTip.Tip="关闭登录">
+            <icons:MaterialIcon Kind="Close" Width="22" Height="22" Foreground="{DynamicResource MusicTextSoftBrush}" />
+          </Button>
+        </Grid>
+
+        <TabControl Grid.Row="1" SelectedIndex="{Binding LoginTabIndex, Mode=TwoWay}" Margin="0,0,0,12">
+          <TabItem Header="二维码">
+            <StackPanel Margin="18,14,18,6" Spacing="14">
+              <Border Width="220" Height="220" CornerRadius="18" Background="White" HorizontalAlignment="Center" Padding="10" ClipToBounds="True">
+                <Grid>
+                  <TextBlock Text="QR" FontSize="42" FontWeight="Black" Foreground="#3368000A" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !HasQrCode}" />
+                  <Image Source="{Binding QrCodeImage}" Stretch="Uniform" IsVisible="{Binding HasQrCode}" />
+                </Grid>
+              </Border>
+
+              <StackPanel Spacing="8">
+                <TextBlock Text="{Binding QrStatus}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextAlignment="Center" TextWrapping="Wrap" />
+                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsQrPolling}" Width="160" Height="4" HorizontalAlignment="Center" />
+              </StackPanel>
+
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Classes="Primary" Command="{Binding StartQrLoginCommand}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Foreground="#68000A" Padding="14,0">
+                  <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                    <icons:MaterialIcon Kind="Qrcode" Width="22" Height="22" Foreground="#68000A" />
+                    <TextBlock Text="生成二维码" FontWeight="Black" Foreground="#68000A" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="1" Classes="Ghost" Command="{Binding CancelQrLoginCommand}" Height="40" CornerRadius="20" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
+                  <TextBlock Text="取消扫码" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Button>
+              </Grid>
+            </StackPanel>
+          </TabItem>
+
+          <TabItem Header="手机号">
+            <StackPanel Margin="18,16,18,8" Spacing="14">
+              <TextBox Classes="Pill MusicPillInput" Text="{Binding PhoneNumber, Mode=TwoWay}" PlaceholderText="手机号" Height="42" />
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <TextBox Classes="Pill MusicPillInput" Text="{Binding VerifyCode, Mode=TwoWay}" PlaceholderText="验证码" Height="42" />
+                <Button Grid.Column="1" Classes="Outline" Command="{Binding SendCodeCommand}" Height="42" CornerRadius="21" Padding="14,0">
+                  <TextBlock Text="发送验证码" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+                </Button>
+              </Grid>
+
+              <Button Classes="Primary" Command="{Binding LoginByPhoneCommand}" Height="42" CornerRadius="21" Background="{DynamicResource MusicPrimaryGradient}" Foreground="#68000A">
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                  <icons:MaterialIcon Kind="Login" Width="22" Height="22" Foreground="#68000A" />
+                  <TextBlock Text="登录" FontWeight="Black" Foreground="#68000A" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </TabItem>
+        </TabControl>
+      </Grid>
+    </Border>
+  </Grid>
+  </Grid>
+</UserControl>

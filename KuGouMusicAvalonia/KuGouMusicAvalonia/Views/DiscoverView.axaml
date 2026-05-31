@@ -1,0 +1,127 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="KuGouMusicAvalonia.Views.DiscoverView"
+             x:DataType="vm:DiscoverViewModel"
+             x:CompileBindings="True">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="20,20,20,30" Spacing="24">
+      <Border CornerRadius="22" MinHeight="210" ClipToBounds="True" Background="{DynamicResource MusicHeroGradient}" BoxShadow="{DynamicResource MusicFloatingShadow}">
+        <Grid>
+          <Border Background="#70000000" />
+          <Grid ColumnDefinitions="*,144" ColumnSpacing="20" Margin="24" VerticalAlignment="Bottom">
+            <StackPanel Spacing="10" VerticalAlignment="Bottom">
+              <TextBlock Text="DISCOVER" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              <lumina:LuminaAutoScrollText Text="{Binding HeroTitle}" FontSize="34" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding HeroArtist}" FontSize="15" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+              <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
+                <Button Classes="Primary" Command="{Binding PlayFeaturedSongCommand}" IsEnabled="{Binding HasFeaturedSong}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Foreground="#68000A" Padding="18,0">
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <icons:MaterialIcon Kind="Play" Foreground="#68000A" Width="22" Height="22" />
+                    <TextBlock Text="立即播放" FontWeight="Bold" Foreground="#68000A" />
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+            </StackPanel>
+
+            <Border Grid.Column="1" Width="128" Height="128" CornerRadius="64" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" BoxShadow="{DynamicResource MusicSoftShadow}" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+              <lumina:LuminaImage Source="{Binding HeroCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+            </Border>
+          </Grid>
+        </Grid>
+      </Border>
+
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <StackPanel>
+          <TextBlock Text="新歌速递" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+          <TextBlock Text="{Binding StatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="Primary" Command="{Binding PlayAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0">
+            <TextBlock Text="播放全部" FontWeight="Black" Foreground="#68000A" />
+          </Button>
+          <Button Classes="Ghost" Command="{Binding QueueAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
+            <TextBlock Text="加入队列" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      <StackPanel IsVisible="{Binding IsLoading}" HorizontalAlignment="Center" Margin="0,12" Spacing="10">
+        <ProgressBar IsIndeterminate="True" Width="160" Height="4" />
+        <TextBlock Text="正在加载音乐库..." Foreground="{DynamicResource MusicTextSoftBrush}" />
+      </StackPanel>
+
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+        <ItemsControl ItemsSource="{Binding NewSongs}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VirtualizingStackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="kugou:KugouSong">
+              <lumina:LuminaCard Width="150" Height="208" Margin="0,0,14,6" Padding="10" Classes="Glass Interactive" CornerRadius="14" Cursor="Hand"
+                                 lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:DiscoverViewModel)DataContext).PlaySongCommand}"
+                                 lumina:LuminaCommand.TappedCommandParameter="{Binding}">
+                <StackPanel Spacing="12">
+                  <Border Width="130" Height="130" CornerRadius="12" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+                    <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                  </Border>
+                  <StackPanel Spacing="4">
+                    <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Black" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                    <lumina:LuminaAutoScrollText Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+                  </StackPanel>
+                </StackPanel>
+              </lumina:LuminaCard>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+        <StackPanel>
+          <TextBlock Text="猜你喜欢 FM" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+          <TextBlock Text="{Binding PersonalFmStatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
+        </StackPanel>
+        <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsPersonalFmLoading}" Width="100" Height="4" VerticalAlignment="Center" />
+      </Grid>
+
+      <Border CornerRadius="20" Background="{DynamicResource MusicSurfaceBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="14" ClipToBounds="True">
+        <Grid ColumnDefinitions="96,*,Auto" ColumnSpacing="14">
+          <Border Width="96" Height="96" CornerRadius="18" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" HorizontalAlignment="Left">
+            <lumina:LuminaImage Source="{Binding PersonalFmCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
+          </Border>
+
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6" MinWidth="0">
+            <TextBlock Text="私人电台" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
+            <lumina:LuminaAutoScrollText Text="{Binding PersonalFmTitle}" FontSize="20" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+            <lumina:LuminaAutoScrollText Text="{Binding PersonalFmArtist}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+            <lumina:LuminaAutoScrollText Text="{Binding PersonalFmAlbumText}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
+          </StackPanel>
+
+          <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Right">
+            <Button Classes="Primary" Command="{Binding StartPersonalFmCommand}" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0" lumina:LuminaButton.IsLoading="{Binding IsPersonalFmLoading}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="Play" Width="20" Height="20" Foreground="#68000A" />
+                <TextBlock Text="播放 FM" FontWeight="Black" Foreground="#68000A" />
+              </StackPanel>
+            </Button>
+            <Button Classes="Ghost" Command="{Binding NextPersonalFmCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="SkipNext" Width="20" Height="20" Foreground="{DynamicResource MusicTextBrush}" />
+                <TextBlock Text="下一首" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

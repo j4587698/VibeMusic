@@ -1,0 +1,27 @@
+# Build outputs.
+**/[Bb]in/
+**/[Oo]bj/
+artifacts/
+publish/
+
+# IDE and user-specific files.
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+*.userprefs
+
+# Logs and transient files.
+*.log
+*.tmp
+*.cache
+TestResults/
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# NuGet package outputs.
+*.nupkg
+*.snupkg

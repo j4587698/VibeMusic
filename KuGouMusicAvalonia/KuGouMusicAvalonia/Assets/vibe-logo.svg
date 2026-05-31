@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="VIBE logo">
+  <defs>
+    <linearGradient id="bg" x1="118" y1="118" x2="906" y2="906" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2A2A2A" />
+      <stop offset="0.42" stop-color="#131313" />
+      <stop offset="1" stop-color="#251313" />
+    </linearGradient>
+    <linearGradient id="hot" x1="268" y1="236" x2="756" y2="788" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFB3AD" />
+      <stop offset="0.5" stop-color="#FE5552" />
+      <stop offset="1" stop-color="#B72026" />
+    </linearGradient>
+    <linearGradient id="blue" x1="318" y1="762" x2="756" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#94CCFF" />
+      <stop offset="1" stop-color="#00639A" />
+    </linearGradient>
+    <radialGradient id="disc" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#39302F" />
+      <stop offset="0.48" stop-color="#1C1B1B" />
+      <stop offset="1" stop-color="#090909" />
+    </radialGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="36" stdDeviation="42" flood-color="#000000" flood-opacity="0.46" />
+    </filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="0" stdDeviation="18" flood-color="#FE5552" flood-opacity="0.42" />
+    </filter>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="216" fill="url(#bg)" />
+  <path d="M160 731C248 873 408 933 574 889C756 841 884 677 884 490C884 312 772 156 612 96" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.08" />
+  <path d="M128 307C226 141 432 67 622 129C770 177 882 302 916 452" fill="none" stroke="#FE5552" stroke-width="28" stroke-linecap="round" opacity="0.12" />
+
+  <g filter="url(#softShadow)">
+    <circle cx="512" cy="512" r="302" fill="#181616" opacity="0.9" />
+    <circle cx="512" cy="512" r="268" fill="url(#disc)" stroke="#5A403E" stroke-width="18" />
+    <circle cx="512" cy="512" r="202" fill="none" stroke="#FFFFFF" stroke-width="10" opacity="0.05" />
+    <circle cx="512" cy="512" r="138" fill="none" stroke="#FFB3AD" stroke-width="12" opacity="0.16" />
+    <circle cx="512" cy="512" r="72" fill="#131313" stroke="#5A403E" stroke-width="12" />
+  </g>
+
+  <g fill="none" stroke-linecap="round" filter="url(#glow)">
+    <path d="M681 333C746 386 783 450 783 512C783 575 746 639 681 692" stroke="url(#hot)" stroke-width="56" />
+    <path d="M760 251C859 332 914 423 914 512C914 602 859 693 760 773" stroke="url(#blue)" stroke-width="38" opacity="0.9" />
+    <path d="M342 366C298 406 272 459 272 512C272 566 298 619 342 658" stroke="#FFB3AD" stroke-width="38" opacity="0.42" />
+  </g>
+
+  <g filter="url(#softShadow)">
+    <path d="M450 374C450 349 478 334 500 348L675 459C713 483 713 541 675 565L500 676C478 690 450 675 450 650V374Z" fill="url(#hot)" />
+    <path d="M493 426L634 512L493 598V426Z" fill="#68000A" opacity="0.26" />
+  </g>
+
+  <g opacity="0.86">
+    <rect x="253" y="710" width="30" height="92" rx="15" fill="#FE5552" />
+    <rect x="303" y="674" width="30" height="128" rx="15" fill="#FFB3AD" />
+    <rect x="353" y="724" width="30" height="78" rx="15" fill="#94CCFF" />
+  </g>
+
+  <path d="M247 247L332 186" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" opacity="0.14" />
+  <path d="M206 330L250 300" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" opacity="0.12" />
+</svg>

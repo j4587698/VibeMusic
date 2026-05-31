@@ -1,0 +1,147 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="KuGouMusicAvalonia.Views.ArtistsView"
+             x:DataType="vm:ArtistsViewModel"
+             x:CompileBindings="True">
+  <ListBox x:Name="ArtistsPageList"
+           ItemsSource="{Binding PageItems}"
+           Background="Transparent"
+           BorderThickness="0"
+           Padding="0"
+           Focusable="False"
+           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+           ScrollViewer.VerticalScrollBarVisibility="Auto">
+    <ListBox.ItemsPanel>
+      <ItemsPanelTemplate>
+        <VirtualizingStackPanel />
+      </ItemsPanelTemplate>
+    </ListBox.ItemsPanel>
+
+    <ListBox.Styles>
+      <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </ControlTemplate>
+        </Setter>
+      </Style>
+    </ListBox.Styles>
+
+    <ListBox.DataTemplates>
+      <DataTemplate DataType="vm:ArtistsHeaderSection">
+        <StackPanel Margin="20,20,20,8" Spacing="22">
+          <Border CornerRadius="24" MinHeight="190" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True" BoxShadow="{DynamicResource MusicFloatingShadow}">
+            <Grid Margin="24" ColumnDefinitions="*,156" ColumnSpacing="24">
+              <StackPanel VerticalAlignment="Center" Spacing="10">
+                <TextBlock Text="ARTISTS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <TextBlock Text="歌手" FontSize="36" FontWeight="Black" Foreground="White" />
+                <TextBlock Text="按地区、性别和音乐人分类浏览，点开歌手后进入独立详情页。" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
+                <StackPanel Orientation="Horizontal" Spacing="22" Margin="0,8,0,0">
+                  <StackPanel>
+                    <TextBlock Text="当前分类" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                    <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).SelectedCategoryName}" FontSize="22" FontWeight="Black" Foreground="White" />
+                  </StackPanel>
+                  <StackPanel>
+                    <TextBlock Text="已加载" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                    <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).VisibleArtistCountText}" FontSize="22" FontWeight="Black" Foreground="White" />
+                  </StackPanel>
+                </StackPanel>
+              </StackPanel>
+              <Border Grid.Column="1" Width="140" Height="140" CornerRadius="70" Background="#33000000" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <icons:MaterialIcon Kind="AccountMusic" Width="86" Height="86" Foreground="#55FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+            </Grid>
+          </Border>
+
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <StackPanel>
+              <TextBlock Text="歌手分类" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).StatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+              <ProgressBar IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).IsLoading}" Width="110" Height="4" VerticalAlignment="Center" />
+              <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).LoadArtistsCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
+                <TextBlock Text="刷新" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+              </Button>
+            </StackPanel>
+          </Grid>
+
+          <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).ArtistCategories}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:ArtistCategoryOption">
+                  <Button Classes="Ghost" Margin="0,0,10,4" Height="42" CornerRadius="21" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0"
+                          Command="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).SelectArtistCategoryCommand}"
+                          CommandParameter="{Binding}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <icons:MaterialIcon Kind="AccountMusic" Width="20" Height="20" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                      <TextBlock Text="{Binding Name}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+                    </StackPanel>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </StackPanel>
+      </DataTemplate>
+
+      <DataTemplate DataType="vm:ArtistCardRow">
+        <ItemsControl ItemsSource="{Binding Artists}" Margin="20,0,20,0">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="kugou:KugouArtist">
+              <lumina:LuminaCard Width="150" Height="208" Margin="0,0,10,12" Padding="10" Classes="Glass Interactive" CornerRadius="15" Cursor="Hand"
+                                 lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).OpenArtistCommand}"
+                                 lumina:LuminaCommand.TappedCommandParameter="{Binding}">
+                <StackPanel Spacing="12" HorizontalAlignment="Stretch">
+                  <Border Width="108" Height="108" CornerRadius="54" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" HorizontalAlignment="Center">
+                    <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                  </Border>
+                  <StackPanel Spacing="5">
+                    <lumina:LuminaAutoScrollText Classes="CenterWhenIdle" Text="{Binding Name}" FontWeight="Black" FontSize="14" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                    <TextBlock Text="{Binding Heat, StringFormat='热度 {0}'}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding FansCount, StringFormat='粉丝 {0}'}" FontSize="11" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </StackPanel>
+              </lumina:LuminaCard>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </DataTemplate>
+
+      <DataTemplate DataType="vm:ArtistsFooterSection">
+        <StackPanel HorizontalAlignment="Center" Spacing="10" Margin="20,8,20,30">
+          <ProgressBar IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).IsLoadingMore}" Width="120" Height="4" />
+          <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).LoadMoreCommand}" IsVisible="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).CanLoadMore}" Height="38" CornerRadius="19" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="18,0">
+            <TextBlock Text="加载更多" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+          </Button>
+        </StackPanel>
+      </DataTemplate>
+    </ListBox.DataTemplates>
+  </ListBox>
+</UserControl>

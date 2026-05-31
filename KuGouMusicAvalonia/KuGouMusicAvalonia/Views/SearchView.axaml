@@ -1,0 +1,149 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="KuGouMusicAvalonia.Views.SearchView"
+             x:DataType="vm:SearchViewModel"
+             x:CompileBindings="True">
+  <ListBox ItemsSource="{Binding PageItems}"
+           Background="Transparent"
+           BorderThickness="0"
+           Padding="0"
+           Focusable="False"
+           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+           ScrollViewer.VerticalScrollBarVisibility="Auto">
+    <ListBox.ItemsPanel>
+      <ItemsPanelTemplate>
+        <VirtualizingStackPanel />
+      </ItemsPanelTemplate>
+    </ListBox.ItemsPanel>
+    <ListBox.Styles>
+      <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </ControlTemplate>
+        </Setter>
+      </Style>
+    </ListBox.Styles>
+
+    <ListBox.DataTemplates>
+      <DataTemplate DataType="vm:SearchHeaderSection">
+        <StackPanel Margin="20,20,20,18" Spacing="22">
+          <StackPanel Spacing="10">
+            <TextBlock Text="搜索" FontSize="34" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+              <TextBox Classes="Pill Search MusicPillInput MusicSearchBox"
+                       Text="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).Keyword}"
+                       PlaceholderText="歌曲、艺人、专辑"
+                       KeyDown="OnSearchKeyDown">
+                <TextBox.InnerLeftContent>
+                  <Grid Width="40" Height="40">
+                    <icons:MaterialIcon Kind="Magnify" Width="23" Height="23" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Grid>
+                </TextBox.InnerLeftContent>
+              </TextBox>
+              <Button Grid.Column="1" Classes="Primary" Height="48" CornerRadius="24" Padding="20,0" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchCommand}" Background="{DynamicResource MusicPrimaryGradient}">
+                <TextBlock Text="搜索" Foreground="#68000A" FontWeight="Black" />
+              </Button>
+            </Grid>
+          </StackPanel>
+
+          <StackPanel Spacing="12">
+            <TextBlock Text="热门搜索" FontSize="18" FontWeight="Black" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).HotKeywords}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="sys:String">
+                  <Button Classes="Ghost" Margin="0,0,8,8" MinHeight="34" CornerRadius="17" Padding="14,0" Background="{DynamicResource MusicSurfaceHighBrush}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).UseKeywordCommand}" CommandParameter="{Binding}">
+                    <TextBlock Text="{Binding}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" FontWeight="SemiBold" />
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <Grid ColumnDefinitions="*,*" RowDefinitions="92,92,92" ColumnSpacing="12" RowSpacing="12">
+            <Border CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" ClipToBounds="True">
+              <TextBlock Text="流行 Pop" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
+            </Border>
+            <Border Grid.Column="1" CornerRadius="18" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+              <TextBlock Text="嘻哈 Hip-Hop" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
+            </Border>
+            <Border Grid.Row="1" CornerRadius="18" Background="#FF4A2221" ClipToBounds="True">
+              <TextBlock Text="摇滚 Rock" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
+            </Border>
+            <Border Grid.Row="1" Grid.Column="1" CornerRadius="18" Background="#FFC9A900" ClipToBounds="True">
+              <TextBlock Text="古典 Classic" FontSize="20" FontWeight="Black" Foreground="#221B00" Margin="16" VerticalAlignment="Bottom" />
+            </Border>
+            <Border Grid.Row="2" CornerRadius="18" Background="{DynamicResource MusicBlueGradient}" ClipToBounds="True">
+              <TextBlock Text="电子 EDM" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
+            </Border>
+            <Border Grid.Row="2" Grid.Column="1" CornerRadius="18" Background="#FF6B3B1F" ClipToBounds="True">
+              <TextBlock Text="爵士 Jazz" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
+            </Border>
+          </Grid>
+
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <StackPanel>
+              <TextBlock Text="搜索结果" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <TextBlock Text="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).StatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+              <Button Classes="Primary" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlayAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0">
+                <TextBlock Text="播放全部" FontWeight="Black" Foreground="#68000A" />
+              </Button>
+              <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).QueueAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
+                <TextBlock Text="加入队列" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+              </Button>
+              <ProgressBar IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).IsLoading}" Width="100" Height="4" VerticalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+        </StackPanel>
+      </DataTemplate>
+
+      <DataTemplate DataType="kugou:KugouSong">
+        <Border Padding="12" Margin="20,0,20,8" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource LuminaBorderDefaultBrush}" Background="{DynamicResource MusicGlassBrush}">
+          <Grid ColumnDefinitions="50,*,Auto" ColumnSpacing="12">
+            <Border Width="44" Height="44" CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+              <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+            </Border>
+
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+              <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Black" FontSize="14" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Artist}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+              <Button Classes="Ghost Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="下载到本地" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).DownloadSongCommand}" CommandParameter="{Binding}">
+                <icons:MaterialIcon Kind="Download" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
+              </Button>
+              <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
+                <icons:MaterialIcon Kind="Play" Foreground="#68000A" Width="24" Height="24" />
+              </Button>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </DataTemplate>
+    </ListBox.DataTemplates>
+  </ListBox>
+</UserControl>

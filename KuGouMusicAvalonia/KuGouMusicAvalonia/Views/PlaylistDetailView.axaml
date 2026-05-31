@@ -1,0 +1,119 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="KuGouMusicAvalonia.Views.PlaylistDetailView"
+             x:DataType="vm:PlaylistDetailViewModel"
+             x:CompileBindings="True">
+  <ListBox ItemsSource="{Binding PageItems}"
+           Background="Transparent"
+           BorderThickness="0"
+           Padding="0"
+           Focusable="False"
+           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+           ScrollViewer.VerticalScrollBarVisibility="Auto">
+    <ListBox.ItemsPanel>
+      <ItemsPanelTemplate>
+        <VirtualizingStackPanel />
+      </ItemsPanelTemplate>
+    </ListBox.ItemsPanel>
+    <ListBox.Styles>
+      <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </ControlTemplate>
+        </Setter>
+      </Style>
+    </ListBox.Styles>
+
+    <ListBox.DataTemplates>
+      <DataTemplate DataType="vm:PlaylistDetailHeaderSection">
+        <StackPanel Margin="20,18,20,18" Spacing="18">
+          <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).BackCommand}" HorizontalAlignment="Left" Padding="0" Background="Transparent">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <icons:MaterialIcon Kind="ArrowLeft" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              <TextBlock Text="返回歌单" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
+            </StackPanel>
+          </Button>
+
+          <Border CornerRadius="24" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True" MinHeight="224" BoxShadow="{DynamicResource MusicFloatingShadow}">
+            <Grid Margin="22" ColumnDefinitions="150,*" ColumnSpacing="22">
+              <Border Width="142" Height="142" CornerRadius="22" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" BoxShadow="{DynamicResource MusicSoftShadow}" VerticalAlignment="Center">
+                <lumina:LuminaImage Source="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center">
+                <TextBlock Text="PLAYLIST" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <lumina:LuminaAutoScrollText Text="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).Title}" FontSize="30" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+                <TextBlock Text="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).Intro}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
+                  <Button Classes="Primary" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).PlayAllCommand}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Padding="18,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="#68000A" />
+                      <TextBlock Text="播放全部" FontWeight="Black" Foreground="#68000A" />
+                    </StackPanel>
+                  </Button>
+                  <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).QueueAllCommand}" Height="40" CornerRadius="20" Background="#33000000" Padding="16,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <icons:MaterialIcon Kind="PlaylistMusic" Width="22" Height="22" Foreground="White" />
+                      <TextBlock Text="加入队列" FontWeight="Bold" Foreground="White" />
+                    </StackPanel>
+                  </Button>
+                </StackPanel>
+                <TextBlock Text="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).MetaText}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" />
+              </StackPanel>
+            </Grid>
+          </Border>
+
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel>
+              <TextBlock Text="歌曲列表" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <TextBlock Text="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).StatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </StackPanel>
+            <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).IsLoading}" Width="130" Height="4" VerticalAlignment="Center" />
+          </Grid>
+        </StackPanel>
+      </DataTemplate>
+
+      <DataTemplate DataType="kugou:KugouSong">
+        <Border Margin="20,0,20,8" CornerRadius="14" Background="{DynamicResource MusicSurfaceBrush}" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="1" Padding="10">
+          <Grid ColumnDefinitions="52,*,Auto" ColumnSpacing="12">
+            <Border Width="46" Height="46" CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+              <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+              <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+            </StackPanel>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+              <Button Classes="Ghost Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="下载到本地"
+                      Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).DownloadSongCommand}"
+                      CommandParameter="{Binding}">
+                <icons:MaterialIcon Kind="Download" Width="22" Height="22" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              </Button>
+              <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放此歌单上下文" Background="{DynamicResource MusicPrimaryGradient}"
+                      Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).PlaySongCommand}"
+                      CommandParameter="{Binding}">
+                <icons:MaterialIcon Kind="Play" Width="24" Height="24" Foreground="#68000A" />
+              </Button>
+            </StackPanel>
+          </Grid>
+        </Border>
+      </DataTemplate>
+    </ListBox.DataTemplates>
+  </ListBox>
+</UserControl>
