@@ -3,14 +3,42 @@ name: release-aot
 on:
   workflow_dispatch:
   push:
-    tags:
-      - "v*"
+    branches:
+      - master
+      - main
 
 permissions:
   contents: write
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.ver.outputs.should_release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check version
+        id: ver
+        shell: pwsh
+        run: |
+          [xml]$props = Get-Content ./KuGouMusicAvalonia/Directory.Build.props
+          $version = $props.Project.PropertyGroup.Version
+          $releaseTag = "v$version"
+          $existing = git tag --list "$releaseTag"
+          
+          if ($existing -and "${{ github.event_name }}" -eq "push") {
+            Write-Host "Tag $releaseTag already exists on server, skipping."
+            "should_release=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          } else {
+            Write-Host "Will build and release $releaseTag"
+            "should_release=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+
   build:
+    needs: check
+    if: needs.check.outputs.should_release == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -43,25 +71,7 @@ jobs:
         run: |
           [xml]$props = Get-Content ./KuGouMusicAvalonia/Directory.Build.props
           $version = $props.Project.PropertyGroup.Version
-          if ([string]::IsNullOrWhiteSpace($version)) {
-            throw "Version is empty in KuGouMusicAvalonia/Directory.Build.props"
-          }
-
-          if ($version -notmatch '^\d+\.\d+\.\d+$') {
-            throw "Version must be MAJOR.MINOR.PATCH, got: $version"
-          }
-
-          $releaseTag = "v$version"
-          if ("${{ github.event_name }}" -eq "push") {
-            $pushedTag = "${{ github.ref_name }}"
-            if ($pushedTag -ne $releaseTag) {
-              throw "Tag/version mismatch: pushed '$pushedTag' but project version is '$releaseTag'"
-            }
-          }
-
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          "release_tag=$releaseTag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          Write-Host "Version: $version"
 
       - name: Restore
         shell: pwsh
@@ -134,13 +144,9 @@ jobs:
         run: |
           [xml]$props = Get-Content ./KuGouMusicAvalonia/Directory.Build.props
           $version = $props.Project.PropertyGroup.Version
-          if ([string]::IsNullOrWhiteSpace($version) -or $version -notmatch '^\d+\.\d+\.\d+$') {
-            throw "Invalid version in KuGouMusicAvalonia/Directory.Build.props"
-          }
           "release_tag=v$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
-      - name: Ensure release tag exists (workflow_dispatch only)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Ensure release tag exists
         shell: pwsh
         run: |
           $tag = "${{ steps.ver.outputs.release_tag }}"
