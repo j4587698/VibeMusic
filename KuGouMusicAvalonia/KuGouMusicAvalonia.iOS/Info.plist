@@ -3,7 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>KuGouMusicAvalonia</string>
+	<string>VibeMusic</string>
+	<key>CFBundleName</key>
+	<string>VibeMusic</string>
 	<key>CFBundleIdentifier</key>
 	<string>companyName.KuGouMusicAvalonia</string>
 	<key>CFBundleShortVersionString</key>

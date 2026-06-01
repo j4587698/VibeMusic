@@ -6,6 +6,7 @@
              xmlns:luminactrls="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="KuGouMusicAvalonia.App"
+             Name="VibeMusic"
              RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 

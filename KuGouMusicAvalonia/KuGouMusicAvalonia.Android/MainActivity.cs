@@ -8,7 +8,7 @@ using Avalonia.Android;
 namespace KuGouMusicAvalonia.Android;
 
 [Activity(
-    Label = "KuGouMusicAvalonia.Android",
+    Label = "VibeMusic",
     Theme = "@style/MyTheme.NoActionBar",
     Icon = "@drawable/icon",
     MainLauncher = true,

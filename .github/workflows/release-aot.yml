@@ -106,19 +106,98 @@ jobs:
           Get-ChildItem -Path $outDir -Recurse -File -Include *.pdb,*.dbg,*.xml | Remove-Item -Force -ErrorAction SilentlyContinue
           Get-ChildItem -Path $outDir -Recurse -Directory -Filter *.dSYM | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
+      - name: Create macOS .app bundle
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.ver.outputs.version }}"
+          rid="${{ matrix.rid }}"
+          appName="VibeMusic"
+          exeName="VibeMusic"
+          publishDir="./artifacts/publish/$rid"
+          appDir="./artifacts/app/$rid/${appName}.app"
+
+          # Build .app bundle skeleton
+          mkdir -p "$appDir/Contents/MacOS"
+          mkdir -p "$appDir/Contents/Resources"
+
+          # Move all published files into the bundle's MacOS folder
+          cp -R "$publishDir/." "$appDir/Contents/MacOS/"
+          chmod +x "$appDir/Contents/MacOS/$exeName"
+
+          # Generate .icns from the PNG logo (best-effort)
+          srcPng="./KuGouMusicAvalonia/Assets/vibe-logo.png"
+          if [ -f "$srcPng" ]; then
+            iconset="./artifacts/app/$rid/${appName}.iconset"
+            mkdir -p "$iconset"
+            for size in 16 32 64 128 256 512; do
+              sips -z $size $size "$srcPng" --out "$iconset/icon_${size}x${size}.png" >/dev/null 2>&1 || true
+              dbl=$((size * 2))
+              sips -z $dbl $dbl "$srcPng" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null 2>&1 || true
+            done
+            if iconutil -c icns "$iconset" -o "$appDir/Contents/Resources/${appName}.icns" >/dev/null 2>&1; then
+              echo "icns generated"
+            else
+              echo "iconutil failed, app will use default icon"
+            fi
+            rm -rf "$iconset"
+          fi
+
+          # Write Info.plist
+          cat > "$appDir/Contents/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>${appName}</string>
+            <key>CFBundleDisplayName</key>
+            <string>${appName}</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.vibemusic.app</string>
+            <key>CFBundleVersion</key>
+            <string>${version}</string>
+            <key>CFBundleShortVersionString</key>
+            <string>${version}</string>
+            <key>CFBundleExecutable</key>
+            <string>${exeName}</string>
+            <key>CFBundleIconFile</key>
+            <string>${appName}</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>CFBundleInfoDictionaryVersion</key>
+            <string>6.0</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>11.0</string>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+            <key>LSApplicationCategoryType</key>
+            <string>public.app-category.music</string>
+          </dict>
+          </plist>
+          PLIST
+
+          # Strip leading indentation that the heredoc preserved
+          sed -i '' 's/^          //' "$appDir/Contents/Info.plist"
+
       - name: Pack zip
         shell: bash
         run: |
           version="${{ steps.ver.outputs.version }}"
           rid="${{ matrix.rid }}"
-          outDir="./artifacts/publish/$rid"
           zipDir="./artifacts/zips"
           zipName="vibemusic-$version-$rid.zip"
           mkdir -p "$zipDir"
-          cd "$outDir"
-          if [ "$RUNNER_OS" == "Windows" ]; then
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            # Zip the .app bundle (preserve symlinks/permissions)
+            cd "./artifacts/app/$rid"
+            zip -ry "../../zips/$zipName" "VibeMusic.app"
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            cd "./artifacts/publish/$rid"
             7z a "../../zips/$zipName" ./*
           else
+            cd "./artifacts/publish/$rid"
             zip -r "../../zips/$zipName" ./*
           fi
 
