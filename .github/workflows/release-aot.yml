@@ -139,7 +139,12 @@ jobs:
           path: release-assets
 
       - name: List assets (Diagnostics)
-        run: ls -R release-assets
+        run: |
+          ls -R release-assets
+          # Flatten all zip files into the root of release-assets to avoid globbing issues
+          find release-assets -type f -name "*.zip" -exec mv {} release-assets/ \;
+          echo "After flattening:"
+          ls -la release-assets/
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -172,4 +177,4 @@ jobs:
           tag_name: ${{ steps.ver.outputs.release_tag }}
           name: VibeMusic ${{ steps.ver.outputs.release_tag }}
           generate_release_notes: true
-          files: release-assets/**/*.zip
+          files: release-assets/*.zip
