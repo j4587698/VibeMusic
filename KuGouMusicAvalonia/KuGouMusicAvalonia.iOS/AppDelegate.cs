@@ -15,6 +15,19 @@ namespace KuGouMusicAvalonia.iOS;
 public partial class AppDelegate : AvaloniaAppDelegate<App>
 #pragma warning restore CA1711 // Identifiers should not have incorrect suffix
 {
+    public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
+    {
+        var result = base.FinishedLaunching(application, launchOptions);
+        IosMediaControlManager.Instance.Initialize();
+        return result;
+    }
+
+    public override void WillTerminate(UIApplication application)
+    {
+        IosMediaControlManager.Instance.Dispose();
+        base.WillTerminate(application);
+    }
+
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
     {
         return base.CustomizeAppBuilder(builder)

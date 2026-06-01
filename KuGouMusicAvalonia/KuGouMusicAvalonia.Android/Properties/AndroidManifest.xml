@@ -1,5 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="auto">
 	<uses-permission android:name="android.permission.INTERNET" />
-	<application android:label="KuGouMusicAvalonia" android:icon="@drawable/Icon" />
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+	<application android:label="KuGouMusicAvalonia" android:icon="@drawable/Icon">
+		<service
+			android:name="KuGouMusicAvalonia.Android.PlaybackNotificationService"
+			android:enabled="true"
+			android:exported="false"
+			android:foregroundServiceType="mediaPlayback" />
+	</application>
 </manifest>
