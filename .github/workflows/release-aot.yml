@@ -133,6 +133,11 @@ jobs:
     needs: build
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -145,11 +150,6 @@ jobs:
           find release-assets -type f -name "*.zip" -exec mv {} release-assets/ \;
           echo "After flattening:"
           ls -la release-assets/
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Resolve release tag from project version
         id: ver
