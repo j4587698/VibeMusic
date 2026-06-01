@@ -97,8 +97,8 @@
               <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-              <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-              <lumina:LuminaAutoScrollText Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+              <TextBlock Text="{Binding Title}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" TextTrimming="CharacterEllipsis" MaxLines="1" />
+              <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" TextTrimming="CharacterEllipsis" MaxLines="1" />
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
               <Button Classes="Ghost Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="下载到本地"

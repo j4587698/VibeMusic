@@ -120,7 +120,7 @@
                       <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                     </Border>
                     <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                      <lumina:LuminaAutoScrollText Text="{Binding Name}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                      <TextBlock Text="{Binding Name}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" TextTrimming="CharacterEllipsis" MaxLines="1" />
                       <TextBlock Text="{Binding Count, StringFormat='{}{0} 首'}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
                       <TextBlock Text="我的歌单" FontSize="11" Foreground="{DynamicResource MusicTextMutedBrush}" />
                     </StackPanel>
@@ -157,8 +157,8 @@
                     <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                   </Border>
                   <StackPanel Spacing="6">
-                    <lumina:LuminaAutoScrollText Text="{Binding Name}" FontWeight="Black" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-                    <lumina:LuminaAutoScrollText Text="{Binding Nickname}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+                    <TextBlock Text="{Binding Name}" FontWeight="Black" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" TextTrimming="CharacterEllipsis" MaxLines="1" />
+                    <TextBlock Text="{Binding Nickname}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" TextTrimming="CharacterEllipsis" MaxLines="1" />
                     <TextBlock Text="{Binding PlayCount, StringFormat='播放 {0}'}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
                   </StackPanel>
                 </StackPanel>
