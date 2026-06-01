@@ -50,37 +50,47 @@ public partial class PlaylistDetailViewModel : ViewModelBase
     {
         if (IsLoading) return;
         IsLoading = true;
-        Songs.Clear();
-        RebuildPageItems();
         StatusMessage = "正在加载歌单歌曲";
 
         try
         {
-            KugouListResult<KugouSong>? result = null;
-            if (Playlist.Listid is int listId && listId > 0)
+            var allSongs = new List<KugouSong>();
+            var listIdStr = (Playlist.Listid as int?)?.ToString();
+            var globalId = !string.IsNullOrWhiteSpace(Playlist.GlobalCollectionId) ? Playlist.GlobalCollectionId! : Playlist.Id.ToString();
+            
+            int page = 1;
+            int pageSize = 500;
+            while (true)
             {
-                result = await MusicService.Client.GetPlaylistTracksNewTypedAsync(listId.ToString(), page: 1, pageSize: 120);
-            }
-
-            if (result is null || result.Items.Count == 0)
-            {
-                var globalId = !string.IsNullOrWhiteSpace(Playlist.GlobalCollectionId) ? Playlist.GlobalCollectionId! : Playlist.Id.ToString();
-                result = await MusicService.Client.GetPlaylistTracksTypedAsync(globalId, page: 1, pageSize: 120);
-            }
-
-            foreach (var song in result.Items)
-            {
-                Songs.Add(song);
-            }
-
-            if (Songs.Count == 0 && Playlist.Songs is { Count: > 0 })
-            {
-                foreach (var song in Playlist.Songs)
+                KugouListResult<KugouSong>? result = null;
+                if (!string.IsNullOrWhiteSpace(listIdStr) && listIdStr != "0")
                 {
-                    Songs.Add(song);
+                    result = await MusicService.Client.GetPlaylistTracksNewTypedAsync(listIdStr, page: page, pageSize: pageSize);
+                }
+                
+                if (result is null || result.Items.Count == 0)
+                {
+                    result = await MusicService.Client.GetPlaylistTracksTypedAsync(globalId, page: page, pageSize: pageSize);
+                }
+                
+                if (result?.Items != null && result.Items.Count > 0)
+                {
+                    allSongs.AddRange(result.Items);
+                    if (result.Items.Count < pageSize) break;
+                    page++;
+                }
+                else
+                {
+                    break;
                 }
             }
 
+            if (allSongs.Count == 0 && Playlist.Songs is { Count: > 0 })
+            {
+                allSongs.AddRange(Playlist.Songs);
+            }
+            
+            Songs = new ObservableCollection<KugouSong>(allSongs);
             StatusMessage = Songs.Count > 0 ? $"已加载 {Songs.Count} 首歌曲" : "该歌单暂时没有歌曲";
             RebuildPageItems();
         }

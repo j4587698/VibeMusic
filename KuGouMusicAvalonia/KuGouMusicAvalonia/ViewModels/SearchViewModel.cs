@@ -8,6 +8,13 @@ using System.Threading.Tasks;
 
 namespace KuGouMusicAvalonia.ViewModels;
 
+public enum SearchType
+{
+    Song,
+    Playlist,
+    Artist
+}
+
 public sealed class SearchHeaderSection
 {
     public static SearchHeaderSection Instance { get; } = new();
@@ -26,9 +33,12 @@ public partial class SearchViewModel : ViewModelBase
     private bool _isLoading;
 
     [ObservableProperty]
-    private ObservableCollection<KugouSong> _searchResults = new();
+    private ObservableCollection<object> _searchResults = new();
 
     public ObservableCollection<object> PageItems { get; } = new();
+
+    [ObservableProperty]
+    private SearchType _currentSearchType = SearchType.Song;
 
     [ObservableProperty]
     private ObservableCollection<string> _hotKeywords = new()
@@ -84,26 +94,34 @@ public partial class SearchViewModel : ViewModelBase
 
         try
         {
-            var result = await MusicService.Client.SearchSongsTypedAsync(Keyword, page: 1, pageSize: 30);
             SearchResults.Clear();
             RebuildPageItems();
-            if (result?.Items != null)
+
+            if (CurrentSearchType == SearchType.Song)
             {
-                foreach (var song in result.Items)
-                {
-                    SearchResults.Add(song);
-                }
+                var result = await MusicService.Client.SearchSongsTypedAsync(Keyword, page: 1, pageSize: 60);
+                if (result?.Items != null) SearchResults = new ObservableCollection<object>(result.Items);
+            }
+            else if (CurrentSearchType == SearchType.Playlist)
+            {
+                var result = await MusicService.Client.SearchPlaylistsTypedAsync(Keyword, page: 1, pageSize: 60);
+                if (result?.Items != null) SearchResults = new ObservableCollection<object>(result.Items);
+            }
+            else if (CurrentSearchType == SearchType.Artist)
+            {
+                var result = await MusicService.Client.SearchArtistsTypedAsync(Keyword, page: 1, pageSize: 60);
+                if (result?.Items != null) SearchResults = new ObservableCollection<object>(result.Items);
             }
 
             RebuildPageItems();
 
             if (SearchResults.Count == 0)
             {
-                StatusMessage = "没有找到歌曲";
+                StatusMessage = "没有找到相关内容";
                 return;
             }
 
-            StatusMessage = $"找到 {SearchResults.Count} 首歌曲";
+            StatusMessage = $"找到 {SearchResults.Count} 个结果";
         }
         catch (System.Exception ex)
         {
@@ -121,8 +139,9 @@ public partial class SearchViewModel : ViewModelBase
     private async Task PlaySongAsync(KugouSong song)
     {
         if (song == null) return;
-        var index = SearchResults.IndexOf(song);
-        await PlayerService.Instance.PlayQueueAsync(SearchResults.ToList(), index < 0 ? 0 : index, $"搜索：{Keyword}", replaceQueue: true);
+        var songs = SearchResults.OfType<KugouSong>().ToList();
+        var index = songs.IndexOf(song);
+        await PlayerService.Instance.PlayQueueAsync(songs, index < 0 ? 0 : index, $"搜索：{Keyword}", replaceQueue: true);
     }
 
     [RelayCommand]
@@ -134,15 +153,17 @@ public partial class SearchViewModel : ViewModelBase
     [RelayCommand]
     private async Task PlayAllAsync()
     {
-        if (SearchResults.Count == 0) return;
-        await PlayerService.Instance.PlayQueueAsync(SearchResults.ToList(), 0, $"搜索：{Keyword}", replaceQueue: true);
+        var songs = SearchResults.OfType<KugouSong>().ToList();
+        if (songs.Count == 0) return;
+        await PlayerService.Instance.PlayQueueAsync(songs, 0, $"搜索：{Keyword}", replaceQueue: true);
     }
 
     [RelayCommand]
     private void QueueAll()
     {
-        if (SearchResults.Count == 0) return;
-        var added = PlayerService.Instance.AppendToQueue(SearchResults.ToList(), $"搜索：{Keyword}");
+        var songs = SearchResults.OfType<KugouSong>().ToList();
+        if (songs.Count == 0) return;
+        var added = PlayerService.Instance.AppendToQueue(songs, $"搜索：{Keyword}");
         StatusMessage = added > 0 ? $"已加入 {added} 首到播放队列" : "这些歌曲已在播放队列中";
     }
 
@@ -151,6 +172,32 @@ public partial class SearchViewModel : ViewModelBase
     {
         Keyword = keyword;
         await SearchAsync();
+    }
+
+    public bool IsSongSearch => CurrentSearchType == SearchType.Song;
+
+    [RelayCommand]
+    private async Task SetSearchTypeAsync(SearchType type)
+    {
+        if (CurrentSearchType == type) return;
+        CurrentSearchType = type;
+        OnPropertyChanged(nameof(IsSongSearch));
+        if (!string.IsNullOrWhiteSpace(Keyword))
+        {
+            await SearchAsync();
+        }
+    }
+
+    [RelayCommand]
+    private void OpenPlaylist(KugouPlaylist playlist)
+    {
+        if (playlist != null) ShellNavigationService.Instance.OpenPlaylistDetail(playlist);
+    }
+
+    [RelayCommand]
+    private void OpenArtist(KugouArtist artist)
+    {
+        if (artist != null) ShellNavigationService.Instance.OpenArtistDetail(artist);
     }
 
     [RelayCommand]
