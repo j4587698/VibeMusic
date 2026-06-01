@@ -17,6 +17,15 @@ public sealed class PlaylistDetailHeaderSection
     }
 }
 
+public sealed class PlaylistLoadMoreSentinel
+{
+    public static PlaylistLoadMoreSentinel Instance { get; } = new();
+
+    private PlaylistLoadMoreSentinel()
+    {
+    }
+}
+
 public partial class PlaylistDetailViewModel : ViewModelBase
 {
     public KugouPlaylist Playlist { get; }
@@ -30,7 +39,16 @@ public partial class PlaylistDetailViewModel : ViewModelBase
     private bool _isLoading;
 
     [ObservableProperty]
+    private bool _isLoadingMore;
+
+    [ObservableProperty]
+    private bool _canLoadMore = true;
+
+    [ObservableProperty]
     private string _statusMessage = "正在加载歌单歌曲";
+
+    private int _currentPage = 1;
+    private const int PageSize = 100;
 
     public string Title => Playlist.Name;
     public string Subtitle => string.IsNullOrWhiteSpace(Playlist.Nickname) ? "歌单" : Playlist.Nickname;
@@ -50,58 +68,82 @@ public partial class PlaylistDetailViewModel : ViewModelBase
     {
         if (IsLoading) return;
         IsLoading = true;
+        _currentPage = 1;
+        CanLoadMore = true;
+        Songs.Clear();
+        RebuildPageItems();
         StatusMessage = "正在加载歌单歌曲";
 
         try
         {
-            var allSongs = new List<KugouSong>();
-            var listIdStr = (Playlist.Listid as int?)?.ToString();
-            var globalId = !string.IsNullOrWhiteSpace(Playlist.GlobalCollectionId) ? Playlist.GlobalCollectionId! : Playlist.Id.ToString();
-            
-            int page = 1;
-            int pageSize = 500;
-            while (true)
-            {
-                KugouListResult<KugouSong>? result = null;
-                if (!string.IsNullOrWhiteSpace(listIdStr) && listIdStr != "0")
-                {
-                    result = await MusicService.Client.GetPlaylistTracksNewTypedAsync(listIdStr, page: page, pageSize: pageSize);
-                }
-                
-                if (result is null || result.Items.Count == 0)
-                {
-                    result = await MusicService.Client.GetPlaylistTracksTypedAsync(globalId, page: page, pageSize: pageSize);
-                }
-                
-                if (result?.Items != null && result.Items.Count > 0)
-                {
-                    allSongs.AddRange(result.Items);
-                    if (result.Items.Count < pageSize) break;
-                    page++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            if (allSongs.Count == 0 && Playlist.Songs is { Count: > 0 })
-            {
-                allSongs.AddRange(Playlist.Songs);
-            }
-            
-            Songs = new ObservableCollection<KugouSong>(allSongs);
-            StatusMessage = Songs.Count > 0 ? $"已加载 {Songs.Count} 首歌曲" : "该歌单暂时没有歌曲";
-            RebuildPageItems();
-        }
-        catch (System.Exception ex)
-        {
-            StatusMessage = $"歌单歌曲加载失败：{ex.Message}";
+            await FetchPageAsync();
         }
         finally
         {
             IsLoading = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task LoadNextPageAsync()
+    {
+        if (IsLoading || IsLoadingMore || !CanLoadMore) return;
+        IsLoadingMore = true;
+
+        try
+        {
+            _currentPage++;
+            await FetchPageAsync();
+        }
+        finally
+        {
+            IsLoadingMore = false;
+        }
+    }
+
+    private async Task FetchPageAsync()
+    {
+        var listIdStr = (Playlist.Listid as int?)?.ToString();
+        var globalId = !string.IsNullOrWhiteSpace(Playlist.GlobalCollectionId) ? Playlist.GlobalCollectionId! : Playlist.Id.ToString();
+        
+        KugouListResult<KugouSong>? result = null;
+        if (!string.IsNullOrWhiteSpace(listIdStr) && listIdStr != "0")
+        {
+            result = await MusicService.Client.GetPlaylistTracksNewTypedAsync(listIdStr, page: _currentPage, pageSize: PageSize);
+        }
+        
+        if (result is null || result.Items.Count == 0)
+        {
+            result = await MusicService.Client.GetPlaylistTracksTypedAsync(globalId, page: _currentPage, pageSize: PageSize);
+        }
+        
+        var newSongs = new List<KugouSong>();
+        if (result?.Items != null && result.Items.Count > 0)
+        {
+            newSongs.AddRange(result.Items);
+            if (result.Items.Count < PageSize)
+            {
+                CanLoadMore = false;
+            }
+        }
+        else
+        {
+            CanLoadMore = false;
+        }
+
+        if (_currentPage == 1 && newSongs.Count == 0 && Playlist.Songs is { Count: > 0 })
+        {
+            newSongs.AddRange(Playlist.Songs);
+            CanLoadMore = false;
+        }
+        
+        foreach (var song in newSongs)
+        {
+            Songs.Add(song);
+        }
+
+        AppendToPageItems(newSongs);
+        StatusMessage = Songs.Count > 0 ? $"已加载 {Songs.Count} 首歌曲" : "该歌单暂时没有歌曲";
     }
 
     [RelayCommand]
@@ -146,6 +188,26 @@ public partial class PlaylistDetailViewModel : ViewModelBase
         foreach (var song in Songs)
         {
             PageItems.Add(song);
+        }
+        if (CanLoadMore)
+        {
+            PageItems.Add(PlaylistLoadMoreSentinel.Instance);
+        }
+    }
+
+    private void AppendToPageItems(IEnumerable<KugouSong> newSongs)
+    {
+        if (PageItems.LastOrDefault() is PlaylistLoadMoreSentinel)
+        {
+            PageItems.RemoveAt(PageItems.Count - 1);
+        }
+        foreach (var song in newSongs)
+        {
+            PageItems.Add(song);
+        }
+        if (CanLoadMore)
+        {
+            PageItems.Add(PlaylistLoadMoreSentinel.Instance);
         }
     }
 }

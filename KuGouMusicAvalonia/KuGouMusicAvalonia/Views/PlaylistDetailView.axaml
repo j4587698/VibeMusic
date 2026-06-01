@@ -114,6 +114,12 @@
           </Grid>
         </Border>
       </DataTemplate>
+
+      <DataTemplate DataType="vm:PlaylistLoadMoreSentinel">
+        <StackPanel HorizontalAlignment="Center" Margin="0,10,0,30" AttachedToVisualTree="OnSentinelAttached">
+          <ProgressBar IsIndeterminate="True" Width="80" Height="4" />
+        </StackPanel>
+      </DataTemplate>
     </ListBox.DataTemplates>
   </ListBox>
 </UserControl>
