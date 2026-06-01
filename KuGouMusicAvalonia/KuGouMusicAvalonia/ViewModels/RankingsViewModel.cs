@@ -49,21 +49,12 @@ public partial class RankingsViewModel : ViewModelBase
             var allTask = MusicService.Client.GetRankListTypedAsync();
             await Task.WhenAll(topTask, allTask);
 
-            FeaturedRanks.Clear();
-            foreach (var rank in topTask.Result.Items.Where(item => item.Id > 0))
-            {
-                FeaturedRanks.Add(rank);
-            }
+            FeaturedRanks = new ObservableCollection<KugouRank>(topTask.Result.Items.Where(item => item.Id > 0));
 
-            Ranks.Clear();
             var seen = new HashSet<int>();
-            foreach (var rank in topTask.Result.Items.Concat(allTask.Result.Items).Where(item => item.Id > 0))
-            {
-                if (seen.Add(rank.Id))
-                {
-                    Ranks.Add(rank);
-                }
-            }
+            var combined = topTask.Result.Items.Concat(allTask.Result.Items)
+                                                 .Where(item => item.Id > 0 && seen.Add(item.Id));
+            Ranks = new ObservableCollection<KugouRank>(combined);
 
             StatusMessage = Ranks.Count > 0 ? $"已同步 {Ranks.Count} 个榜单" : "暂时没有拿到排行榜";
         }
