@@ -82,27 +82,39 @@
             </StackPanel>
           </Grid>
 
-          <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-            <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).ArtistCategories}">
-              <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-              </ItemsControl.ItemsPanel>
-              <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="vm:ArtistCategoryOption">
-                  <Button Classes="Ghost" Margin="0,0,10,4" Height="42" CornerRadius="21" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0"
-                          Command="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).SelectArtistCategoryCommand}"
-                          CommandParameter="{Binding}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                      <icons:MaterialIcon Kind="AccountMusic" Width="20" Height="20" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                      <TextBlock Text="{Binding Name}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-                    </StackPanel>
-                  </Button>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </ScrollViewer>
+          <ListBox ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="Transparent" BorderThickness="0" Padding="0" ItemsSource="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).ArtistCategories}">
+            <ListBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <VirtualizingStackPanel Orientation="Horizontal" />
+              </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.Styles>
+              <Style Selector="ListBoxItem">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Margin" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Template">
+                  <ControlTemplate>
+                    <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                  </ControlTemplate>
+                </Setter>
+              </Style>
+            </ListBox.Styles>
+            <ListBox.ItemTemplate>
+              <DataTemplate DataType="vm:ArtistCategoryOption">
+                <Button Classes="Ghost" Margin="0,0,10,4" Height="42" CornerRadius="21" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0"
+                        Command="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).SelectArtistCategoryCommand}"
+                        CommandParameter="{Binding}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <icons:MaterialIcon Kind="AccountMusic" Width="20" Height="20" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                    <TextBlock Text="{Binding Name}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
         </StackPanel>
       </DataTemplate>
 
