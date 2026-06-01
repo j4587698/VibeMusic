@@ -59,7 +59,7 @@
                 </TextBox.InnerLeftContent>
               </TextBox>
               <Button Grid.Column="1" Classes="Primary" Height="48" CornerRadius="24" Padding="20,0" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchCommand}" Background="{DynamicResource MusicPrimaryGradient}">
-                <TextBlock Text="搜索" Foreground="#68000A" FontWeight="Black" />
+                <TextBlock Text="搜索" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontWeight="Black" />
               </Button>
             </Grid>
 
@@ -118,7 +118,7 @@
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
               <Button Classes="Primary" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlayAllCommand}" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).IsSongSearch}" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0">
-                <TextBlock Text="播放全部" FontWeight="Black" Foreground="#68000A" />
+                <TextBlock Text="播放全部" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
               </Button>
               <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).QueueAllCommand}" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).IsSongSearch}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
                 <TextBlock Text="加入队列" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
@@ -146,7 +146,7 @@
                 <icons:MaterialIcon Kind="Download" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
               </Button>
               <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
-                <icons:MaterialIcon Kind="Play" Foreground="#68000A" Width="24" Height="24" />
+                <icons:MaterialIcon Kind="Play" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="24" Height="24" />
               </Button>
             </StackPanel>
           </Grid>

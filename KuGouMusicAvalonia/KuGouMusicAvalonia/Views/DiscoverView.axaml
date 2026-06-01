@@ -18,13 +18,13 @@
           <Grid ColumnDefinitions="*,144" ColumnSpacing="20" Margin="24" VerticalAlignment="Bottom">
             <StackPanel Spacing="10" VerticalAlignment="Bottom">
               <TextBlock Text="DISCOVER" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-              <lumina:LuminaAutoScrollText Text="{Binding HeroTitle}" FontSize="34" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding HeroTitle}" FontSize="34" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
               <lumina:LuminaAutoScrollText Text="{Binding HeroArtist}" FontSize="15" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
               <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,8,0,0">
-                <Button Classes="Primary" Command="{Binding PlayFeaturedSongCommand}" IsEnabled="{Binding HasFeaturedSong}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Foreground="#68000A" Padding="18,0">
+                <Button Classes="Primary" Command="{Binding PlayFeaturedSongCommand}" IsEnabled="{Binding HasFeaturedSong}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="18,0">
                   <StackPanel Orientation="Horizontal" Spacing="10">
-                    <icons:MaterialIcon Kind="Play" Foreground="#68000A" Width="22" Height="22" />
-                    <TextBlock Text="立即播放" FontWeight="Bold" Foreground="#68000A" />
+                    <icons:MaterialIcon Kind="Play" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="22" Height="22" />
+                    <TextBlock Text="立即播放" FontWeight="Bold" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                   </StackPanel>
                 </Button>
               </StackPanel>
@@ -44,7 +44,7 @@
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
           <Button Classes="Primary" Command="{Binding PlayAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0">
-            <TextBlock Text="播放全部" FontWeight="Black" Foreground="#68000A" />
+            <TextBlock Text="播放全部" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
           </Button>
           <Button Classes="Ghost" Command="{Binding QueueAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
             <TextBlock Text="加入队列" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
@@ -108,8 +108,8 @@
           <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Right">
             <Button Classes="Primary" Command="{Binding StartPersonalFmCommand}" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0" lumina:LuminaButton.IsLoading="{Binding IsPersonalFmLoading}">
               <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="Play" Width="20" Height="20" Foreground="#68000A" />
-                <TextBlock Text="播放 FM" FontWeight="Black" Foreground="#68000A" />
+                <icons:MaterialIcon Kind="Play" Width="20" Height="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                <TextBlock Text="播放 FM" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
               </StackPanel>
             </Button>
             <Button Classes="Ghost" Command="{Binding NextPersonalFmCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">

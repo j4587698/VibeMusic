@@ -18,6 +18,15 @@ public sealed class PlaylistsHeaderSection
     }
 }
 
+public sealed class PlaylistsFooterSection
+{
+    public static PlaylistsFooterSection Instance { get; } = new();
+
+    private PlaylistsFooterSection()
+    {
+    }
+}
+
 public sealed class PlaylistCardRow
 {
     public PlaylistCardRow(IReadOnlyList<KugouPlaylist> playlists)
@@ -42,6 +51,15 @@ public partial class PlaylistsViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isLoading;
+
+    [ObservableProperty]
+    private bool _isLoadingMore;
+
+    private const int PlaylistFetchSize = 120;
+    private const int PlaylistBatchSize = 24;
+    private readonly List<KugouPlaylist> _allPlaylists = new();
+
+    public bool CanLoadMore => !IsLoading && !IsLoadingMore && Playlists.Count < _allPlaylists.Count;
 
     [ObservableProperty]
     private bool _isUserPlaylistsLoading;
@@ -79,6 +97,16 @@ public partial class PlaylistsViewModel : ViewModelBase
         RebuildPageItems();
     }
 
+    partial void OnIsLoadingChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanLoadMore));
+    }
+
+    partial void OnIsLoadingMoreChanged(bool value)
+    {
+        OnPropertyChanged(nameof(CanLoadMore));
+    }
+
     [RelayCommand]
     private async Task LoadDataAsync()
     {
@@ -87,19 +115,17 @@ public partial class PlaylistsViewModel : ViewModelBase
 
         try
         {
-            var result = await MusicService.Client.GetTopPlaylistsTypedAsync(categoryId: 0, page: 1, pageSize: 30);
+            var result = await MusicService.Client.GetTopPlaylistsTypedAsync(categoryId: 0, page: 1, pageSize: PlaylistFetchSize);
             Playlists.Clear();
+            _allPlaylists.Clear();
             if (result?.Items != null)
             {
-                foreach (var list in result.Items)
-                {
-                    Playlists.Add(list);
-                }
+                _allPlaylists.AddRange(result.Items.Where(p => p != null));
             }
 
-            RebuildPageItems();
+            AddNextPlaylistBatch();
 
-            if (Playlists.Count == 0)
+            if (_allPlaylists.Count == 0)
             {
                 UseDemoData();
                 StatusMessage = "接口暂时无内容，已展示示例歌单";
@@ -122,15 +148,44 @@ public partial class PlaylistsViewModel : ViewModelBase
         }
     }
 
-    private void UseDemoData()
+    [RelayCommand]
+    private void LoadMore()
     {
-        Playlists.Clear();
-        foreach (var playlist in DemoMusicData.Playlists)
+        if (!CanLoadMore) return;
+        IsLoadingMore = true;
+
+        try
+        {
+            AddNextPlaylistBatch();
+        }
+        finally
+        {
+            IsLoadingMore = false;
+        }
+    }
+
+    private void AddNextPlaylistBatch()
+    {
+        var nextPlaylists = _allPlaylists.Skip(Playlists.Count).Take(PlaylistBatchSize).ToArray();
+        foreach (var playlist in nextPlaylists)
         {
             Playlists.Add(playlist);
         }
 
         RebuildPageItems();
+        OnPropertyChanged(nameof(CanLoadMore));
+    }
+
+    private void UseDemoData()
+    {
+        Playlists.Clear();
+        _allPlaylists.Clear();
+        foreach (var playlist in DemoMusicData.Playlists)
+        {
+            _allPlaylists.Add(playlist);
+        }
+
+        AddNextPlaylistBatch();
     }
 
     private void RebuildPageItems()
@@ -142,7 +197,11 @@ public partial class PlaylistsViewModel : ViewModelBase
         {
             PageItems.Add(new PlaylistCardRow(row));
         }
+
+        PageItems.Add(PlaylistsFooterSection.Instance);
     }
+
+
 
     [RelayCommand]
     private void OpenPlaylist(KugouPlaylist playlist)

@@ -20,7 +20,7 @@
         </Button>
 
         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-          <lumina:LuminaAutoScrollText Text="{Binding HeaderTitle}" FontSize="24" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+          <lumina:LuminaAutoScrollText Text="{Binding HeaderTitle}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
           <lumina:LuminaAutoScrollText Text="{Binding HeaderArtist}" FontSize="14" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
         </StackPanel>
 
@@ -32,7 +32,7 @@
         </Button>
 
         <Button Grid.Column="3" Classes="Primary Icon" Width="42" Height="42" CornerRadius="21" Command="{Binding LoadLyricsCommand}" ToolTip.Tip="重新加载歌词" Background="{DynamicResource MusicPrimaryGradient}">
-          <icons:MaterialIcon Kind="Refresh" Width="24" Height="24" Foreground="#68000A" />
+          <icons:MaterialIcon Kind="Refresh" Width="24" Height="24" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
         </Button>
       </Grid>
 
@@ -54,7 +54,7 @@
 
           <StackPanel Grid.Row="1" Spacing="12" MaxWidth="420" HorizontalAlignment="Center" Margin="0,20,0,0">
             <StackPanel Spacing="5">
-              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" FontSize="28" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
               <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
             </StackPanel>
 
@@ -62,16 +62,16 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16">
               <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding PreviousCommand}" ToolTip.Tip="上一首">
-                <icons:MaterialIcon Kind="SkipPrevious" Width="28" Height="28" Foreground="White" />
+                <icons:MaterialIcon Kind="SkipPrevious" Width="28" Height="28" Foreground="{DynamicResource MusicTextBrush}" />
               </Button>
               <Button Classes="Primary Icon" Width="62" Height="62" CornerRadius="31" Command="{Binding TogglePlayCommand}" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="{Binding Player.PlaybackStateText}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}">
                 <Grid>
-                  <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="34" Height="34" Foreground="#68000A" />
-                  <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="34" Height="34" Foreground="#68000A" />
+                  <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="34" Height="34" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                  <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="34" Height="34" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                 </Grid>
               </Button>
               <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding NextCommand}" ToolTip.Tip="下一首">
-                <icons:MaterialIcon Kind="SkipNext" Width="28" Height="28" Foreground="White" />
+                <icons:MaterialIcon Kind="SkipNext" Width="28" Height="28" Foreground="{DynamicResource MusicTextBrush}" />
               </Button>
             </StackPanel>
           </StackPanel>
@@ -108,11 +108,11 @@
           <icons:MaterialIcon Kind="ArrowLeft" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
         </Button>
         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-          <lumina:LuminaAutoScrollText Text="{Binding HeaderTitle}" FontSize="20" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+          <lumina:LuminaAutoScrollText Text="{Binding HeaderTitle}" FontSize="20" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
           <lumina:LuminaAutoScrollText Text="{Binding HeaderArtist}" FontSize="12" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
         </StackPanel>
         <Button Grid.Column="2" Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" Command="{Binding LoadLyricsCommand}" ToolTip.Tip="重新加载歌词" Background="{DynamicResource MusicPrimaryGradient}">
-          <icons:MaterialIcon Kind="Refresh" Width="23" Height="23" Foreground="#68000A" />
+          <icons:MaterialIcon Kind="Refresh" Width="23" Height="23" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
         </Button>
       </Grid>
 
@@ -134,7 +134,7 @@
               </Grid>
 
               <StackPanel Spacing="6">
-                <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" FontSize="25" FontWeight="Black" Foreground="White" HorizontalAlignment="Stretch" />
+                <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" FontSize="25" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
                 <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
               </StackPanel>
 
@@ -142,16 +142,16 @@
 
               <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16">
                 <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding PreviousCommand}" ToolTip.Tip="上一首">
-                  <icons:MaterialIcon Kind="SkipPrevious" Width="28" Height="28" Foreground="White" />
+                  <icons:MaterialIcon Kind="SkipPrevious" Width="28" Height="28" Foreground="{DynamicResource MusicTextBrush}" />
                 </Button>
                 <Button Classes="Primary Icon" Width="62" Height="62" CornerRadius="31" Command="{Binding TogglePlayCommand}" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="{Binding Player.PlaybackStateText}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}">
                   <Grid>
-                    <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="34" Height="34" Foreground="#68000A" />
-                    <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="34" Height="34" Foreground="#68000A" />
+                    <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="34" Height="34" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                    <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="34" Height="34" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                   </Grid>
                 </Button>
                 <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding NextCommand}" ToolTip.Tip="下一首">
-                  <icons:MaterialIcon Kind="SkipNext" Width="28" Height="28" Foreground="White" />
+                  <icons:MaterialIcon Kind="SkipNext" Width="28" Height="28" Foreground="{DynamicResource MusicTextBrush}" />
                 </Button>
               </StackPanel>
             </StackPanel>
@@ -186,3 +186,4 @@
     </Grid>
   </Grid>
 </UserControl>
+

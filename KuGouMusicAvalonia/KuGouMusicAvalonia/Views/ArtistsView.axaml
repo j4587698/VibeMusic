@@ -50,21 +50,21 @@
             <Grid Margin="24" ColumnDefinitions="*,156" ColumnSpacing="24">
               <StackPanel VerticalAlignment="Center" Spacing="10">
                 <TextBlock Text="ARTISTS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <TextBlock Text="歌手" FontSize="36" FontWeight="Black" Foreground="White" />
+                <TextBlock Text="歌手" FontSize="36" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
                 <TextBlock Text="按地区、性别和音乐人分类浏览，点开歌手后进入独立详情页。" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
                 <StackPanel Orientation="Horizontal" Spacing="22" Margin="0,8,0,0">
                   <StackPanel>
                     <TextBlock Text="当前分类" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
-                    <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).SelectedCategoryName}" FontSize="22" FontWeight="Black" Foreground="White" />
+                    <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).SelectedCategoryName}" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
                   </StackPanel>
                   <StackPanel>
                     <TextBlock Text="已加载" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
-                    <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).VisibleArtistCountText}" FontSize="22" FontWeight="Black" Foreground="White" />
+                    <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).VisibleArtistCountText}" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
                   </StackPanel>
                 </StackPanel>
               </StackPanel>
               <Border Grid.Column="1" Width="140" Height="140" CornerRadius="70" Background="#33000000" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <icons:MaterialIcon Kind="AccountMusic" Width="86" Height="86" Foreground="#55FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <icons:MaterialIcon Kind="AccountMusic" Width="86" Height="86" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
               </Border>
             </Grid>
           </Border>

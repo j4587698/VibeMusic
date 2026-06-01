@@ -82,21 +82,46 @@
       <SolidColorBrush x:Key="LuminaCardGlassTintBrush" Color="#AA201F1F" />
       <SolidColorBrush x:Key="LuminaCardGlassBorderBrush" Color="#665A403E" />
       <SolidColorBrush x:Key="LuminaCardGlassEdgeBrush" Color="#30FFFFFF" />
+
+      <BoxShadows x:Key="MusicFloatingShadow">0 8 24 #80000000</BoxShadows>
+      <BoxShadows x:Key="MusicSoftShadow">0 4 14 #66000000</BoxShadows>
+
+      <LinearGradientBrush x:Key="MusicHeroGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#FE5552" Offset="0" />
+        <GradientStop Color="#131313" Offset="0.46" />
+        <GradientStop Color="#003A5C" Offset="1" />
+      </LinearGradientBrush>
+
+      <LinearGradientBrush x:Key="MusicPrimaryGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#FE5552" Offset="0" />
+        <GradientStop Color="#B72026" Offset="1" />
+      </LinearGradientBrush>
+
+      <LinearGradientBrush x:Key="MusicBlueGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#00A8FE" Offset="0" />
+        <GradientStop Color="#004B74" Offset="1" />
+      </LinearGradientBrush>
+
+      <LinearGradientBrush x:Key="MusicCoverFallbackBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#1B202A" Offset="0" />
+        <GradientStop Color="#4A2221" Offset="0.55" />
+        <GradientStop Color="#003A5C" Offset="1" />
+      </LinearGradientBrush>
     </ResourceDictionary>
 
     <ResourceDictionary x:Key="Light">
-      <Color x:Key="MusicBackground">#FFF7F6</Color>
+      <Color x:Key="MusicBackground">#F9FAFB</Color>
       <Color x:Key="MusicSurface">#FFFFFF</Color>
-      <Color x:Key="MusicSurfaceHigh">#FFE9E7</Color>
-      <Color x:Key="MusicSurfaceHighest">#F7DAD7</Color>
-      <Color x:Key="MusicPrimary">#B72026</Color>
-      <Color x:Key="MusicPrimaryHot">#FE5552</Color>
-      <Color x:Key="MusicPrimaryDeep">#68000A</Color>
-      <Color x:Key="MusicSecondary">#00639A</Color>
-      <Color x:Key="MusicText">#201A19</Color>
-      <Color x:Key="MusicTextSoft">#5A403E</Color>
-      <Color x:Key="MusicTextMuted">#806966</Color>
-      <Color x:Key="MusicOutline">#D8C2BE</Color>
+      <Color x:Key="MusicSurfaceHigh">#F3F4F6</Color>
+      <Color x:Key="MusicSurfaceHighest">#E5E7EB</Color>
+      <Color x:Key="MusicPrimary">#BA5A58</Color>
+      <Color x:Key="MusicPrimaryHot">#D16B68</Color>
+      <Color x:Key="MusicPrimaryDeep">#914341</Color>
+      <Color x:Key="MusicSecondary">#0284C7</Color>
+      <Color x:Key="MusicText">#111827</Color>
+      <Color x:Key="MusicTextSoft">#4B5563</Color>
+      <Color x:Key="MusicTextMuted">#9CA3AF</Color>
+      <Color x:Key="MusicOutline">#E5E7EB</Color>
 
       <SolidColorBrush x:Key="MusicBackgroundBrush" Color="{StaticResource MusicBackground}" />
       <SolidColorBrush x:Key="MusicSurfaceBrush" Color="{StaticResource MusicSurface}" />
@@ -110,33 +135,33 @@
       <SolidColorBrush x:Key="MusicTextSoftBrush" Color="{StaticResource MusicTextSoft}" />
       <SolidColorBrush x:Key="MusicTextMutedBrush" Color="{StaticResource MusicTextMuted}" />
       <SolidColorBrush x:Key="MusicOutlineBrush" Color="{StaticResource MusicOutline}" />
-      <SolidColorBrush x:Key="MusicGlassBrush" Color="#F2FFFFFF" />
-      <SolidColorBrush x:Key="MusicGlassLightBrush" Color="#22B72026" />
+      <SolidColorBrush x:Key="MusicGlassBrush" Color="#CCFFFFFF" />
+      <SolidColorBrush x:Key="MusicGlassLightBrush" Color="#22D32F2F" />
 
-      <Color x:Key="LuminaBackground">#FFF7F6</Color>
-      <Color x:Key="LuminaNavigationPane">#FFF7F6</Color>
-      <Color x:Key="LuminaNavigationPaneItemSelected">#FFDBD7</Color>
-      <Color x:Key="LuminaNavigationPaneItemSelectedForeground">#B72026</Color>
+      <Color x:Key="LuminaBackground">#F9FAFB</Color>
+      <Color x:Key="LuminaNavigationPane">#F3F4F6</Color>
+      <Color x:Key="LuminaNavigationPaneItemSelected">#E5E7EB</Color>
+      <Color x:Key="LuminaNavigationPaneItemSelectedForeground">#BA5A58</Color>
       <Color x:Key="LuminaSurface">#FFFFFF</Color>
-      <Color x:Key="LuminaSurfaceElevated">#FFE9E7</Color>
+      <Color x:Key="LuminaSurfaceElevated">#F9FAFB</Color>
       <Color x:Key="LuminaPopover">#FFFFFF</Color>
-      <Color x:Key="LuminaTextPrimary">#201A19</Color>
-      <Color x:Key="LuminaTextSecondary">#5A403E</Color>
-      <Color x:Key="LuminaTextTertiary">#806966</Color>
-      <Color x:Key="LuminaTextForeground">#201A19</Color>
-      <Color x:Key="LuminaTextMuted">#806966</Color>
-      <Color x:Key="LuminaBorderDefault">#D8C2BE</Color>
-      <Color x:Key="LuminaBorderStrong">#AA8986</Color>
-      <Color x:Key="LuminaBorder">#D8C2BE</Color>
-      <Color x:Key="LuminaDivider">#E8D8D5</Color>
-      <Color x:Key="LuminaPrimary">#B72026</Color>
-      <Color x:Key="LuminaPrimaryHover">#930013</Color>
-      <Color x:Key="LuminaPrimaryPressed">#68000A</Color>
+      <Color x:Key="LuminaTextPrimary">#111827</Color>
+      <Color x:Key="LuminaTextSecondary">#4B5563</Color>
+      <Color x:Key="LuminaTextTertiary">#9CA3AF</Color>
+      <Color x:Key="LuminaTextForeground">#111827</Color>
+      <Color x:Key="LuminaTextMuted">#9CA3AF</Color>
+      <Color x:Key="LuminaBorderDefault">#E5E7EB</Color>
+      <Color x:Key="LuminaBorderStrong">#D1D5DB</Color>
+      <Color x:Key="LuminaBorder">#E5E7EB</Color>
+      <Color x:Key="LuminaDivider">#F3F4F6</Color>
+      <Color x:Key="LuminaPrimary">#BA5A58</Color>
+      <Color x:Key="LuminaPrimaryHover">#914341</Color>
+      <Color x:Key="LuminaPrimaryPressed">#7A3533</Color>
       <Color x:Key="LuminaPrimaryForeground">#FFFFFF</Color>
-      <Color x:Key="LuminaPrimaryBg">#FFDBD7</Color>
-      <Color x:Key="LuminaHoverBackground">#FFE9E7</Color>
-      <Color x:Key="LuminaStateHover">#14B72026</Color>
-      <Color x:Key="LuminaStatePressed">#22B72026</Color>
+      <Color x:Key="LuminaPrimaryBg">#FCE8E7</Color>
+      <Color x:Key="LuminaHoverBackground">#E5E7EB</Color>
+      <Color x:Key="LuminaStateHover">#0A000000</Color>
+      <Color x:Key="LuminaStatePressed">#15000000</Color>
 
       <SolidColorBrush x:Key="LuminaBackgroundBrush" Color="{StaticResource LuminaBackground}" />
       <SolidColorBrush x:Key="LuminaNavigationPaneBrush" Color="{StaticResource LuminaNavigationPane}" />
@@ -162,35 +187,34 @@
       <SolidColorBrush x:Key="LuminaHoverBackgroundBrush" Color="{StaticResource LuminaHoverBackground}" />
       <SolidColorBrush x:Key="LuminaStateHoverBrush" Color="{StaticResource LuminaStateHover}" />
       <SolidColorBrush x:Key="LuminaStatePressedBrush" Color="{StaticResource LuminaStatePressed}" />
-      <SolidColorBrush x:Key="LuminaCardGlassTintBrush" Color="#DFFFFFFF" />
-      <SolidColorBrush x:Key="LuminaCardGlassBorderBrush" Color="#66D8C2BE" />
+      <SolidColorBrush x:Key="LuminaCardGlassTintBrush" Color="#EEFFFFFF" />
+      <SolidColorBrush x:Key="LuminaCardGlassBorderBrush" Color="#44D8C2BE" />
       <SolidColorBrush x:Key="LuminaCardGlassEdgeBrush" Color="#80FFFFFF" />
+
+      <BoxShadows x:Key="MusicFloatingShadow">0 8 24 #15000000</BoxShadows>
+      <BoxShadows x:Key="MusicSoftShadow">0 4 14 #0A000000</BoxShadows>
+
+      <LinearGradientBrush x:Key="MusicHeroGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#FFFFFF" Offset="0" />
+        <GradientStop Color="#F9FAFB" Offset="0.46" />
+        <GradientStop Color="#F3F4F6" Offset="1" />
+      </LinearGradientBrush>
+
+      <LinearGradientBrush x:Key="MusicPrimaryGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#D16B68" Offset="0" />
+        <GradientStop Color="#BA5A58" Offset="1" />
+      </LinearGradientBrush>
+
+      <LinearGradientBrush x:Key="MusicBlueGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#A3BAC3" Offset="0" />
+        <GradientStop Color="#78939E" Offset="1" />
+      </LinearGradientBrush>
+
+      <LinearGradientBrush x:Key="MusicCoverFallbackBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#F3F4F6" Offset="0" />
+        <GradientStop Color="#E5E7EB" Offset="0.55" />
+        <GradientStop Color="#D1D5DB" Offset="1" />
+      </LinearGradientBrush>
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
-
-  <BoxShadows x:Key="MusicFloatingShadow">0 8 24 #80000000</BoxShadows>
-  <BoxShadows x:Key="MusicSoftShadow">0 4 14 #66000000</BoxShadows>
-
-  <LinearGradientBrush x:Key="MusicHeroGradient" StartPoint="0%,0%" EndPoint="100%,100%">
-    <GradientStop Color="#FE5552" Offset="0" />
-    <GradientStop Color="#131313" Offset="0.46" />
-    <GradientStop Color="#003A5C" Offset="1" />
-  </LinearGradientBrush>
-
-  <LinearGradientBrush x:Key="MusicPrimaryGradient" StartPoint="0%,0%" EndPoint="100%,100%">
-    <GradientStop Color="#FE5552" Offset="0" />
-    <GradientStop Color="#B72026" Offset="1" />
-  </LinearGradientBrush>
-
-  <LinearGradientBrush x:Key="MusicBlueGradient" StartPoint="0%,0%" EndPoint="100%,100%">
-    <GradientStop Color="#00A8FE" Offset="0" />
-    <GradientStop Color="#004B74" Offset="1" />
-  </LinearGradientBrush>
-
-  <LinearGradientBrush x:Key="MusicCoverFallbackBrush" StartPoint="0%,0%" EndPoint="100%,100%">
-    <GradientStop Color="#1B202A" Offset="0" />
-    <GradientStop Color="#4A2221" Offset="0.55" />
-    <GradientStop Color="#003A5C" Offset="1" />
-  </LinearGradientBrush>
-
 </ResourceDictionary>

@@ -16,12 +16,12 @@
         <Grid Margin="18" ColumnDefinitions="*,96" ColumnSpacing="14" VerticalAlignment="Center">
           <StackPanel Spacing="9" VerticalAlignment="Center">
             <TextBlock Text="KUGOU CHARTS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-            <TextBlock Text="酷狗排行榜" FontSize="28" FontWeight="Black" Foreground="White" TextWrapping="Wrap" />
+            <TextBlock Text="酷狗排行榜" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
             <TextBlock Text="{Binding StatusMessage}" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
-            <Button Classes="Primary" Command="{Binding LoadRankingsCommand}" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Foreground="#68000A" HorizontalAlignment="Left" Padding="18,0">
+            <Button Classes="Primary" Command="{Binding LoadRankingsCommand}" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Left" Padding="18,0">
               <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="Refresh" Width="23" Height="23" Foreground="#68000A" />
-                <TextBlock Text="刷新榜单" FontWeight="Bold" Foreground="#68000A" />
+                <icons:MaterialIcon Kind="Refresh" Width="23" Height="23" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                <TextBlock Text="刷新榜单" FontWeight="Bold" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
               </StackPanel>
             </Button>
           </StackPanel>
