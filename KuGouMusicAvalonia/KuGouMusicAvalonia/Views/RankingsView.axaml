@@ -54,7 +54,7 @@
                 <Border CornerRadius="11" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
                   <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                 </Border>
-                <lumina:LuminaAutoScrollText Grid.Row="1" Classes="CenterWhenIdle" Text="{Binding Name}" FontWeight="Black" FontSize="14" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                <lumina:LuminaAutoScrollText Grid.Row="1" IdleTextAlignment="Center" IsRunning="{Binding $parent[lumina:LuminaCard].IsPointerOver}" Text="{Binding Name}" FontWeight="Black" FontSize="14" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
               </Grid>
             </lumina:LuminaCard>
           </DataTemplate>
@@ -78,7 +78,7 @@
                   <Border Width="38" Height="38" CornerRadius="9" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" VerticalAlignment="Center">
                     <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                   </Border>
-                  <lumina:LuminaAutoScrollText Grid.Column="1" Text="{Binding Name}" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                  <lumina:LuminaAutoScrollText Grid.Column="1" IsRunning="{Binding $parent[Button].IsPointerOver}" Text="{Binding Name}" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
                   <icons:MaterialIcon Grid.Column="2" Kind="ChevronRight" Width="18" Height="18" Foreground="{DynamicResource MusicTextMutedBrush}" VerticalAlignment="Center" />
                 </Grid>
               </Button>
