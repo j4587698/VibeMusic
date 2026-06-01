@@ -107,15 +107,20 @@ jobs:
           Get-ChildItem -Path $outDir -Recurse -Directory -Filter *.dSYM | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
       - name: Pack zip
-        shell: pwsh
+        shell: bash
         run: |
-          $version = "${{ steps.ver.outputs.version }}"
-          $rid = "${{ matrix.rid }}"
-          $outDir = "./artifacts/publish/$rid"
-          $zipDir = "./artifacts/zips"
-          $zipName = "vibemusic-$version-$rid.zip"
-          New-Item -ItemType Directory -Force -Path $zipDir | Out-Null
-          Compress-Archive -Path "$outDir/*" -DestinationPath "$zipDir/$zipName" -Force
+          version="${{ steps.ver.outputs.version }}"
+          rid="${{ matrix.rid }}"
+          outDir="./artifacts/publish/$rid"
+          zipDir="./artifacts/zips"
+          zipName="vibemusic-$version-$rid.zip"
+          mkdir -p "$zipDir"
+          cd "$outDir"
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            7z a "../../zips/$zipName" ./*
+          else
+            zip -r "../../zips/$zipName" ./*
+          fi
 
       - name: Upload zipped artifact
         uses: actions/upload-artifact@v4
@@ -132,6 +137,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: release-assets
+
+      - name: List assets (Diagnostics)
+        run: ls -R release-assets
 
       - name: Checkout
         uses: actions/checkout@v4
