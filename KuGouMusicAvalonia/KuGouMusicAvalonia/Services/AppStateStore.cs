@@ -15,6 +15,7 @@ internal sealed class MusicAppState
     public string DownloadDirectory { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
     public string DefaultPlaybackQuality { get; set; } = "标准 128k";
     public List<string> FavoriteSongKeys { get; set; } = new();
+    public List<string> SearchHistories { get; set; } = new();
 }
 
 internal static class AppStateStore

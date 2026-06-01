@@ -44,8 +44,19 @@ public partial class SearchViewModel : ViewModelBase
     [ObservableProperty]
     private string _statusMessage = "输入关键词开始搜索";
 
+    [ObservableProperty]
+    private ObservableCollection<string> _searchHistories = new();
+
     public SearchViewModel()
     {
+        var state = AppStateStore.Load();
+        if (state.SearchHistories != null)
+        {
+            foreach (var h in state.SearchHistories)
+            {
+                SearchHistories.Add(h);
+            }
+        }
         RebuildPageItems();
     }
 
@@ -56,6 +67,20 @@ public partial class SearchViewModel : ViewModelBase
         
         if (IsLoading) return;
         IsLoading = true;
+
+        var trimmed = Keyword.Trim();
+        if (SearchHistories.Contains(trimmed))
+        {
+            SearchHistories.Remove(trimmed);
+        }
+        SearchHistories.Insert(0, trimmed);
+        if (SearchHistories.Count > 15)
+        {
+            SearchHistories.RemoveAt(SearchHistories.Count - 1);
+        }
+        var state = AppStateStore.Load();
+        state.SearchHistories = SearchHistories.ToList();
+        AppStateStore.Save(state);
 
         try
         {
@@ -126,6 +151,15 @@ public partial class SearchViewModel : ViewModelBase
     {
         Keyword = keyword;
         await SearchAsync();
+    }
+
+    [RelayCommand]
+    private void ClearHistory()
+    {
+        SearchHistories.Clear();
+        var state = AppStateStore.Load();
+        state.SearchHistories.Clear();
+        AppStateStore.Save(state);
     }
 
     private void RebuildPageItems()

@@ -82,26 +82,28 @@
             </ItemsControl>
           </StackPanel>
 
-          <Grid ColumnDefinitions="*,*" RowDefinitions="92,92,92" ColumnSpacing="12" RowSpacing="12">
-            <Border CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" ClipToBounds="True">
-              <TextBlock Text="流行 Pop" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
-            </Border>
-            <Border Grid.Column="1" CornerRadius="18" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
-              <TextBlock Text="嘻哈 Hip-Hop" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
-            </Border>
-            <Border Grid.Row="1" CornerRadius="18" Background="#FF4A2221" ClipToBounds="True">
-              <TextBlock Text="摇滚 Rock" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
-            </Border>
-            <Border Grid.Row="1" Grid.Column="1" CornerRadius="18" Background="#FFC9A900" ClipToBounds="True">
-              <TextBlock Text="古典 Classic" FontSize="20" FontWeight="Black" Foreground="#221B00" Margin="16" VerticalAlignment="Bottom" />
-            </Border>
-            <Border Grid.Row="2" CornerRadius="18" Background="{DynamicResource MusicBlueGradient}" ClipToBounds="True">
-              <TextBlock Text="电子 EDM" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
-            </Border>
-            <Border Grid.Row="2" Grid.Column="1" CornerRadius="18" Background="#FF6B3B1F" ClipToBounds="True">
-              <TextBlock Text="爵士 Jazz" FontSize="20" FontWeight="Black" Foreground="White" Margin="16" VerticalAlignment="Bottom" />
-            </Border>
-          </Grid>
+          <StackPanel Spacing="12" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchHistories.Count}">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="搜索历史" FontSize="18" FontWeight="Black" Foreground="{DynamicResource MusicTextSoftBrush}" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Classes="Ghost Icon" Width="32" Height="32" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).ClearHistoryCommand}" ToolTip.Tip="清空历史记录">
+                <icons:MaterialIcon Kind="DeleteOutline" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              </Button>
+            </Grid>
+            <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchHistories}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="sys:String">
+                  <Button Classes="Ghost" Margin="0,0,8,8" MinHeight="34" CornerRadius="17" Padding="14,0" Background="{DynamicResource MusicSurfaceHighBrush}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).UseKeywordCommand}" CommandParameter="{Binding}">
+                    <TextBlock Text="{Binding}" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" FontWeight="SemiBold" />
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
 
           <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
             <StackPanel>
