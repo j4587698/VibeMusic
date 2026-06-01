@@ -129,8 +129,8 @@
             </Border>
 
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-              <TextBlock Text="{Binding Title}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" TextTrimming="CharacterEllipsis" MaxLines="1" />
-              <TextBlock Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" TextTrimming="CharacterEllipsis" MaxLines="1" />
+              <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
             </StackPanel>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
