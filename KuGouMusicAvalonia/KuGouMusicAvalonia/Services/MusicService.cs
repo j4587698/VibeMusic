@@ -229,6 +229,18 @@ public static class MusicService
         set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.StreamWhileDownloading, value);
     }
 
+    public static bool MinimizeToTrayOnClose
+    {
+        get => LocalMusicStore.Instance.GetBoolSetting("MinimizeToTrayOnClose", true);
+        set => LocalMusicStore.Instance.SetSetting("MinimizeToTrayOnClose", value);
+    }
+
+    public static bool HasPromptedMinimizeToTray
+    {
+        get => LocalMusicStore.Instance.GetBoolSetting("HasPromptedMinimizeToTray", false);
+        set => LocalMusicStore.Instance.SetSetting("HasPromptedMinimizeToTray", value);
+    }
+
     public static string DownloadDirectory
     {
         get => LocalMusicStore.Instance.GetStringSetting(LocalSettingKeys.DownloadDirectory, Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));

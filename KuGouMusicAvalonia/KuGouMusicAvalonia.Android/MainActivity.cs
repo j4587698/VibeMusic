@@ -1,9 +1,10 @@
-﻿using Android.App;
+using Android.App;
 using Android;
 using Android.Content.PM;
 using Android.OS;
 using Avalonia;
 using Avalonia.Android;
+using Android.Content;
 
 namespace KuGouMusicAvalonia.Android;
 
@@ -13,19 +14,39 @@ namespace KuGouMusicAvalonia.Android;
     Icon = "@drawable/icon",
     MainLauncher = true,
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
-public class MainActivity : AvaloniaMainActivity
+public class MainActivity : AvaloniaMainActivity, IServiceConnection
 {
+    private bool _isBound;
+
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
         EnsureNotificationPermission();
         AndroidMediaControlManager.Instance.Initialize(this);
+
+        var intent = new Intent(this, typeof(PlaybackNotificationService));
+        BindService(intent, this, Bind.AutoCreate);
     }
 
     protected override void OnDestroy()
     {
+        if (_isBound)
+        {
+            UnbindService(this);
+            _isBound = false;
+        }
         AndroidMediaControlManager.Instance.Dispose();
         base.OnDestroy();
+    }
+
+    public void OnServiceConnected(ComponentName? name, IBinder? service)
+    {
+        _isBound = true;
+    }
+
+    public void OnServiceDisconnected(ComponentName? name)
+    {
+        _isBound = false;
     }
 
     private void EnsureNotificationPermission()

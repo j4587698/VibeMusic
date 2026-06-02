@@ -255,7 +255,7 @@
         <StackPanel Spacing="16">
           <TextBlock Text="设置" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
 
-          <Grid ColumnDefinitions="180,*" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+          <Grid ColumnDefinitions="180,*" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="12">
             <TextBlock Text="主题" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
             <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeModeOptions}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}" Height="40" />
 
@@ -264,8 +264,13 @@
               <TextBlock Text="已下载歌曲优先本地播放；未下载时边播边保存" Foreground="{DynamicResource MusicTextBrush}" />
             </CheckBox>
 
-            <TextBlock Grid.Row="2" Text="存储位置" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
-            <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <TextBlock Grid.Row="2" Text="关闭主界面" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+            <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding MinimizeToTrayOnClose, Mode=TwoWay}" VerticalAlignment="Center">
+              <TextBlock Text="关闭窗口时最小化到系统托盘（仅电脑端）" Foreground="{DynamicResource MusicTextBrush}" />
+            </CheckBox>
+
+            <TextBlock Grid.Row="3" Text="存储位置" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+            <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="10">
               <TextBox Grid.Column="0" Classes="Pill MusicPillInput" Text="{Binding DownloadDirectory, Mode=TwoWay}" Height="40" />
               <Button Grid.Column="1" Classes="Outline" Height="40" CornerRadius="20" Padding="14,0" Command="{Binding PickDownloadDirectoryCommand}" ToolTip.Tip="选择下载目录">
                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
@@ -275,8 +280,8 @@
               </Button>
             </Grid>
 
-            <TextBlock Grid.Row="3" Text="默认播放比特率" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
-            <ComboBox Grid.Row="3" Grid.Column="1" ItemsSource="{Binding PlaybackQualityOptions}" SelectedItem="{Binding DefaultPlaybackQuality, Mode=TwoWay}" Height="40" />
+            <TextBlock Grid.Row="4" Text="默认播放比特率" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+            <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding PlaybackQualityOptions}" SelectedItem="{Binding DefaultPlaybackQuality, Mode=TwoWay}" Height="40" />
           </Grid>
         </StackPanel>
       </Border>

@@ -111,6 +111,9 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _defaultPlaybackQuality = "标准 128k";
 
+    [ObservableProperty]
+    private bool _minimizeToTrayOnClose;
+
     public IReadOnlyList<string> ThemeModeOptions { get; } = new[] { "跟随系统", "浅色", "深色" };
 
     public IReadOnlyList<string> PlaybackQualityOptions { get; } = new[] { "标准 128k", "高品 320k", "无损 FLAC", "高解析 High" };
@@ -137,6 +140,7 @@ public partial class SettingsViewModel : ViewModelBase
         AutoReceiveVipBeforePlayback = VipPrivilegeService.Instance.AutoReceiveBeforePlayback;
         ThemeMode = MusicService.ThemeMode;
         StreamWhileDownloading = MusicService.StreamWhileDownloading;
+        MinimizeToTrayOnClose = MusicService.MinimizeToTrayOnClose;
         DownloadDirectory = MusicService.DownloadDirectory;
         DefaultPlaybackQuality = MusicService.DefaultPlaybackQuality;
         ApplyThemeMode(ThemeMode);
@@ -162,6 +166,11 @@ public partial class SettingsViewModel : ViewModelBase
     partial void OnStreamWhileDownloadingChanged(bool value)
     {
         MusicService.StreamWhileDownloading = value;
+    }
+
+    partial void OnMinimizeToTrayOnCloseChanged(bool value)
+    {
+        MusicService.MinimizeToTrayOnClose = value;
     }
 
     partial void OnDownloadDirectoryChanged(string value)

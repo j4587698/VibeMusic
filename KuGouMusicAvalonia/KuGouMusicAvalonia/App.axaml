@@ -23,6 +23,35 @@
         </ResourceDictionary>
     </Application.Resources>
 
+    <NativeMenu.Menu>
+        <NativeMenu>
+            <NativeMenuItem Header="VibeMusic">
+                <NativeMenuItem.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="关于 VibeMusic" Click="About_OnClick" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Header="隐藏 VibeMusic" Click="HideMainWindow_OnClick" Gesture="Cmd+H" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Header="退出 VibeMusic" Click="ExitApp_OnClick" Gesture="Cmd+Q" />
+                    </NativeMenu>
+                </NativeMenuItem.Menu>
+            </NativeMenuItem>
+        </NativeMenu>
+    </NativeMenu.Menu>
+
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon Icon="/Assets/vibe-logo.ico" ToolTipText="VibeMusic" Clicked="TrayIcon_OnClicked">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="显示主界面" Click="ShowMainWindow_OnClick" />
+                        <NativeMenuItem Header="退出" Click="ExitApp_OnClick" />
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
+
     <Application.Styles>
         <FluentTheme />
         <lumina:LuminaTheme />

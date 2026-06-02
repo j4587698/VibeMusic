@@ -127,21 +127,24 @@ jobs:
           chmod +x "$appDir/Contents/MacOS/$exeName"
 
           # Generate .icns from the PNG logo (best-effort)
-          srcPng="./KuGouMusicAvalonia/Assets/vibe-logo.png"
+          srcPng="./KuGouMusicAvalonia/KuGouMusicAvalonia/Assets/vibe-logo.png"
           if [ -f "$srcPng" ]; then
             iconset="./artifacts/app/$rid/${appName}.iconset"
             mkdir -p "$iconset"
-            for size in 16 32 64 128 256 512; do
-              sips -z $size $size "$srcPng" --out "$iconset/icon_${size}x${size}.png" >/dev/null 2>&1 || true
+            # iconutil requires exactly these standard sizes; extra sizes make it fail
+            for size in 16 32 128 256 512; do
               dbl=$((size * 2))
+              sips -z $size $size "$srcPng" --out "$iconset/icon_${size}x${size}.png" >/dev/null 2>&1 || true
               sips -z $dbl $dbl "$srcPng" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null 2>&1 || true
             done
-            if iconutil -c icns "$iconset" -o "$appDir/Contents/Resources/${appName}.icns" >/dev/null 2>&1; then
+            if iconutil -c icns "$iconset" -o "$appDir/Contents/Resources/${appName}.icns"; then
               echo "icns generated"
             else
               echo "iconutil failed, app will use default icon"
             fi
             rm -rf "$iconset"
+          else
+            echo "WARNING: source png not found at $srcPng"
           fi
 
           # Write Info.plist

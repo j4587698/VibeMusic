@@ -7,7 +7,16 @@ namespace KuGouMusicAvalonia.Android;
 [Service(Enabled = true, Exported = false)]
 internal sealed class PlaybackNotificationService : Service
 {
-    public override IBinder? OnBind(Intent? intent) => null;
+    public class PlaybackBinder : Binder
+    {
+        public PlaybackNotificationService Service { get; }
+        public PlaybackBinder(PlaybackNotificationService service)
+        {
+            Service = service;
+        }
+    }
+
+    public override IBinder? OnBind(Intent? intent) => new PlaybackBinder(this);
 
     public override StartCommandResult OnStartCommand(Intent? intent, StartCommandFlags flags, int startId)
     {
