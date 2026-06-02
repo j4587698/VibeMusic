@@ -9,6 +9,14 @@ namespace KuGouMusicAvalonia.ViewModels;
 
 public sealed partial class NowPlayingViewModel : ViewModelBase
 {
+    public NowPlayingViewModel()
+    {
+        DesktopLyricsWindowService.Instance.StateChanged += (_, _) => 
+        {
+            OnPropertyChanged(nameof(IsDesktopLyricsOpen));
+            OnPropertyChanged(nameof(IsDesktopLyricsLocked));
+        };
+    }
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCoverModeVisible))]
     [NotifyPropertyChangedFor(nameof(IsLyricsModeVisible))]
@@ -38,10 +46,28 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
 
     public bool IsLyricsModeVisible => IsWideLayout || IsCompactLyricsVisible;
 
+    public bool IsDesktopLyricsOpen => DesktopLyricsWindowService.Instance.IsOpen;
+
+    public bool IsDesktopLyricsSupported => DesktopLyricsWindowService.Instance.IsSupported;
+
+    public bool IsDesktopLyricsLocked => DesktopLyricsWindowService.Instance.IsLocked;
+
     [RelayCommand]
     private void Close()
     {
         ShellNavigationService.Instance.CloseNowPlaying();
+    }
+
+    [RelayCommand]
+    private void ToggleDesktopLyrics()
+    {
+        DesktopLyricsWindowService.Instance.Toggle();
+    }
+
+    [RelayCommand]
+    private void ToggleDesktopLyricsLock()
+    {
+        DesktopLyricsWindowService.Instance.IsLocked = !DesktopLyricsWindowService.Instance.IsLocked;
     }
 
     [RelayCommand]

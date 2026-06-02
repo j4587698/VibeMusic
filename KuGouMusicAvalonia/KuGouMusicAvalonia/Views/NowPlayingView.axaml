@@ -14,7 +14,7 @@
     <Border Background="{DynamicResource MusicHeroGradient}" Opacity="0.26" />
 
     <Grid Margin="20,16,20,20" RowDefinitions="Auto,*,Auto,Auto,Auto" RowSpacing="14">
-      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="12">
+      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12">
         <Button Classes="Ghost Icon" Width="40" Height="40" Command="{Binding CloseCommand}" ToolTip.Tip="返回">
           <icons:MaterialIcon Kind="ChevronDown" Width="26" Height="26" Foreground="{DynamicResource MusicPrimaryBrush}" />
         </Button>
@@ -29,7 +29,19 @@
         <Button Grid.Column="3" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleQueueCommand}" ToolTip.Tip="播放队列">
           <icons:MaterialIcon Kind="PlaylistMusic" Width="24" Height="24" Foreground="{DynamicResource MusicTextSoftBrush}" />
         </Button>
-        <Button Grid.Column="4" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleFavoriteCommand}" ToolTip.Tip="{Binding Player.FavoriteStatusText}">
+        <Button Grid.Column="4" IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="桌面歌词">
+          <Grid>
+            <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsOpen}" Kind="SubtitlesOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
+            <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsOpen}" Kind="Subtitles" Foreground="{DynamicResource MusicPrimaryBrush}" Width="24" Height="24" />
+          </Grid>
+        </Button>
+        <Button Grid.Column="5" IsVisible="{Binding IsDesktopLyricsOpen}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsLockCommand}" ToolTip.Tip="锁定/解锁桌面歌词">
+          <Grid>
+            <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsLocked}" Kind="LockOpenOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
+            <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsLocked}" Kind="Lock" Foreground="{DynamicResource MusicPrimaryBrush}" Width="22" Height="22" />
+          </Grid>
+        </Button>
+        <Button Grid.Column="6" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleFavoriteCommand}" ToolTip.Tip="{Binding Player.FavoriteStatusText}">
           <Grid>
             <icons:MaterialIcon IsVisible="{Binding !Player.IsCurrentSongFavorite}" Kind="HeartOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
             <icons:MaterialIcon IsVisible="{Binding Player.IsCurrentSongFavorite}" Kind="Heart" Foreground="{DynamicResource MusicPrimaryBrush}" Width="24" Height="24" />
