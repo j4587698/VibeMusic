@@ -12,6 +12,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly PlaylistsViewModel _playlistsViewModel = new();
     private readonly ArtistsViewModel _artistsViewModel = new();
     private readonly RankingsViewModel _rankingsViewModel = new();
+    private readonly HistoryViewModel _historyViewModel = new();
     private readonly SearchViewModel _searchViewModel = new();
     private readonly SettingsViewModel _settingsViewModel = new();
     private readonly NowPlayingViewModel _nowPlayingViewModel = new();
@@ -24,6 +25,7 @@ public partial class MainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsPlaylistsActive))]
     [NotifyPropertyChangedFor(nameof(IsArtistsActive))]
     [NotifyPropertyChangedFor(nameof(IsRankingsActive))]
+    [NotifyPropertyChangedFor(nameof(IsHistoryActive))]
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsSettingsActive))]
     [NotifyPropertyChangedFor(nameof(IsLyricsActive))]
@@ -51,6 +53,7 @@ public partial class MainViewModel : ViewModelBase
     public bool IsPlaylistsActive => ActiveNavigationKey == "NavPlaylists";
     public bool IsArtistsActive => ActiveNavigationKey == "NavArtists";
     public bool IsRankingsActive => ActiveNavigationKey == "NavRankings";
+    public bool IsHistoryActive => ActiveNavigationKey == "NavHistory";
     public bool IsSearchActive => ActiveNavigationKey == "NavSearch";
     public bool IsSettingsActive => ActiveNavigationKey == "NavSettings";
     public bool IsLyricsActive => ActiveNavigationKey == "NavLyrics";
@@ -89,6 +92,7 @@ public partial class MainViewModel : ViewModelBase
             "NavPlaylists" => _playlistsViewModel,
             "NavArtists" => _artistsViewModel,
             "NavRankings" => _rankingsViewModel,
+            "NavHistory" => _historyViewModel,
             "NavSearch" => _searchViewModel,
             "NavSettings" => _settingsViewModel,
             "NavNowPlaying" => _nowPlayingViewModel,
@@ -181,6 +185,11 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private async Task PlayQueueSongAsync(KugouSong song)
     {
+        if (PlayerService.IsSameSong(song, Player.CurrentSong))
+        {
+            Player.TogglePlayPause();
+            return;
+        }
         await Player.PlayQueueSongAsync(song);
     }
 

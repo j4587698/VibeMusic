@@ -992,8 +992,13 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         }
     }
 
-    private static bool IsSameSong(KugouSong left, KugouSong right)
+    public static bool IsSameSong(KugouSong? left, KugouSong? right)
     {
+        if (left is null || right is null)
+        {
+            return false;
+        }
+
         if (!string.IsNullOrWhiteSpace(left.Hash) && !string.IsNullOrWhiteSpace(right.Hash) && string.Equals(left.Hash, right.Hash, StringComparison.OrdinalIgnoreCase))
         {
             return true;

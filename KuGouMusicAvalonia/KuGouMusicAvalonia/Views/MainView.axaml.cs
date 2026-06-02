@@ -21,10 +21,37 @@ public partial class MainView : UserControl
         }
     }
 
+    private MainViewModel? _viewModel;
+
     protected override void OnDataContextChanged(EventArgs e)
     {
         base.OnDataContextChanged(e);
         UpdateLayoutMode();
+
+        if (_viewModel != null)
+        {
+            _viewModel.PropertyChanged -= ViewModel_PropertyChanged;
+        }
+
+        _viewModel = DataContext as MainViewModel;
+        if (_viewModel != null)
+        {
+            _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+        }
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainViewModel.IsQueueOpen))
+        {
+            if (_viewModel?.IsQueueOpen == true && _viewModel.Player.CurrentSong != null)
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    QueueListBox.ScrollIntoView(_viewModel.Player.CurrentSong);
+                }, Avalonia.Threading.DispatcherPriority.Loaded);
+            }
+        }
     }
 
     private void UpdateLayoutMode()

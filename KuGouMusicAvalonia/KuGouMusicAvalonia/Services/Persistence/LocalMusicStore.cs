@@ -401,7 +401,23 @@ internal sealed class LocalMusicStore
             record.DurationSeconds = Math.Max(record.DurationSeconds, durationSeconds);
             record.Completed = record.Completed || completed;
             record.UpdatedAtUtc = DateTime.UtcNow;
+            record.UpdatedAtUtc = DateTime.UtcNow;
             _history.Update(record);
+        }
+    }
+
+    public IReadOnlyList<KugouSong> LoadLocalHistory(int count = 100)
+    {
+        lock (_gate)
+        {
+            return _history.FindAll()
+                .OrderByDescending(record => record.PlayedAtUtc)
+                .Select(record => ToSong(_songs.FindById(record.SongKey)))
+                .Where(song => song is not null)
+                .Cast<KugouSong>()
+                .DistinctBy(song => GetSongKey(song))
+                .Take(count)
+                .ToList();
         }
     }
 

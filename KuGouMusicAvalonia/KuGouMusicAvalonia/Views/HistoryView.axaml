@@ -10,9 +10,8 @@
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
-             x:Class="KuGouMusicAvalonia.Views.PlaylistDetailView"
-             x:DataType="vm:PlaylistDetailViewModel"
-             x:CompileBindings="True">
+             x:Class="KuGouMusicAvalonia.Views.HistoryView"
+             x:DataType="vm:HistoryViewModel">
   <ListBox ItemsSource="{Binding PageItems}"
            Background="Transparent"
            BorderThickness="0"
@@ -45,50 +44,33 @@
     </ListBox.Styles>
 
     <ListBox.DataTemplates>
-      <DataTemplate DataType="vm:PlaylistDetailHeaderSection">
+      <DataTemplate DataType="vm:HistoryHeaderSection">
         <StackPanel Margin="20,18,20,18" Spacing="18">
-          <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).BackCommand}" HorizontalAlignment="Left" Padding="0" Background="Transparent">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <icons:MaterialIcon Kind="ArrowLeft" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
-              <TextBlock Text="返回歌单" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-            </StackPanel>
-          </Button>
-
-          <Border CornerRadius="24" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True" MinHeight="224" BoxShadow="{DynamicResource MusicFloatingShadow}">
-            <Grid Margin="22" ColumnDefinitions="150,*" ColumnSpacing="22">
-              <Border Width="142" Height="142" CornerRadius="22" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" BoxShadow="{DynamicResource MusicSoftShadow}" VerticalAlignment="Center">
-                <lumina:LuminaImage Source="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+          <Border Padding="4,14,4,6" Background="Transparent">
+            <Grid ColumnDefinitions="160,*" ColumnSpacing="24">
+              <!-- Cover -->
+              <Border Width="160" Height="160" CornerRadius="16" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True" BoxShadow="0 8 32 0 #33000000">
+                <icons:MaterialIcon Kind="History" Width="64" Height="64" Foreground="{DynamicResource MusicTextMutedBrush}" />
               </Border>
-              <StackPanel Grid.Column="1" Spacing="10" VerticalAlignment="Center">
-                <TextBlock Text="PLAYLIST" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <lumina:LuminaAutoScrollText Text="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).Title}" FontSize="30" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-                <TextBlock Text="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).Intro}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,4,0,0">
-                  <Button Classes="Primary" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).PlayAllCommand}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Padding="18,0">
+
+              <!-- Info -->
+              <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="16">
+                <TextBlock Text="历史播放" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <TextBlock Text="最近播放记录" FontSize="36" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).SongCountText}" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                  <Button Classes="Primary" CornerRadius="20" Padding="20,10" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).PlayAllCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                      <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                      <TextBlock Text="播放全部" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                    </StackPanel>
-                  </Button>
-                  <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).QueueAllCommand}" Height="40" CornerRadius="20" Background="#33000000" Padding="16,0">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                      <icons:MaterialIcon Kind="PlaylistMusic" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
-                      <TextBlock Text="加入队列" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+                      <icons:MaterialIcon Kind="Play" Width="20" Height="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                      <TextBlock Text="播放全部" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                     </StackPanel>
                   </Button>
                 </StackPanel>
-                <TextBlock Text="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).MetaText}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" />
               </StackPanel>
             </Grid>
           </Border>
-
-          <Grid ColumnDefinitions="*,Auto">
-            <StackPanel>
-              <TextBlock Text="歌曲列表" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-              <TextBlock Text="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).StatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
-            </StackPanel>
-            <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).IsLoading}" Width="130" Height="4" VerticalAlignment="Center" />
-          </Grid>
         </StackPanel>
       </DataTemplate>
 
@@ -120,12 +102,8 @@
               <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
             </StackPanel>
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-              <Button Classes="Ghost Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="下载到本地"
-                      Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).DownloadSongCommand}"
-                      CommandParameter="{Binding}">
-                <icons:MaterialIcon Kind="Download" Width="22" Height="22" Foreground="{DynamicResource MusicTextSoftBrush}" />
-              </Button>
-              <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
+              <!-- Actions -->
+              <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
                   <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="24" Height="24">
                     <icons:MaterialIcon.Kind>
                       <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
@@ -139,12 +117,6 @@
             </StackPanel>
           </Grid>
         </Border>
-      </DataTemplate>
-
-      <DataTemplate DataType="vm:PlaylistLoadMoreSentinel">
-        <StackPanel HorizontalAlignment="Center" Margin="0,10,0,30" AttachedToVisualTree="OnSentinelAttached">
-          <ProgressBar IsIndeterminate="True" Width="80" Height="4" />
-        </StackPanel>
       </DataTemplate>
     </ListBox.DataTemplates>
   </ListBox>

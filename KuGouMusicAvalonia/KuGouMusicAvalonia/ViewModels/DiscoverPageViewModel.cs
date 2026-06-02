@@ -123,6 +123,11 @@ public partial class DiscoverViewModel : ViewModelBase
     private async Task PlaySongAsync(KugouSong song)
     {
         if (song == null) return;
+        if (PlayerService.IsSameSong(song, PlayerService.Instance.CurrentSong))
+        {
+            PlayerService.Instance.TogglePlayPause();
+            return;
+        }
         var index = NewSongs.IndexOf(song);
         await PlayerService.Instance.PlayQueueAsync(NewSongs.ToList(), index < 0 ? 0 : index, "新歌速递", replaceQueue: true);
     }

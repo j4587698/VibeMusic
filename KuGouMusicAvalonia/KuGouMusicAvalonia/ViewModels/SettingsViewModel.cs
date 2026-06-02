@@ -122,7 +122,7 @@ public partial class SettingsViewModel : ViewModelBase
 
     public ObservableCollection<UserLibraryItem> UserCollections { get; } = new();
 
-    public ObservableCollection<UserLibraryItem> UserHistory { get; } = new();
+    public ObservableCollection<KugouSong> UserHistory { get; } = new();
 
     public ObservableCollection<UserLibraryItem> UserLibraryPreview { get; } = new();
 
@@ -573,20 +573,7 @@ public partial class SettingsViewModel : ViewModelBase
             UserCollections.Add(new UserLibraryItem("云盘/收藏同步失败", ex.Message, string.Empty, "云盘/收藏"));
         }
 
-        try
-        {
-            var history = await MusicService.Client.GetUserHistoryTypedAsync();
-            UserHistoryCountText = CountText(history.Total, history.Items.Count);
-            foreach (var song in history.Items.Take(4))
-            {
-                UserHistory.Add(new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "最近播放"));
-            }
-        }
-        catch (Exception ex)
-        {
-            UserHistoryCountText = "同步失败";
-            UserHistory.Add(new UserLibraryItem("最近播放同步失败", ex.Message, string.Empty, "最近播放"));
-        }
+        RefreshLocalHistory();
 
         RebuildUserLibraryPreview();
     }
@@ -622,9 +609,13 @@ public partial class SettingsViewModel : ViewModelBase
     private void RebuildUserLibraryPreview()
     {
         UserLibraryPreview.Clear();
-        foreach (var item in UserPlaylists.Take(2).Concat(UserCollections.Take(2)).Concat(UserHistory.Take(2)))
+        foreach (var item in UserPlaylists.Take(2).Concat(UserCollections.Take(2)))
         {
             UserLibraryPreview.Add(item);
+        }
+        foreach (var song in UserHistory.Take(2))
+        {
+            UserLibraryPreview.Add(new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "最近播放"));
         }
     }
 
@@ -685,6 +676,41 @@ public partial class SettingsViewModel : ViewModelBase
         using var data = generator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
         var png = new PngByteQRCode(data).GetGraphic(8);
         return new Bitmap(new MemoryStream(png));
+    }
+    [RelayCommand]
+    private async Task PlayHistorySongAsync(KugouSong song)
+    {
+        if (song is null) return;
+        if (PlayerService.IsSameSong(song, PlayerService.Instance.CurrentSong))
+        {
+            PlayerService.Instance.TogglePlayPause();
+            return;
+        }
+        var index = UserHistory.IndexOf(song);
+        await PlayerService.Instance.PlayQueueAsync(UserHistory.ToList(), index < 0 ? 0 : index, "最近播放", replaceQueue: true);
+    }
+
+    [RelayCommand]
+    private void ViewAllHistory()
+    {
+        ShellNavigationService.Instance.Navigate("NavHistory");
+    }
+
+    [RelayCommand]
+    private void ViewAllPlaylists()
+    {
+        ShellNavigationService.Instance.Navigate("NavPlaylists");
+    }
+
+    public void RefreshLocalHistory()
+    {
+        var history = LocalMusicStore.Instance.LoadLocalHistory(100);
+        UserHistoryCountText = $"{history.Count} 首";
+        UserHistory.Clear();
+        foreach (var song in history.Take(4))
+        {
+            UserHistory.Add(song);
+        }
     }
 }
 

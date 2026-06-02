@@ -4,6 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:services="using:KuGouMusicAvalonia.Services"
+             xmlns:converters="using:KuGouMusicAvalonia.Converters"
+             xmlns:controls="using:KuGouMusicAvalonia.Controls"
              xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
@@ -137,7 +140,24 @@
             </Border>
 
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-              <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <controls:PlayingIndicator VerticalAlignment="Center">
+                  <controls:PlayingIndicator.IsVisible>
+                    <MultiBinding Converter="{x:Static converters:SongEqualityConverter.Instance}">
+                      <Binding />
+                      <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                    </MultiBinding>
+                  </controls:PlayingIndicator.IsVisible>
+                </controls:PlayingIndicator>
+                <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontWeight="Black" HorizontalAlignment="Stretch">
+                  <lumina:LuminaAutoScrollText.Foreground>
+                    <MultiBinding Converter="{x:Static converters:SongPlayingBrushConverter.Instance}">
+                      <Binding />
+                      <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                    </MultiBinding>
+                  </lumina:LuminaAutoScrollText.Foreground>
+                </lumina:LuminaAutoScrollText>
+              </StackPanel>
               <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
             </StackPanel>
 
@@ -145,8 +165,16 @@
               <Button Classes="Ghost Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="下载到本地" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).DownloadSongCommand}" CommandParameter="{Binding}">
                 <icons:MaterialIcon Kind="Download" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
               </Button>
-              <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
-                <icons:MaterialIcon Kind="Play" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="24" Height="24" />
+              <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
+                <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="24" Height="24">
+                  <icons:MaterialIcon.Kind>
+                    <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
+                      <Binding />
+                      <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                      <Binding Path="IsPlaying" Source="{x:Static services:PlayerService.Instance}" />
+                    </MultiBinding>
+                  </icons:MaterialIcon.Kind>
+                </icons:MaterialIcon>
               </Button>
             </StackPanel>
           </Grid>

@@ -139,6 +139,11 @@ public partial class SearchViewModel : ViewModelBase
     private async Task PlaySongAsync(KugouSong song)
     {
         if (song == null) return;
+        if (PlayerService.IsSameSong(song, PlayerService.Instance.CurrentSong))
+        {
+            PlayerService.Instance.TogglePlayPause();
+            return;
+        }
         var songs = SearchResults.OfType<KugouSong>().ToList();
         var index = songs.IndexOf(song);
         await PlayerService.Instance.PlayQueueAsync(songs, index < 0 ? 0 : index, $"搜索：{Keyword}", replaceQueue: true);

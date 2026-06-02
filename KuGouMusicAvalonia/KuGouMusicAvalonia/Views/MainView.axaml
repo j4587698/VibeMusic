@@ -3,6 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:converters="using:KuGouMusicAvalonia.Converters"
+             xmlns:controls="using:KuGouMusicAvalonia.Controls"
              xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
@@ -276,7 +278,7 @@
             </StackPanel>
           </Border>
 
-          <ListBox IsVisible="{Binding Player.HasQueue}" MaxHeight="440" ItemsSource="{Binding Player.Queue}" Background="Transparent" BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
+          <ListBox x:Name="QueueListBox" IsVisible="{Binding Player.HasQueue}" MaxHeight="440" ItemsSource="{Binding Player.Queue}" Background="Transparent" BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
             <ListBox.ItemsPanel>
               <ItemsPanelTemplate>
                 <VirtualizingStackPanel />
@@ -306,13 +308,38 @@
                           <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3" MinWidth="0" HorizontalAlignment="Stretch">
-                          <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Button].IsPointerOver}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                          <StackPanel Orientation="Horizontal" Spacing="6">
+                            <controls:PlayingIndicator VerticalAlignment="Center">
+                              <controls:PlayingIndicator.IsVisible>
+                                <MultiBinding Converter="{x:Static converters:SongEqualityConverter.Instance}">
+                                  <Binding />
+                                  <Binding Path="$parent[UserControl].((vm:MainViewModel)DataContext).Player.CurrentSong" />
+                                </MultiBinding>
+                              </controls:PlayingIndicator.IsVisible>
+                            </controls:PlayingIndicator>
+                            <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Button].IsPointerOver}" FontWeight="Black" HorizontalAlignment="Stretch">
+                              <lumina:LuminaAutoScrollText.Foreground>
+                                <MultiBinding Converter="{x:Static converters:SongPlayingBrushConverter.Instance}">
+                                  <Binding />
+                                  <Binding Path="$parent[UserControl].((vm:MainViewModel)DataContext).Player.CurrentSong" />
+                                </MultiBinding>
+                              </lumina:LuminaAutoScrollText.Foreground>
+                            </lumina:LuminaAutoScrollText>
+                          </StackPanel>
                           <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Button].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
                         </StackPanel>
                       </Grid>
                     </Button>
-                    <Button Grid.Column="2" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).PlayQueueSongCommand}" CommandParameter="{Binding}" ToolTip.Tip="播放这一首">
-                      <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                    <Button Grid.Column="2" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).PlayQueueSongCommand}" CommandParameter="{Binding}" ToolTip.Tip="播放/暂停">
+                      <icons:MaterialIcon Width="22" Height="22" Foreground="{DynamicResource MusicPrimaryBrush}">
+                        <icons:MaterialIcon.Kind>
+                          <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
+                            <Binding />
+                            <Binding Path="$parent[UserControl].((vm:MainViewModel)DataContext).Player.CurrentSong" />
+                            <Binding Path="$parent[UserControl].((vm:MainViewModel)DataContext).Player.IsPlaying" />
+                          </MultiBinding>
+                        </icons:MaterialIcon.Kind>
+                      </icons:MaterialIcon>
                     </Button>
                     <Button Grid.Column="3" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding $parent[UserControl].((vm:MainViewModel)DataContext).RemoveQueueSongCommand}" CommandParameter="{Binding}" ToolTip.Tip="从队列移除">
                       <icons:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource MusicTextSoftBrush}" />

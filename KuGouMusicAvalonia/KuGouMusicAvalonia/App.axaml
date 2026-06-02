@@ -17,6 +17,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <converters:EmptyStringToNullConverter x:Key="EmptyStringToNullConverter" />
+            <converters:DurationConverter x:Key="DurationConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://KuGouMusicAvalonia/Styles/MusicTheme.axaml" />
             </ResourceDictionary.MergedDictionaries>

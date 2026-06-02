@@ -28,6 +28,7 @@ public class ViewLocator : IDataTemplate
             ArtistDetailViewModel => new Views.ArtistDetailView(),
             SearchViewModel => new Views.SearchView(),
             SettingsViewModel => new Views.SettingsView(),
+            HistoryViewModel => new Views.HistoryView(),
             NowPlayingViewModel => new Views.NowPlayingView(),
             LyricsViewModel => new Views.LyricsView(),
             _ => new TextBlock { Text = "Not Found: " + param.GetType().Name }

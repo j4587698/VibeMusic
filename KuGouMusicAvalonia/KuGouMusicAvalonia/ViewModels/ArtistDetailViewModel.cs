@@ -157,6 +157,11 @@ public partial class ArtistDetailViewModel : ViewModelBase
     private async Task PlaySongAsync(KugouSong song)
     {
         if (song is null) return;
+        if (PlayerService.IsSameSong(song, PlayerService.Instance.CurrentSong))
+        {
+            PlayerService.Instance.TogglePlayPause();
+            return;
+        }
         var index = Songs.IndexOf(song);
         await PlayerService.Instance.PlayQueueAsync(Songs.ToList(), index < 0 ? 0 : index, Title, replaceQueue: true);
     }
