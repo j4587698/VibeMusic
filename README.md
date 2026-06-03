@@ -10,7 +10,7 @@ VibeMusic 是一款基于 **Avalonia UI** 和 **.NET 10** 构建的现代化、�
 - **🎵 核心音乐功能**：
   - 完整接入流媒体生态，支持账号登录、歌单同步、云盘/收藏管理。
   - 强大的本地历史播放记录，无缝回溯你的听歌历程。
-  - 支持歌词滚动展示、桌面悬浮歌词、以及高度沉浸式的全屏播放页。
+  - 支持歌词滚动展示、桌面悬浮歌词、KRC / LRC 双轨歌词智能解析与首选切换，以及高度沉浸式的全屏播放页。
 - **⚡ 高性能与虚拟化**：针对长列表（如数千首歌曲的历史记录、歌单）深度采用 UI 虚拟化技术，内存占用极小，无论数据多少滚动都丝滑不卡顿。
 - **🛠 纯净的 C# 架构**：严格遵循 MVVM 设计模式，将核心业务逻辑、SDK 与 UI 完美解耦。
 
@@ -53,6 +53,20 @@ dotnet build KuGouMusicAvalonia/KuGouMusicAvalonia.Desktop/KuGouMusicAvalonia.De
 
 ## 📸 界面预览
 
+### 🎵 首页推荐
+![首页推荐](images/discover.png)
+
+### 📂 我的歌单
+![我的歌单](images/playlists.png)
+
+### 🎤 歌手库
+![歌手库](images/artists.png)
+
+### 🏆 排行榜
+![排行榜](images/rankings.png)
+
+### 🔍 搜索页
+![搜索页](images/search.png)
 
 ## 📄 声明
 
