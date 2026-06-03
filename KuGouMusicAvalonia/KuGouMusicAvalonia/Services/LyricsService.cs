@@ -297,11 +297,10 @@ public sealed partial class LyricsService : ObservableObject
     }
 
     private static bool IsMetadataLine(string line) =>
-        line.StartsWith("[ti:", StringComparison.OrdinalIgnoreCase) ||
-        line.StartsWith("[ar:", StringComparison.OrdinalIgnoreCase) ||
-        line.StartsWith("[al:", StringComparison.OrdinalIgnoreCase) ||
-        line.StartsWith("[by:", StringComparison.OrdinalIgnoreCase) ||
-        line.StartsWith("[offset:", StringComparison.OrdinalIgnoreCase);
+        MetadataRegex().IsMatch(line);
+
+    [GeneratedRegex(@"^\[[a-zA-Z_$]+:.*?\]")]
+    private static partial Regex MetadataRegex();
 
     private static double ParseTime(Match match)
     {
