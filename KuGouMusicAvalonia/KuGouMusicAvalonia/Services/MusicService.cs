@@ -253,6 +253,12 @@ public static class MusicService
         set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.DefaultPlaybackQuality, string.IsNullOrWhiteSpace(value) ? "标准 128k" : value);
     }
 
+    public static bool PreferKrc
+    {
+        get => LocalMusicStore.Instance.GetBoolSetting(LocalSettingKeys.PreferKrc, true);
+        set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.PreferKrc, value);
+    }
+
     public static string DefaultPlaybackQualityValue => DefaultPlaybackQuality switch
     {
         "高品 320k" => "320",

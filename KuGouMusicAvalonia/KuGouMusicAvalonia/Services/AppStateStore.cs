@@ -14,6 +14,7 @@ internal sealed class MusicAppState
     public bool StreamWhileDownloading { get; set; } = true;
     public string DownloadDirectory { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
     public string DefaultPlaybackQuality { get; set; } = "标准 128k";
+    public bool PreferKrc { get; set; } = true;
     public List<string> FavoriteSongKeys { get; set; } = new();
     public List<string> SearchHistories { get; set; } = new();
 }

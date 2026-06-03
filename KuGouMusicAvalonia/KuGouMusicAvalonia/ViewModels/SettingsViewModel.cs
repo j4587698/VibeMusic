@@ -114,6 +114,9 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _minimizeToTrayOnClose;
 
+    [ObservableProperty]
+    private bool _preferKrc;
+
     public IReadOnlyList<string> ThemeModeOptions { get; } = new[] { "跟随系统", "浅色", "深色" };
 
     public IReadOnlyList<string> PlaybackQualityOptions { get; } = new[] { "标准 128k", "高品 320k", "无损 FLAC", "高解析 High" };
@@ -143,6 +146,7 @@ public partial class SettingsViewModel : ViewModelBase
         MinimizeToTrayOnClose = MusicService.MinimizeToTrayOnClose;
         DownloadDirectory = MusicService.DownloadDirectory;
         DefaultPlaybackQuality = MusicService.DefaultPlaybackQuality;
+        PreferKrc = MusicService.PreferKrc;
         ApplyThemeMode(ThemeMode);
         RefreshLoginState();
         if (IsLoggedIn)
@@ -171,6 +175,11 @@ public partial class SettingsViewModel : ViewModelBase
     partial void OnMinimizeToTrayOnCloseChanged(bool value)
     {
         MusicService.MinimizeToTrayOnClose = value;
+    }
+
+    partial void OnPreferKrcChanged(bool value)
+    {
+        MusicService.PreferKrc = value;
     }
 
     partial void OnDownloadDirectoryChanged(string value)

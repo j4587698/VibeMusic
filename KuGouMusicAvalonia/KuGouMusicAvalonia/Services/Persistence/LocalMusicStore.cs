@@ -717,4 +717,5 @@ internal static class LocalSettingKeys
     public const string StreamWhileDownloading = "settings.streamWhileDownloading";
     public const string DownloadDirectory = "settings.downloadDirectory";
     public const string DefaultPlaybackQuality = "settings.defaultPlaybackQuality";
+    public const string PreferKrc = "settings.preferKrc";
 }

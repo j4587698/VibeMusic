@@ -16,14 +16,17 @@ public partial class MainWindow : LuminaWindow
 
     protected override async void OnClosing(WindowClosingEventArgs e)
     {
+        // 1. 如果是真正的彻底退出阶段，直接交给基类处理并放行
         if (_isRealClosing)
         {
             base.OnClosing(e);
             return;
         }
 
+        // 2. 拦截当前的关闭事件
         e.Cancel = true;
 
+        // 3. 询问用户是否最小化到托盘（首次）
         if (!MusicService.HasPromptedMinimizeToTray)
         {
             var result = await LuminaDialogService.Instance.ShowConfirmAsync(
@@ -37,14 +40,25 @@ public partial class MainWindow : LuminaWindow
             MusicService.HasPromptedMinimizeToTray = true;
         }
 
+        // 4. 根据设置决定是隐藏还是彻底退出
         if (MusicService.MinimizeToTrayOnClose)
         {
-            Avalonia.Threading.Dispatcher.UIThread.Post(() => this.Hide());
+            // 仅仅隐藏主窗口，保持托盘运行
+            this.Hide();
         }
         else
         {
+            // 彻底退出：标记变量并调用 Shutdown
             _isRealClosing = true;
-            Avalonia.Threading.Dispatcher.UIThread.Post(() => this.Close());
+            
+            if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.Shutdown();
+            }
+            else
+            {
+                this.Close();
+            }
         }
     }
 }

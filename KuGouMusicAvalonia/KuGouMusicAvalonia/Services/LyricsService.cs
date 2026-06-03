@@ -104,7 +104,8 @@ public sealed partial class LyricsService : ObservableObject
                 return;
             }
 
-            var lyric = await MusicService.Client.GetLyricAsync(id, accessKey, "krc", decode: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var format = MusicService.PreferKrc ? "krc" : "lrc";
+            var lyric = await MusicService.Client.GetLyricAsync(id, accessKey, format, decode: true, cancellationToken: cancellationToken).ConfigureAwait(false);
             var text = ReadDecodedLyric(lyric.BodyText);
             var lines = new List<LyricLine>(ParseLines(text));
             cancellationToken.ThrowIfCancellationRequested();
