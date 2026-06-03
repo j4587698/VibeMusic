@@ -270,7 +270,11 @@ public sealed partial class LyricsService : ObservableObject
         foreach (var rawLine in text.Split('\n'))
         {
             var line = rawLine.Trim();
-            if (line.Length == 0 || IsMetadataLine(line))
+            
+            // Remove metadata tags anywhere in the line (handles cases like [00:00.00][id:$00000000])
+            line = MetadataRegex().Replace(line, string.Empty).Trim();
+            
+            if (line.Length == 0)
             {
                 continue;
             }
@@ -296,10 +300,7 @@ public sealed partial class LyricsService : ObservableObject
         }
     }
 
-    private static bool IsMetadataLine(string line) =>
-        MetadataRegex().IsMatch(line);
-
-    [GeneratedRegex(@"^\[[a-zA-Z_$]+:.*?\]")]
+    [GeneratedRegex(@"\[[a-zA-Z_$]+:.*?\]")]
     private static partial Regex MetadataRegex();
 
     private static double ParseTime(Match match)
