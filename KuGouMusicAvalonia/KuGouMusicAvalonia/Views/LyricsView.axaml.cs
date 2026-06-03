@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using KuGouMusicAvalonia.Services;
 
 namespace KuGouMusicAvalonia.Views;
 
@@ -9,6 +10,18 @@ public partial class LyricsView : UserControl
     {
         InitializeComponent();
         UpdateLayoutMode();
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        LyricsService.Instance.BeginWordHighlight();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        LyricsService.Instance.EndWordHighlight();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

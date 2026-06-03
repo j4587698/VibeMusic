@@ -96,8 +96,8 @@
                     <lumina:LuminaImage Source="{Binding Player.CurrentCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
                   </Border>
                   <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4" MinWidth="0" HorizontalAlignment="Stretch">
-                    <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" FontWeight="Black" FontSize="15" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-                    <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+                    <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" IsRunning="{Binding $parent[Button].IsPointerOver}" FontWeight="Black" FontSize="15" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                    <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" IsRunning="{Binding $parent[Button].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
                   </StackPanel>
                 </Grid>
               </Button>
@@ -148,7 +148,7 @@
             <Button Classes="Ghost" Command="{Binding ToggleQueueCommand}" Height="34" MinWidth="112" MaxWidth="146" CornerRadius="17" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="10,0" ToolTip.Tip="查看播放队列">
               <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                 <icons:MaterialIcon Kind="PlaylistMusic" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" VerticalAlignment="Center" />
-                <lumina:LuminaAutoScrollText Grid.Column="1" Text="{Binding Player.QueueStatusText}" Foreground="{DynamicResource MusicTextSoftBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                <lumina:LuminaAutoScrollText Grid.Column="1" Text="{Binding Player.QueueStatusText}" IsRunning="{Binding $parent[Button].IsPointerOver}" Foreground="{DynamicResource MusicTextSoftBrush}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
               </Grid>
             </Button>
             <icons:MaterialIcon Kind="VolumeHigh" Width="26" Height="26" Foreground="{DynamicResource MusicSecondaryBrush}" VerticalAlignment="Center" />
@@ -184,8 +184,8 @@
               <lumina:LuminaImage Source="{Binding Player.CurrentCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
             </Border>
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-              <lumina:LuminaAutoScrollText Text="{Binding Player.StatusMessage}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" ToolTip.Tip="{Binding Player.LastErrorDetail}" />
+              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Player.StatusMessage}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" ToolTip.Tip="{Binding Player.LastErrorDetail}" />
               <TextBlock IsVisible="{Binding Player.IsDownloading}" Text="{Binding Player.DownloadProgressText}" FontSize="11" Foreground="{DynamicResource MusicPrimaryBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
             </StackPanel>
             <Button Grid.Column="2" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding OpenNowPlayingCommand}" ToolTip.Tip="正在播放">

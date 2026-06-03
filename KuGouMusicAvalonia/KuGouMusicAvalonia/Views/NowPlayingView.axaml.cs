@@ -66,6 +66,7 @@ public partial class NowPlayingView : UserControl
 
         LyricsService.Instance.PropertyChanged += OnLyricsPropertyChanged;
         LyricsService.Instance.Lines.CollectionChanged += OnLyricsLinesChanged;
+        LyricsService.Instance.BeginWordHighlight();
         _lyricsEventsAttached = true;
     }
 
@@ -78,6 +79,7 @@ public partial class NowPlayingView : UserControl
 
         LyricsService.Instance.PropertyChanged -= OnLyricsPropertyChanged;
         LyricsService.Instance.Lines.CollectionChanged -= OnLyricsLinesChanged;
+        LyricsService.Instance.EndWordHighlight();
         _lyricsEventsAttached = false;
     }
 

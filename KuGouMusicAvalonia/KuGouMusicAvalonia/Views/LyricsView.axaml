@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
              xmlns:services="using:KuGouMusicAvalonia.Services"
+             xmlns:controls="using:KuGouMusicAvalonia.Controls"
              xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
@@ -84,16 +85,28 @@
             <ItemsControl Grid.Row="1" ItemsSource="{Binding Lyrics.FocusedLines}" VerticalAlignment="Center">
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="services:LyricLine">
-                  <TextBlock Text="{Binding Text}"
-                             MinHeight="50"
-                             Margin="0,4"
-                             FontSize="{Binding DisplayFontSize}"
-                             FontWeight="Black"
-                             Foreground="{DynamicResource MusicTextBrush}"
-                             Opacity="{Binding DisplayOpacity}"
-                             TextAlignment="Center"
-                             TextWrapping="Wrap"
-                             MaxLines="2" />
+                  <Panel MinHeight="50" Margin="0,4">
+                    <TextBlock Text="{Binding Text}"
+                               FontSize="{Binding DisplayFontSize}"
+                               FontWeight="Black"
+                               Foreground="{DynamicResource MusicTextBrush}"
+                               Opacity="{Binding DisplayOpacity}"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap"
+                               MaxLines="2"
+                               IsVisible="{Binding ShowPlain}" />
+                    <controls:KaraokeTextBlock
+                        Words="{Binding Words}"
+                        PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
+                        FontSize="{Binding DisplayFontSize}"
+                        FontWeight="Black"
+                        TextAlignment="Center"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        SungBrush="{DynamicResource MusicPrimaryBrush}"
+                        UnsungBrush="{DynamicResource MusicTextBrush}"
+                        IsVisible="{Binding ShowWords}" />
+                  </Panel>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -166,16 +179,28 @@
               <ItemsControl Grid.Row="1" ItemsSource="{Binding Lyrics.FocusedLines}" VerticalAlignment="Center">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="services:LyricLine">
-                    <TextBlock Text="{Binding Text}"
-                               MinHeight="48"
-                               Margin="0,3"
-                               FontSize="{Binding DisplayFontSize}"
-                               FontWeight="Black"
-                               Foreground="{DynamicResource MusicTextBrush}"
-                               Opacity="{Binding DisplayOpacity}"
-                               TextAlignment="Center"
-                               TextWrapping="Wrap"
-                               MaxLines="2" />
+                    <Panel MinHeight="48" Margin="0,3">
+                      <TextBlock Text="{Binding Text}"
+                                 FontSize="{Binding DisplayFontSize}"
+                                 FontWeight="Black"
+                                 Foreground="{DynamicResource MusicTextBrush}"
+                                 Opacity="{Binding DisplayOpacity}"
+                                 TextAlignment="Center"
+                                 TextWrapping="Wrap"
+                                 MaxLines="2"
+                                 IsVisible="{Binding ShowPlain}" />
+                      <controls:KaraokeTextBlock
+                          Words="{Binding Words}"
+                          PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
+                          FontSize="{Binding DisplayFontSize}"
+                          FontWeight="Black"
+                          TextAlignment="Center"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          SungBrush="{DynamicResource MusicPrimaryBrush}"
+                          UnsungBrush="{DynamicResource MusicTextBrush}"
+                          IsVisible="{Binding ShowWords}" />
+                    </Panel>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>

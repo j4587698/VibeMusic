@@ -22,6 +22,10 @@ public sealed partial class LyricsService : ObservableObject
     private int _activeLineIndex = -1;
     private const int FocusedLineCount = 9;
     private const int FocusedLineCenterIndex = FocusedLineCount / 2;
+    private readonly DispatcherTimer _interpolationTimer;
+    private readonly System.Diagnostics.Stopwatch _playbackClock = new();
+    private double _clockAnchorSeconds;
+    private int _wordHighlightSubscribers;
 
     public int ActiveLineIndex => _activeLineIndex;
 
@@ -43,9 +47,18 @@ public sealed partial class LyricsService : ObservableObject
     [ObservableProperty]
     private string _nextLineText = string.Empty;
 
+    // 当前播放位置（秒），由高分辨率时钟驱动，供逐字歌词控件按帧裁剪。
+    [ObservableProperty]
+    private double _wordPlaybackPosition;
+
     private LyricsService()
     {
         _player.PropertyChanged += OnPlayerPropertyChanged;
+        _interpolationTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(33) // ~30 fps
+        };
+        _interpolationTimer.Tick += OnInterpolationTick;
     }
 
     public async Task LoadForCurrentSongAsync()
@@ -91,7 +104,7 @@ public sealed partial class LyricsService : ObservableObject
                 return;
             }
 
-            var lyric = await MusicService.Client.GetLyricAsync(id, accessKey, "lrc", decode: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lyric = await MusicService.Client.GetLyricAsync(id, accessKey, "krc", decode: true, cancellationToken: cancellationToken).ConfigureAwait(false);
             var text = ReadDecodedLyric(lyric.BodyText);
             var lines = new List<LyricLine>(ParseLines(text));
             cancellationToken.ThrowIfCancellationRequested();
@@ -146,8 +159,89 @@ public sealed partial class LyricsService : ObservableObject
 
         if (e.PropertyName == nameof(PlayerService.Progress))
         {
+            // PlayerService.Progress only ticks every 500ms; re-anchor the
+            // high-resolution clock so per-word interpolation stays in sync.
+            AnchorPlaybackClock();
             UpdateActiveLine();
+            UpdateWordProgress();
         }
+        
+        if (e.PropertyName == nameof(PlayerService.IsPlaying))
+        {
+            AnchorPlaybackClock();
+            UpdateInterpolationTimerState();
+        }
+    }
+
+    private void OnInterpolationTick(object? sender, EventArgs e) => UpdateWordProgress();
+
+    private void UpdateWordProgress()
+    {
+        if (_activeLineIndex < 0 || _activeLineIndex >= Lines.Count)
+        {
+            return;
+        }
+
+        if (Lines[_activeLineIndex].Words.Count == 0)
+        {
+            return;
+        }
+
+        // 仅推送一个标量位置（每帧一次通知），逐字裁剪在控件 Render 内完成，
+        // 避免逐字写属性产生的多次变更通知与可视树更新。
+        WordPlaybackPosition = GetPlaybackPosition();
+    }
+
+    private void AnchorPlaybackClock()
+    {
+        _clockAnchorSeconds = _player.Progress;
+        _playbackClock.Restart();
+    }
+
+    private double GetPlaybackPosition()
+    {
+        var position = _clockAnchorSeconds;
+        if (_player.IsPlaying)
+        {
+            position += _playbackClock.Elapsed.TotalSeconds;
+        }
+
+        return position;
+    }
+
+    private void UpdateInterpolationTimerState()
+    {
+        // Only run the 30fps timer when something is actually rendering the
+        // per-word karaoke effect (e.g. the desktop lyrics window is open).
+        var shouldRun = _player.IsPlaying && _wordHighlightSubscribers > 0;
+        if (shouldRun)
+        {
+            if (!_interpolationTimer.IsEnabled)
+            {
+                _interpolationTimer.Start();
+            }
+        }
+        else if (_interpolationTimer.IsEnabled)
+        {
+            _interpolationTimer.Stop();
+        }
+    }
+
+    public void BeginWordHighlight()
+    {
+        _wordHighlightSubscribers++;
+        UpdateInterpolationTimerState();
+        UpdateWordProgress();
+    }
+
+    public void EndWordHighlight()
+    {
+        if (_wordHighlightSubscribers > 0)
+        {
+            _wordHighlightSubscribers--;
+        }
+
+        UpdateInterpolationTimerState();
     }
 
     private async Task ApplyNoLyricAsync(string message, CancellationToken cancellationToken)
@@ -279,6 +373,31 @@ public sealed partial class LyricsService : ObservableObject
                 continue;
             }
 
+            var krcLineMatch = KrcLineRegex().Match(line);
+            if (krcLineMatch.Success)
+            {
+                var lineStartTime = double.Parse(krcLineMatch.Groups["start"].Value, CultureInfo.InvariantCulture) / 1000.0;
+                var lineDuration = double.Parse(krcLineMatch.Groups["duration"].Value, CultureInfo.InvariantCulture) / 1000.0;
+                
+                var contentMatch = KrcLineRegex().Replace(line, string.Empty);
+                var wordMatches = KrcWordRegex().Matches(contentMatch);
+                
+                var rawText = KrcWordRegex().Replace(contentMatch, match => match.Groups["text"].Value).Trim();
+                var timeText = TimeSpan.FromSeconds(lineStartTime).ToString(@"mm\:ss\.ff");
+                
+                var lyricLine = new LyricLine(timeText, rawText, lineStartTime, lineDuration);
+                foreach (Match wordMatch in wordMatches)
+                {
+                    var offset = double.Parse(wordMatch.Groups["offset"].Value, CultureInfo.InvariantCulture) / 1000.0;
+                    var wordDuration = double.Parse(wordMatch.Groups["duration"].Value, CultureInfo.InvariantCulture) / 1000.0;
+                    var wordText = wordMatch.Groups["text"].Value;
+                    lyricLine.Words.Add(new LyricWord(wordText, lineStartTime + offset, wordDuration));
+                }
+                
+                yield return lyricLine;
+                continue;
+            }
+
             var matches = TimestampRegex().Matches(line);
             var content = TimestampRegex().Replace(line, string.Empty).Trim();
             if (content.Length == 0)
@@ -300,6 +419,12 @@ public sealed partial class LyricsService : ObservableObject
         }
     }
 
+    [GeneratedRegex(@"\[(?<start>\d+),(?<duration>\d+)\]")]
+    private static partial Regex KrcLineRegex();
+
+    [GeneratedRegex(@"<(?<offset>\d+),(?<duration>\d+),\d+>(?<text>[^<]+)")]
+    private static partial Regex KrcWordRegex();
+
     [GeneratedRegex(@"\[[a-zA-Z_$]+:.*?\]")]
     private static partial Regex MetadataRegex();
 
@@ -318,11 +443,12 @@ public sealed partial class LyricLine : ObservableObject
 {
     public static LyricLine Placeholder { get; } = new(string.Empty, string.Empty, 0) { IsPlaceholder = true };
 
-    public LyricLine(string timeText, string text, double startTime)
+    public LyricLine(string timeText, string text, double startTime, double duration = 0)
     {
         TimeText = timeText;
         Text = text;
         StartTime = startTime;
+        Duration = duration;
     }
 
     public string TimeText { get; }
@@ -330,6 +456,10 @@ public sealed partial class LyricLine : ObservableObject
     public string Text { get; }
 
     public double StartTime { get; }
+    
+    public double Duration { get; }
+    
+    public ObservableCollection<LyricWord> Words { get; } = new();
 
     public bool IsPlaceholder { get; init; }
 
@@ -339,9 +469,32 @@ public sealed partial class LyricLine : ObservableObject
 
     public double ActiveMarkerOpacity => IsActive ? 1 : 0;
 
+    public bool ShowWords => IsActive && Words.Count > 0;
+
+    public bool ShowPlain => !ShowWords;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DisplayOpacity))]
     [NotifyPropertyChangedFor(nameof(DisplayFontSize))]
     [NotifyPropertyChangedFor(nameof(ActiveMarkerOpacity))]
+    [NotifyPropertyChangedFor(nameof(ShowWords))]
+    [NotifyPropertyChangedFor(nameof(ShowPlain))]
     private bool _isActive;
+}
+
+public sealed partial class LyricWord : ObservableObject
+{
+    public LyricWord(string text, double startTime, double duration)
+    {
+        Text = text;
+        StartTime = startTime;
+        Duration = duration;
+    }
+
+    public string Text { get; }
+    public double StartTime { get; }
+    public double Duration { get; }
+
+    [ObservableProperty]
+    private double _progress;
 }

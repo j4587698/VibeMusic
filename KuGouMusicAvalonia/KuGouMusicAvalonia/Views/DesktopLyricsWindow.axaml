@@ -3,6 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+        xmlns:services="using:KuGouMusicAvalonia.Services"
+        xmlns:controls="using:KuGouMusicAvalonia.Controls"
         xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="160"
@@ -70,7 +72,19 @@
 
       <!-- Lyrics (Always visible) -->
       <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="6" Margin="0,4" IsHitTestVisible="False">
-        <TextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="36" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" />
+        <Panel HorizontalAlignment="Center">
+          <TextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="36" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" IsVisible="{Binding Lyrics.ActiveLine.ShowPlain, FallbackValue=True}" />
+          <controls:KaraokeTextBlock
+              Words="{Binding Lyrics.ActiveLine.Words}"
+              PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
+              FontSize="36"
+              FontWeight="Black"
+              TextAlignment="Center"
+              HorizontalAlignment="Center"
+              SungBrush="{DynamicResource MusicPrimaryBrush}"
+              UnsungBrush="#99FFFFFF"
+              IsVisible="{Binding Lyrics.ActiveLine.ShowWords, FallbackValue=False}" />
+        </Panel>
         <TextBlock Text="{Binding Lyrics.NextLineText}" FontSize="18" FontWeight="Bold" Foreground="#CCFFFFFF" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" />
       </StackPanel>
 

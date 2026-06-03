@@ -69,6 +69,7 @@ public partial class DesktopLyricsWindow : Window
     protected override void OnClosed(System.EventArgs e)
     {
         KuGouMusicAvalonia.Services.DesktopLyricsWindowService.Instance.StateChanged -= OnServiceStateChanged;
+        KuGouMusicAvalonia.Services.LyricsService.Instance.EndWordHighlight();
         (DataContext as DesktopLyricsViewModel)?.Cleanup();
         base.OnClosed(e);
     }
@@ -155,6 +156,7 @@ public partial class DesktopLyricsWindow : Window
             Position = new Avalonia.PixelPoint((int)x, (int)y);
         }
         UpdatePassthroughState();
+        KuGouMusicAvalonia.Services.LyricsService.Instance.BeginWordHighlight();
     }
 
     private void OnPointerEntered(object? sender, PointerEventArgs e)
