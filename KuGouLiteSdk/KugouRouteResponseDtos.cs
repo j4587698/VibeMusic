@@ -101,11 +101,11 @@ public sealed class KugouSearchLyricResponseDto : KugouRouteResponseDto { }
 public sealed class KugouSearchMixedResponseDto : KugouRouteResponseDto { }
 public sealed class KugouSearchSuggestResponseDto : KugouRouteResponseDto { }
 public sealed class KugouServerNowResponseDto : KugouRouteResponseDto { }
-public sealed class KugouSheetCollectionResponseDto : KugouRouteResponseDto { }
-public sealed class KugouSheetCollectionDetailResponseDto : KugouRouteResponseDto { }
 public sealed class KugouSheetDetailResponseDto : KugouRouteResponseDto { }
-public sealed class KugouSheetHotResponseDto : KugouRouteResponseDto { }
-public sealed class KugouSheetListResponseDto : KugouRouteResponseDto { }
+public sealed class KugouSheetExploreResponseDto : KugouRouteResponseDto { }
+public sealed class KugouSheetRankResponseDto : KugouRouteResponseDto { }
+public sealed class KugouSheetSongResponseDto : KugouRouteResponseDto { }
+public sealed class KugouSheetTagsResponseDto : KugouRouteResponseDto { }
 public sealed class KugouSingerListResponseDto : KugouRouteResponseDto { }
 public sealed class KugouSongClimaxResponseDto : KugouRouteResponseDto { }
 public sealed class KugouSongRankingResponseDto : KugouRouteResponseDto { }

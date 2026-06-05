@@ -6,8 +6,8 @@
 
 - 固定概念版参数：`appid=3116`、`clientver=11440`、概念版 Android 签名盐、概念版 RSA 公钥。
 - 核心请求：`KugouLiteClient.SendAsync(KugouRequest)`，可直接构造任意酷狗上游请求。
-- 全量入口：`KugouApiCatalog.All` 已登记原 `module/*.js` 的 155 个 API，可通过 `InvokeRouteAsync(route, parameters)` 直接调用。
-- 参数元数据：`KugouApiParameterCatalog.All` 从原 README 抽取了 141 个唯一文档路由的输入参数。
+- 全量入口：`KugouApiCatalog.All` 已完整登记原 Node.js API 中 150+ 个路由（包括最新版曲谱接口），可通过 `InvokeRouteAsync(route, parameters)` 直接调用。
+- 参数元数据：`KugouApiParameterCatalog.All` 抽取了路由的输入参数限制。
 - EchoMusic 强类型输出层：按 EchoMusic 的 `models` + `mappers` 增加 `KugouSong`、`KugouPlaylist`、`KugouAlbum`、`KugouArtist`、`KugouRank`、`KugouComment`、`KugouUser`、`KugouVideo`、`KugouAudioUrl` 等 DTO；typed result 会保留 `Raw` 原始响应。
 - AOT DTO 层：155 个目录接口都有独立的 `*ResponseDto`，并全部加入 `KugouJsonSerializerContext` 源生成上下文；可通过 `InvokeRouteDtoAsync()` 返回 AOT 友好的 `KugouRouteDtoResult`，不必只处理 `BodyText`。
 - Cookie/设备态：自动生成并维护 `KUGOU_API_GUID`、`KUGOU_API_MID`、`KUGOU_API_DEV`、`KUGOU_API_MAC`、`token`、`userid`、`dfid` 等。

@@ -325,8 +325,8 @@ public sealed partial class KugouLiteClient : IDisposable
 
     private void ApplyJsonCookies(string json, DateTimeOffset issuedAt)
     {
-        using var doc = JsonDocument.Parse(json);
-        if (doc.RootElement.ValueKind != JsonValueKind.Object)
+        var trimmed = json.Trim();
+        if (!trimmed.StartsWith('{') && !trimmed.StartsWith('['))
         {
             CookieStore.Set("token", json);
             SetTokenIssuedAt(issuedAt);
@@ -334,12 +334,30 @@ public sealed partial class KugouLiteClient : IDisposable
             return;
         }
 
-        foreach (var property in doc.RootElement.EnumerateObject())
+        try
         {
-            CookieStore.Set(property.Name, property.Value.ValueKind == JsonValueKind.String ? property.Value.GetString() : property.Value.GetRawText());
-        }
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                CookieStore.Set("token", json);
+                SetTokenIssuedAt(issuedAt);
+                CookieStore.Remove(TokenExpiresAtKey);
+                return;
+            }
 
-        ApplyTokenExpirationMetadata(doc.RootElement, issuedAt);
+            foreach (var property in doc.RootElement.EnumerateObject())
+            {
+                CookieStore.Set(property.Name, property.Value.ValueKind == JsonValueKind.String ? property.Value.GetString() : property.Value.GetRawText());
+            }
+
+            ApplyTokenExpirationMetadata(doc.RootElement, issuedAt);
+        }
+        catch (JsonException)
+        {
+            CookieStore.Set("token", json);
+            SetTokenIssuedAt(issuedAt);
+            CookieStore.Remove(TokenExpiresAtKey);
+        }
     }
 
     private void SetCookieFromJson(JsonElement data, string name)

@@ -156,11 +156,11 @@ public static class KugouApiCatalog
 /search/mixed|混合搜索|GET|/v3/search/mixed|complexsearch.kugou.com|Query
 /search/suggest|搜索建议|GET|/v2/getSearchTip|searchtip.kugou.com|Query
 /server/now|获取服务器时间|POST|/v1/server_now|usercenter.kugou.com|Both
-/sheet/collection|曲谱合集|GET|/miniyueku/v1/opern_square/get_home_module_config|-|Query
-/sheet/collection/detail|曲谱合集详情|GET|/miniyueku/v1/opern_square/collection_detail|-|Query
-/sheet/detail|曲谱详情|GET|https://miniyueku.kugou.com/v1/opern/detail|-|Query
-/sheet/hot|推荐曲谱|GET|/miniyueku/v1/opern_square/get_home_hot_opern|-|Query
-/sheet/list|歌曲曲谱|GET|/miniyueku/v1/opern/list|-|Query
+/sheet/detail|曲谱详情|GET|/opern/v1/detail/info|-|Query
+/sheet/explore|曲谱推荐|POST|/opern/v1/home/get_rec_opern|-|Both
+/sheet/rank|曲谱排行榜|POST|/opern/v1/home/get_rank_opern|-|Query
+/sheet/song|单曲曲谱|GET|/opern/v1/detail/song_info|-|Query
+/sheet/tags|曲谱标签|GET|/opern/v1/home/get_tags|-|Query
 /singer/list|歌手列表|GET|/ocean/v6/singer/list|-|Query
 /song/climax|获取歌曲高潮部分|GET|https://expendablekmrcdn.kugou.com/v1/audio_climax/audio|-|Both
 /song/ranking|歌曲成绩单|GET|/grow/v1/song_ranking/play_page/ranking_info|-|Query

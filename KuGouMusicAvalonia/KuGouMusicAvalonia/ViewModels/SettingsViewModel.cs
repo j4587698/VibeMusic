@@ -311,7 +311,8 @@ public partial class SettingsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.SendCaptchaAsync(PhoneNumber.Trim());
-            LoginStatus = response.IsSuccessStatusCode ? "验证码已发送" : $"验证码发送失败：HTTP {(int)response.StatusCode}";
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            LoginStatus = isSuccess ? "验证码已发送" : $"验证码发送失败：{errorMsg}";
         }
         catch (Exception ex)
         {
@@ -336,15 +337,23 @@ public partial class SettingsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.LoginByCellphoneAsync(PhoneNumber.Trim(), VerifyCode.Trim());
-            MusicService.SaveSession();
-            LoginStatus = response.IsSuccessStatusCode ? "已登录，登录态已保存" : $"登录失败：HTTP {(int)response.StatusCode}";
-            VipPrivilegeService.Instance.ResetSessionState();
-            RefreshLoginState();
-            if (IsLoggedIn)
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            if (isSuccess)
             {
-                IsLoginDialogOpen = false;
-                await RefreshUserDataAsync();
-                await RefreshVipStateAsync();
+                MusicService.SaveSession();
+                LoginStatus = "已登录，登录态已保存";
+                VipPrivilegeService.Instance.ResetSessionState();
+                RefreshLoginState();
+                if (IsLoggedIn)
+                {
+                    IsLoginDialogOpen = false;
+                    await RefreshUserDataAsync();
+                    await RefreshVipStateAsync();
+                }
+            }
+            else
+            {
+                LoginStatus = $"登录失败：{errorMsg}";
             }
         }
         catch (Exception ex)
@@ -364,13 +373,21 @@ public partial class SettingsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.RefreshTokenAsync();
-            MusicService.SaveSession();
-            LoginStatus = response.IsSuccessStatusCode ? "登录态已刷新" : $"刷新失败：HTTP {(int)response.StatusCode}";
-            RefreshLoginState();
-            if (IsLoggedIn)
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            if (isSuccess)
             {
-                await RefreshUserDataAsync();
-                await RefreshVipStateAsync();
+                MusicService.SaveSession();
+                LoginStatus = "登录态已刷新";
+                RefreshLoginState();
+                if (IsLoggedIn)
+                {
+                    await RefreshUserDataAsync();
+                    await RefreshVipStateAsync();
+                }
+            }
+            else
+            {
+                LoginStatus = $"刷新失败：{errorMsg}";
             }
         }
         catch (Exception ex)
@@ -719,6 +736,50 @@ public partial class SettingsViewModel : ViewModelBase
         foreach (var song in history.Take(4))
         {
             UserHistory.Add(song);
+        }
+    }
+
+    private static void ExtractKugouResponse(KugouResponse response, out bool isSuccess, out string errorMessage)
+    {
+        isSuccess = response.IsSuccessStatusCode;
+        errorMessage = string.Empty;
+        if (!isSuccess)
+        {
+            errorMessage = $"HTTP {(int)response.StatusCode}";
+            return;
+        }
+
+        var doc = response.TryParseJson();
+        if (doc != null)
+        {
+            var root = doc.RootElement;
+            int errorCode = 0;
+            int status = 1;
+
+            if (root.TryGetProperty("error_code", out var ec) && ec.ValueKind == System.Text.Json.JsonValueKind.Number)
+            {
+                errorCode = ec.GetInt32();
+            }
+            else if (root.TryGetProperty("errcode", out var err) && err.ValueKind == System.Text.Json.JsonValueKind.Number)
+            {
+                errorCode = err.GetInt32();
+            }
+
+            if (root.TryGetProperty("status", out var st) && st.ValueKind == System.Text.Json.JsonValueKind.Number)
+            {
+                status = st.GetInt32();
+            }
+
+            // In some KUGOU apis, status=0 is failure, or error_code != 0 is failure.
+            if (errorCode != 0 || status == 0)
+            {
+                isSuccess = false;
+                var msg = root.TryGetProperty("msg", out var m) && m.ValueKind == System.Text.Json.JsonValueKind.String ? m.GetString() :
+                          root.TryGetProperty("message", out var m2) && m2.ValueKind == System.Text.Json.JsonValueKind.String ? m2.GetString() :
+                          root.TryGetProperty("error", out var m3) && m3.ValueKind == System.Text.Json.JsonValueKind.String ? m3.GetString() : null;
+
+                errorMessage = string.IsNullOrWhiteSpace(msg) ? $"API Error Code: {errorCode}" : msg;
+            }
         }
     }
 }

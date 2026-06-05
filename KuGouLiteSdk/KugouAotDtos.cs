@@ -219,11 +219,11 @@ public static class KugouRouteDtoCatalog
         "/search/mixed" => KugouJsonSerializerContext.Default.KugouSearchMixedResponseDto,
         "/search/suggest" => KugouJsonSerializerContext.Default.KugouSearchSuggestResponseDto,
         "/server/now" => KugouJsonSerializerContext.Default.KugouServerNowResponseDto,
-        "/sheet/collection" => KugouJsonSerializerContext.Default.KugouSheetCollectionResponseDto,
-        "/sheet/collection/detail" => KugouJsonSerializerContext.Default.KugouSheetCollectionDetailResponseDto,
         "/sheet/detail" => KugouJsonSerializerContext.Default.KugouSheetDetailResponseDto,
-        "/sheet/hot" => KugouJsonSerializerContext.Default.KugouSheetHotResponseDto,
-        "/sheet/list" => KugouJsonSerializerContext.Default.KugouSheetListResponseDto,
+        "/sheet/explore" => KugouJsonSerializerContext.Default.KugouSheetExploreResponseDto,
+        "/sheet/rank" => KugouJsonSerializerContext.Default.KugouSheetRankResponseDto,
+        "/sheet/song" => KugouJsonSerializerContext.Default.KugouSheetSongResponseDto,
+        "/sheet/tags" => KugouJsonSerializerContext.Default.KugouSheetTagsResponseDto,
         "/singer/list" => KugouJsonSerializerContext.Default.KugouSingerListResponseDto,
         "/song/climax" => KugouJsonSerializerContext.Default.KugouSongClimaxResponseDto,
         "/song/ranking" => KugouJsonSerializerContext.Default.KugouSongRankingResponseDto,
@@ -509,11 +509,11 @@ public static class KugouResponseDtoExtensions
 [JsonSerializable(typeof(KugouSearchMixedResponseDto))]
 [JsonSerializable(typeof(KugouSearchSuggestResponseDto))]
 [JsonSerializable(typeof(KugouServerNowResponseDto))]
-[JsonSerializable(typeof(KugouSheetCollectionResponseDto))]
-[JsonSerializable(typeof(KugouSheetCollectionDetailResponseDto))]
 [JsonSerializable(typeof(KugouSheetDetailResponseDto))]
-[JsonSerializable(typeof(KugouSheetHotResponseDto))]
-[JsonSerializable(typeof(KugouSheetListResponseDto))]
+[JsonSerializable(typeof(KugouSheetExploreResponseDto))]
+[JsonSerializable(typeof(KugouSheetRankResponseDto))]
+[JsonSerializable(typeof(KugouSheetSongResponseDto))]
+[JsonSerializable(typeof(KugouSheetTagsResponseDto))]
 [JsonSerializable(typeof(KugouSingerListResponseDto))]
 [JsonSerializable(typeof(KugouSongClimaxResponseDto))]
 [JsonSerializable(typeof(KugouSongRankingResponseDto))]

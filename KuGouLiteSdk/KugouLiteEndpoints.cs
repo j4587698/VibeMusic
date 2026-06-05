@@ -435,7 +435,7 @@ public partial class KugouLiteClient
         return SendAsync(request, cancellationToken);
     }
 
-    public Task<KugouResponse> SearchLyricAsync(string? keywords = null, string? hash = null, long albumAudioId = 0, string man = "no", CancellationToken cancellationToken = default)
+    public Task<KugouResponse> SearchLyricAsync(string? keywords = null, string? hash = null, long albumAudioId = 0, string man = "no", long duration = 0, CancellationToken cancellationToken = default)
     {
         var request = new KugouRequest
         {
@@ -448,7 +448,7 @@ public partial class KugouLiteClient
         request.Params["album_audio_id"] = albumAudioId;
         request.Params["appid"] = KugouConstants.LiteAppId;
         request.Params["clientver"] = KugouConstants.LiteClientVersion;
-        request.Params["duration"] = 0;
+        request.Params["duration"] = duration;
         request.Params["hash"] = hash ?? string.Empty;
         request.Params["keyword"] = keywords ?? string.Empty;
         request.Params["lrctxt"] = 1;
