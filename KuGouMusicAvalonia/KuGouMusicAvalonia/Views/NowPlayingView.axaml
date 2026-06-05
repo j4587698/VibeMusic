@@ -16,38 +16,50 @@
 
     <Grid Margin="20,16,20,20" RowDefinitions="Auto,*,Auto,Auto,Auto" RowSpacing="14">
       <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12">
-        <Button Classes="Ghost Icon" Width="40" Height="40" Command="{Binding CloseCommand}" ToolTip.Tip="返回">
-          <icons:MaterialIcon Kind="ChevronDown" Width="26" Height="26" Foreground="{DynamicResource MusicPrimaryBrush}" />
-        </Button>
+        <Button Classes="Ghost Icon" Width="40" Height="40" Command="{Binding CloseCommand}" ToolTip.Tip="返回" lumina:LuminaButton.IconSize="26">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="ChevronDown" Width="26" Height="26" Foreground="{DynamicResource MusicPrimaryBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
         <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
           <TextBlock Text="正在播放" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
           <TextBlock Text="{Binding Player.QueueStatusText}" FontSize="13" Foreground="{DynamicResource MusicTextMutedBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
           <TextBlock IsVisible="{Binding Player.IsDownloading}" Text="{Binding Player.DownloadProgressText}" FontSize="12" Foreground="{DynamicResource MusicPrimaryBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
         </StackPanel>
-        <Button Grid.Column="2" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding DownloadCommand}" ToolTip.Tip="下载到本地" IsEnabled="{Binding !Player.IsDownloading}">
-          <icons:MaterialIcon Kind="Download" Width="24" Height="24" Foreground="{DynamicResource MusicTextSoftBrush}" />
-        </Button>
-        <Button Grid.Column="3" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleQueueCommand}" ToolTip.Tip="播放队列">
-          <icons:MaterialIcon Kind="PlaylistMusic" Width="24" Height="24" Foreground="{DynamicResource MusicTextSoftBrush}" />
-        </Button>
-        <Button Grid.Column="4" IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="桌面歌词">
-          <Grid>
-            <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsOpen}" Kind="SubtitlesOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
-            <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsOpen}" Kind="Subtitles" Foreground="{DynamicResource MusicPrimaryBrush}" Width="24" Height="24" />
-          </Grid>
-        </Button>
-        <Button Grid.Column="5" IsVisible="{Binding IsDesktopLyricsOpen}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsLockCommand}" ToolTip.Tip="锁定/解锁桌面歌词">
-          <Grid>
-            <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsLocked}" Kind="LockOpenOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
-            <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsLocked}" Kind="Lock" Foreground="{DynamicResource MusicPrimaryBrush}" Width="22" Height="22" />
-          </Grid>
-        </Button>
-        <Button Grid.Column="6" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleFavoriteCommand}" ToolTip.Tip="{Binding Player.FavoriteStatusText}">
-          <Grid>
-            <icons:MaterialIcon IsVisible="{Binding !Player.IsCurrentSongFavorite}" Kind="HeartOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
-            <icons:MaterialIcon IsVisible="{Binding Player.IsCurrentSongFavorite}" Kind="Heart" Foreground="{DynamicResource MusicPrimaryBrush}" Width="24" Height="24" />
-          </Grid>
-        </Button>
+        <Button Grid.Column="2" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding DownloadCommand}" ToolTip.Tip="下载到本地" IsEnabled="{Binding !Player.IsDownloading}" lumina:LuminaButton.IconSize="24">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Download" Width="24" Height="24" Foreground="{DynamicResource MusicTextSoftBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Grid.Column="3" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleQueueCommand}" ToolTip.Tip="播放队列" lumina:LuminaButton.IconSize="24">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="PlaylistMusic" Width="24" Height="24" Foreground="{DynamicResource MusicTextSoftBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Grid.Column="4" IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="桌面歌词" lumina:LuminaButton.IconSize="24">
+  <lumina:LuminaButton.Icon>
+    <Grid>
+                <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsOpen}" Kind="SubtitlesOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
+                <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsOpen}" Kind="Subtitles" Foreground="{DynamicResource MusicPrimaryBrush}" Width="24" Height="24" />
+              </Grid>
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Grid.Column="5" IsVisible="{Binding IsDesktopLyricsOpen}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsLockCommand}" ToolTip.Tip="锁定/解锁桌面歌词" lumina:LuminaButton.IconSize="22">
+  <lumina:LuminaButton.Icon>
+    <Grid>
+                <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsLocked}" Kind="LockOpenOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
+                <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsLocked}" Kind="Lock" Foreground="{DynamicResource MusicPrimaryBrush}" Width="22" Height="22" />
+              </Grid>
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Grid.Column="6" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleFavoriteCommand}" ToolTip.Tip="{Binding Player.FavoriteStatusText}" lumina:LuminaButton.IconSize="24">
+  <lumina:LuminaButton.Icon>
+    <Grid>
+                <icons:MaterialIcon IsVisible="{Binding !Player.IsCurrentSongFavorite}" Kind="HeartOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsCurrentSongFavorite}" Kind="Heart" Foreground="{DynamicResource MusicPrimaryBrush}" Width="24" Height="24" />
+              </Grid>
+  </lumina:LuminaButton.Icon>
+</Button>
       </Grid>
 
       <Grid Grid.Row="1" IsVisible="{Binding IsWideLayout}" ColumnDefinitions="0.92*,1.08*" ColumnSpacing="34">
@@ -118,12 +130,16 @@
                   <TextBlock Text="{Binding LyricSeekPreviewTimeText}" FontSize="13" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
                   <TextBlock Text="{Binding LyricSeekPreviewLineText}" FontSize="11" Foreground="{DynamicResource MusicTextSoftBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
                 </StackPanel>
-                <Button Grid.Column="1" Classes="Primary Icon" Width="38" Height="38" CornerRadius="19" Command="{Binding ConfirmLyricSeekPreviewCommand}" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="跳到这里播放">
-                  <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                </Button>
-                <Button Grid.Column="2" Classes="Ghost Icon" Width="34" Height="34" Command="{Binding CancelLyricSeekPreviewCommand}" ToolTip.Tip="取消跳转">
-                  <icons:MaterialIcon Kind="Close" Width="19" Height="19" Foreground="{DynamicResource MusicTextSoftBrush}" />
-                </Button>
+                <Button Grid.Column="1" Classes="Primary Icon" Width="38" Height="38" CornerRadius="19" Command="{Binding ConfirmLyricSeekPreviewCommand}" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="跳到这里播放" lumina:LuminaButton.IconSize="22">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
+                <Button Grid.Column="2" Classes="Ghost Icon" Width="34" Height="34" Command="{Binding CancelLyricSeekPreviewCommand}" ToolTip.Tip="取消跳转" lumina:LuminaButton.IconSize="19">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Close" Width="19" Height="19" Foreground="{DynamicResource MusicTextSoftBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
               </Grid>
             </Border>
           </Grid>
@@ -201,12 +217,16 @@
                     <TextBlock Text="{Binding LyricSeekPreviewTimeText}" FontSize="13" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
                     <TextBlock Text="{Binding LyricSeekPreviewLineText}" FontSize="11" Foreground="{DynamicResource MusicTextSoftBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
                   </StackPanel>
-                  <Button Grid.Column="1" Classes="Primary Icon" Width="38" Height="38" CornerRadius="19" Command="{Binding ConfirmLyricSeekPreviewCommand}" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="跳到这里播放">
-                    <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                  </Button>
-                  <Button Grid.Column="2" Classes="Ghost Icon" Width="34" Height="34" Command="{Binding CancelLyricSeekPreviewCommand}" ToolTip.Tip="取消跳转">
-                    <icons:MaterialIcon Kind="Close" Width="19" Height="19" Foreground="{DynamicResource MusicTextSoftBrush}" />
-                  </Button>
+                  <Button Grid.Column="1" Classes="Primary Icon" Width="38" Height="38" CornerRadius="19" Command="{Binding ConfirmLyricSeekPreviewCommand}" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="跳到这里播放" lumina:LuminaButton.IconSize="22">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
+                  <Button Grid.Column="2" Classes="Ghost Icon" Width="34" Height="34" Command="{Binding CancelLyricSeekPreviewCommand}" ToolTip.Tip="取消跳转" lumina:LuminaButton.IconSize="19">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Close" Width="19" Height="19" Foreground="{DynamicResource MusicTextSoftBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
                 </Grid>
               </Border>
             </Grid>
@@ -224,25 +244,33 @@
 
       <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16">
         <Button Classes="Ghost Icon" Width="42" Height="42" Command="{Binding CyclePlayModeCommand}" ToolTip.Tip="{Binding Player.PlayModeText}">
-          <Grid>
-            <icons:MaterialIcon IsVisible="{Binding Player.IsSequentialMode}" Kind="PlaylistPlay" Foreground="{DynamicResource MusicTextSoftBrush}" />
-            <icons:MaterialIcon IsVisible="{Binding Player.IsListLoopMode}" Kind="Repeat" Foreground="{DynamicResource MusicPrimaryBrush}" />
-            <icons:MaterialIcon IsVisible="{Binding Player.IsSingleLoopMode}" Kind="RepeatOnce" Foreground="{DynamicResource MusicPrimaryBrush}" />
-            <icons:MaterialIcon IsVisible="{Binding Player.IsShuffleActive}" Kind="Shuffle" Foreground="{DynamicResource MusicPrimaryBrush}" />
-          </Grid>
-        </Button>
+  <lumina:LuminaButton.Icon>
+    <Grid>
+                <icons:MaterialIcon IsVisible="{Binding Player.IsSequentialMode}" Kind="PlaylistPlay" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsListLoopMode}" Kind="Repeat" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsSingleLoopMode}" Kind="RepeatOnce" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsShuffleActive}" Kind="Shuffle" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              </Grid>
+  </lumina:LuminaButton.Icon>
+</Button>
         <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding PreviousCommand}" ToolTip.Tip="上一首">
-          <icons:MaterialIcon Kind="SkipPrevious" Foreground="{DynamicResource MusicTextBrush}" />
-        </Button>
-        <Button Classes="Primary Icon" Width="58" Height="58" CornerRadius="29" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding TogglePlayCommand}" ToolTip.Tip="{Binding Player.PlaybackStateText}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}">
-          <Grid IsVisible="{Binding !Player.IsLoading}">
-            <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="32" Height="32" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-            <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="32" Height="32" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-          </Grid>
-        </Button>
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="SkipPrevious" Foreground="{DynamicResource MusicTextBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Classes="Primary Icon" Width="58" Height="58" CornerRadius="29" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding TogglePlayCommand}" ToolTip.Tip="{Binding Player.PlaybackStateText}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}" lumina:LuminaButton.IconSize="32">
+  <lumina:LuminaButton.Icon>
+    <Grid>
+                <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="32" Height="32" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="32" Height="32" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+              </Grid>
+  </lumina:LuminaButton.Icon>
+</Button>
         <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding NextCommand}" ToolTip.Tip="下一首">
-          <icons:MaterialIcon Kind="SkipNext" Foreground="{DynamicResource MusicTextBrush}" />
-        </Button>
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="SkipNext" Foreground="{DynamicResource MusicTextBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
       </StackPanel>
 
       <Border Grid.Row="4" IsVisible="{Binding Player.HasPlaybackError}" CornerRadius="16" Background="#AA1E1212" BorderBrush="#77FF6B6B" BorderThickness="1" Padding="12" HorizontalAlignment="Stretch" MaxHeight="132">

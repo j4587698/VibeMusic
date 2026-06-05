@@ -94,9 +94,11 @@
           <StackPanel Spacing="12" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchHistories.Count}">
             <Grid ColumnDefinitions="*,Auto">
               <TextBlock Text="搜索历史" FontSize="18" FontWeight="Black" Foreground="{DynamicResource MusicTextSoftBrush}" VerticalAlignment="Center" />
-              <Button Grid.Column="1" Classes="Ghost Icon" Width="32" Height="32" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).ClearHistoryCommand}" ToolTip.Tip="清空历史记录">
-                <icons:MaterialIcon Kind="DeleteOutline" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" />
-              </Button>
+              <Button Grid.Column="1" Classes="Ghost Icon" Width="32" Height="32" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).ClearHistoryCommand}" ToolTip.Tip="清空历史记录" lumina:LuminaButton.IconSize="18">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="DeleteOutline" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
             </Grid>
             <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchHistories}">
               <ItemsControl.ItemsPanel>
@@ -162,9 +164,11 @@
             </StackPanel>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-              <Button Classes="Ghost Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="下载到本地" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).DownloadSongCommand}" CommandParameter="{Binding}">
-                <icons:MaterialIcon Kind="Download" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
-              </Button>
+              <Button Classes="Ghost Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="下载到本地" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).DownloadSongCommand}" CommandParameter="{Binding}" lumina:LuminaButton.IconSize="22">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Download" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
+  </lumina:LuminaButton.Icon>
+</Button>
               <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
                 <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="24" Height="24">
                   <icons:MaterialIcon.Kind>

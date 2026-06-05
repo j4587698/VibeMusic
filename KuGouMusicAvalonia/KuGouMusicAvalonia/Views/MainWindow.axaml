@@ -17,7 +17,7 @@
                                                                                  ExtendedSystemButtonMode="Auto"
                                                                                  UseWindowGlass="True">
         <lumina:LuminaWindow.TitleBarLeftContent>
-                <StackPanel Orientation="Horizontal" Spacing="10" Margin="8,0,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="5">
                         <Border Width="18" Height="18" CornerRadius="5" ClipToBounds="True">
                                 <Image Source="/Assets/vibe-logo.png" Stretch="UniformToFill" />
                         </Border>

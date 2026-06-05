@@ -49,9 +49,11 @@
             </StackPanel>
 
             <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="10">
-              <Button Classes="Ghost Icon" Command="{Binding RefreshUserDataCommand}" Width="44" Height="44" ToolTip.Tip="同步资料">
-                <icons:MaterialIcon Kind="Sync" Width="25" Height="25" Foreground="{DynamicResource MusicPrimaryBrush}" />
-              </Button>
+              <Button Classes="Ghost Icon" Command="{Binding RefreshUserDataCommand}" Width="44" Height="44" ToolTip.Tip="同步资料" lumina:LuminaButton.IconSize="25">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Sync" Width="25" Height="25" Foreground="{DynamicResource MusicPrimaryBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
               <Button Classes="Outline" Command="{Binding ClearLoginCommand}" Height="38" CornerRadius="19" BorderBrush="#44FFFFFF" Background="#22000000" Padding="14,0">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <icons:MaterialIcon Kind="Logout" Width="24" Height="24" Foreground="{DynamicResource MusicTextBrush}" />
@@ -81,9 +83,11 @@
             </Grid>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-              <Button Classes="Ghost Icon" Command="{Binding RefreshUserDataCommand}" Width="42" Height="42" ToolTip.Tip="同步资料">
-                <icons:MaterialIcon Kind="Sync" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
-              </Button>
+              <Button Classes="Ghost Icon" Command="{Binding RefreshUserDataCommand}" Width="42" Height="42" ToolTip.Tip="同步资料" lumina:LuminaButton.IconSize="24">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Sync" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
               <Button Classes="Outline" Command="{Binding ClearLoginCommand}" Height="38" CornerRadius="19" BorderBrush="#44FFFFFF" Background="#22000000" Padding="14,0">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <icons:MaterialIcon Kind="Logout" Width="23" Height="23" Foreground="{DynamicResource MusicTextBrush}" />
@@ -337,9 +341,11 @@
             <TextBlock Text="登录酷狗账号" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
             <TextBlock Text="{Binding LoginStatus}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" TextWrapping="Wrap" MaxLines="2" />
           </StackPanel>
-          <Button Grid.Column="1" Classes="Ghost Icon" Command="{Binding CloseLoginDialogCommand}" Width="38" Height="38" ToolTip.Tip="关闭登录">
-            <icons:MaterialIcon Kind="Close" Width="22" Height="22" Foreground="{DynamicResource MusicTextSoftBrush}" />
-          </Button>
+          <Button Grid.Column="1" Classes="Ghost Icon" Command="{Binding CloseLoginDialogCommand}" Width="38" Height="38" ToolTip.Tip="关闭登录" lumina:LuminaButton.IconSize="22">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="Close" Width="22" Height="22" Foreground="{DynamicResource MusicTextSoftBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
         </Grid>
 
         <TabControl Grid.Row="1" SelectedIndex="{Binding LoginTabIndex, Mode=TwoWay}" Margin="0,0,0,12">
