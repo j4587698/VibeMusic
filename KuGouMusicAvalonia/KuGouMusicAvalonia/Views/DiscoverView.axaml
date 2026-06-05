@@ -42,14 +42,14 @@
           <TextBlock Text="新歌速递" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
           <TextBlock Text="{Binding StatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
         </StackPanel>
-        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-          <Button Classes="Primary" Command="{Binding PlayAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0">
+        <WrapPanel Grid.Column="1" VerticalAlignment="Center">
+          <Button Classes="Primary" Command="{Binding PlayAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0" Margin="0,0,8,8">
             <TextBlock Text="播放全部" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
           </Button>
-          <Button Classes="Ghost" Command="{Binding QueueAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
+          <Button Classes="Ghost" Command="{Binding QueueAllCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0" Margin="0,0,8,8">
             <TextBlock Text="加入队列" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
           </Button>
-        </StackPanel>
+        </WrapPanel>
       </Grid>
 
       <StackPanel IsVisible="{Binding IsLoading}" HorizontalAlignment="Center" Margin="0,12" Spacing="10">
