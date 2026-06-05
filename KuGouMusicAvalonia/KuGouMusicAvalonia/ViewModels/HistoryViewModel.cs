@@ -73,4 +73,14 @@ public partial class HistoryViewModel : ViewModelBase
             await PlayerService.Instance.PlayQueueAsync(Songs.ToList(), 0, "历史播放", replaceQueue: true);
         }
     }
+
+    [RelayCommand]
+    private void ClearHistory()
+    {
+        LocalMusicStore.Instance.ClearLocalHistory();
+        Songs.Clear();
+        PageItems.Clear();
+        PageItems.Add(HistoryHeaderSection.Instance);
+        SongCountText = "0 首歌曲";
+    }
 }

@@ -39,7 +39,6 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     private bool _isRestoringPlaybackState;
     private string _pendingResumeSongKey = string.Empty;
     private double _pendingResumeProgress;
-    private string _currentHistoryId = string.Empty;
 
     private static string ErrorLogPath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -339,7 +338,6 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     public void ClearQueue()
     {
         ExitRadioMode();
-        FinishCurrentPlaybackHistory(completed: false);
         ResetActiveLoad();
         DisposeCurrentPlayer();
         Queue.Clear();
@@ -521,7 +519,6 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         }
 
         var requestId = Interlocked.Increment(ref _playRequestId);
-        FinishCurrentPlaybackHistory(completed: false);
         ResetActiveLoad();
         DisposeCurrentPlayer();
 
@@ -866,7 +863,6 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     public void Stop()
     {
         ExitRadioMode();
-        FinishCurrentPlaybackHistory(completed: false);
         ResetActiveLoad();
         _audioPlayer?.Stop();
         IsPlaying = false;
@@ -1085,7 +1081,6 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             return;
         }
 
-        FinishCurrentPlaybackHistory(completed: true);
         PersistPlaybackState(force: true);
 
         if (IsRadioMode)
@@ -1344,7 +1339,9 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
                 Duration,
                 IsRadioMode,
                 saveQueue);
-            UpdateCurrentPlaybackHistory(completed: false);
+            // 优化：不再每 10 秒去更新一次不参与实际业务的“历史进度”，以大幅减少磁盘 I/O
+            // 只有在切歌、播放完成或关闭应用时才会去记录最终停留进度。
+            // UpdateCurrentPlaybackHistory(completed: false);
         }
         catch
         {
@@ -1369,37 +1366,13 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     {
         try
         {
-            _currentHistoryId = LocalMusicStore.Instance.RecordPlaybackStarted(
+            LocalMusicStore.Instance.RecordPlaybackStarted(
                 song,
-                playbackSource.IsLocalFile ? "local" : "stream",
-                Duration);
-        }
-        catch
-        {
-            _currentHistoryId = string.Empty;
-        }
-    }
-
-    private void UpdateCurrentPlaybackHistory(bool completed)
-    {
-        if (string.IsNullOrWhiteSpace(_currentHistoryId))
-        {
-            return;
-        }
-
-        try
-        {
-            LocalMusicStore.Instance.UpdatePlaybackHistory(_currentHistoryId, Progress, Duration, completed);
+                playbackSource.IsLocalFile ? "local" : "stream");
         }
         catch
         {
         }
-    }
-
-    private void FinishCurrentPlaybackHistory(bool completed)
-    {
-        UpdateCurrentPlaybackHistory(completed);
-        _currentHistoryId = string.Empty;
     }
 
     private void StartProgressTimer()
@@ -1458,7 +1431,6 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         _disposed = true;
         StopProgressTimer();
         ResetActiveLoad();
-        FinishCurrentPlaybackHistory(completed: false);
         PersistPlaybackState(force: true);
         DisposeCurrentPlayer();
     }

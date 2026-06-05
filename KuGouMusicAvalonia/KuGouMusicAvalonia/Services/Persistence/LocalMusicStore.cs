@@ -353,56 +353,63 @@ internal sealed class LocalMusicStore
         }
     }
 
-    public string RecordPlaybackStarted(KugouSong song, string source, double durationSeconds)
+    public void RecordPlaybackStarted(KugouSong song, string source)
     {
         var songKey = GetSongKey(song);
         if (string.IsNullOrWhiteSpace(songKey))
         {
-            return string.Empty;
-        }
-
-        SaveSongSnapshot(song);
-        var record = new PlaybackHistoryRecord
-        {
-            Id = Guid.NewGuid().ToString("N"),
-            SongKey = songKey,
-            Source = source,
-            PlayedAtUtc = DateTime.UtcNow,
-            ProgressSeconds = 0,
-            DurationSeconds = Math.Max(0, durationSeconds),
-            Completed = false,
-            UpdatedAtUtc = DateTime.UtcNow
-        };
-
-        lock (_gate)
-        {
-            _history.Insert(record);
-        }
-
-        return record.Id;
-    }
-
-    public void UpdatePlaybackHistory(string historyId, double progressSeconds, double durationSeconds, bool completed)
-    {
-        if (string.IsNullOrWhiteSpace(historyId))
-        {
             return;
         }
 
+        SaveSongSnapshot(song);
+        
         lock (_gate)
         {
-            var record = _history.FindById(historyId);
-            if (record is null)
+            var records = _history.FindAll().ToList();
+            var existing = records.FirstOrDefault(x => x.SongKey == songKey);
+
+            if (existing is null)
             {
-                return;
+                _history.Insert(new PlaybackHistoryRecord
+                {
+                    Id = Guid.NewGuid().ToString("N"),
+                    SongKey = songKey,
+                    Source = source,
+                    PlayedAtUtc = DateTime.UtcNow,
+                    ProgressSeconds = 0,
+                    DurationSeconds = 0,
+                    Completed = false,
+                    UpdatedAtUtc = DateTime.UtcNow
+                });
+            }
+            else
+            {
+                existing.PlayedAtUtc = DateTime.UtcNow;
+                existing.UpdatedAtUtc = DateTime.UtcNow;
+                existing.Source = source;
+                _history.Update(existing);
+            }
+            
+            // 清理可能存在的老旧重复数据
+            if (existing is not null)
+            {
+                var duplicates = records.Where(x => x.SongKey == songKey && x.Id != existing.Id).ToList();
+                foreach(var dup in duplicates)
+                {
+                    _history.Delete(dup.Id);
+                }
             }
 
-            record.ProgressSeconds = Math.Max(record.ProgressSeconds, progressSeconds);
-            record.DurationSeconds = Math.Max(record.DurationSeconds, durationSeconds);
-            record.Completed = record.Completed || completed;
-            record.UpdatedAtUtc = DateTime.UtcNow;
-            record.UpdatedAtUtc = DateTime.UtcNow;
-            _history.Update(record);
+            // 限制最多只保留 100 条记录
+            var allRemaining = _history.FindAll().OrderByDescending(x => x.PlayedAtUtc).ToList();
+            if (allRemaining.Count > 100)
+            {
+                var toDelete = allRemaining.Skip(100).Select(x => x.Id).ToList();
+                foreach (var id in toDelete)
+                {
+                    _history.Delete(id);
+                }
+            }
         }
     }
 
@@ -415,9 +422,16 @@ internal sealed class LocalMusicStore
                 .Select(record => ToSong(_songs.FindById(record.SongKey)))
                 .Where(song => song is not null)
                 .Cast<KugouSong>()
-                .DistinctBy(song => GetSongKey(song))
                 .Take(count)
                 .ToList();
+        }
+    }
+
+    public void ClearLocalHistory()
+    {
+        lock (_gate)
+        {
+            _history.DeleteAll();
         }
     }
 

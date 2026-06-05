@@ -1,36 +1,23 @@
 using System;
-using System.Threading.Tasks;
-using KuGou.Lite;
+using System.IO;
 
 namespace Tester
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            var client = new KugouLiteClient();
-            var idsToTest = new[] { 0, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 24, 25, 26, 30, 40 };
-
-            foreach (var id in idsToTest)
+            string dir = @"e:\music\CSharp\KuGouMusicAvalonia\KuGouMusicAvalonia\Views";
+            var files = Directory.GetFiles(dir, "*.axaml", SearchOption.AllDirectories);
+            foreach (var file in files)
             {
-                Console.WriteLine($"\nTesting categoryId: {id}");
-                try
+                var text = File.ReadAllText(file);
+                if (text.Contains("<Button.Icon>"))
                 {
-                    var page1 = await client.GetTopPlaylistsTypedAsync(id, 1, 30);
-                    Console.WriteLine($"  Page 1 items count: {page1?.Items?.Count ?? 0}");
-
-                    if (page1?.Items?.Count > 0)
-                    {
-                        var page2 = await client.GetTopPlaylistsTypedAsync(id, 2, 30);
-                        Console.WriteLine($"  Page 2 items count: {page2?.Items?.Count ?? 0}");
-                        
-                        var page3 = await client.GetTopPlaylistsTypedAsync(id, 3, 30);
-                        Console.WriteLine($"  Page 3 items count: {page3?.Items?.Count ?? 0}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"  Error: {ex.Message}");
+                    text = text.Replace("<Button.Icon>", "<lumina:LuminaButton.Icon>");
+                    text = text.Replace("</Button.Icon>", "</lumina:LuminaButton.Icon>");
+                    File.WriteAllText(file, text);
+                    Console.WriteLine("Fixed: " + Path.GetFileName(file));
                 }
             }
         }
