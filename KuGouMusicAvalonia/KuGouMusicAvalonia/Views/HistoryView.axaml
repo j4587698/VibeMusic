@@ -67,10 +67,10 @@
                       <TextBlock Text="播放全部" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                     </StackPanel>
                   </Button>
-                  <Button Classes="Subtle" CornerRadius="20" Padding="20,10" Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).ClearHistoryCommand}">
+                  <Button Classes="Outline" CornerRadius="20" Padding="20,10" Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).ClearHistoryCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                      <icons:MaterialIcon Kind="DeleteOutline" Width="20" Height="20" Foreground="{DynamicResource MusicTextSoftBrush}" />
-                      <TextBlock Text="清空历史" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                      <icons:MaterialIcon Kind="DeleteOutline" Width="20" Height="20" />
+                      <TextBlock Text="清空历史" FontSize="14" FontWeight="Bold" />
                     </StackPanel>
                   </Button>
                 </StackPanel>
