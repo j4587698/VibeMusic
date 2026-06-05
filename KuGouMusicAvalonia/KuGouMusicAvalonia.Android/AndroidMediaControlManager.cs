@@ -12,6 +12,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
+using SysResource = global::Android.Resource;
+
 namespace KuGouMusicAvalonia.Android;
 
 internal sealed class AndroidMediaControlManager : IDisposable
@@ -177,9 +179,9 @@ internal sealed class AndroidMediaControlManager : IDisposable
             .SetOngoing(player.IsPlaying)
             .SetVisibility(NotificationVisibility.Public)
             .SetStyle(new Notification.MediaStyle().SetMediaSession(_mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2))
-            .AddAction(new Notification.Action.Builder(Android.Resource.Drawable.IcMediaPrevious, "上一首", previousIntent).Build())
-            .AddAction(new Notification.Action.Builder(player.IsPlaying ? Android.Resource.Drawable.IcMediaPause : Android.Resource.Drawable.IcMediaPlay, player.IsPlaying ? "暂停" : "播放", toggleIntent).Build())
-            .AddAction(new Notification.Action.Builder(Android.Resource.Drawable.IcMediaNext, "下一首", nextIntent).Build());
+            .AddAction(new Notification.Action.Builder(SysResource.Drawable.IcMediaPrevious, "上一首", previousIntent).Build())
+            .AddAction(new Notification.Action.Builder(player.IsPlaying ? SysResource.Drawable.IcMediaPause : SysResource.Drawable.IcMediaPlay, player.IsPlaying ? "暂停" : "播放", toggleIntent).Build())
+            .AddAction(new Notification.Action.Builder(SysResource.Drawable.IcMediaNext, "下一首", nextIntent).Build());
 
         if (coverBitmap is not null)
         {
