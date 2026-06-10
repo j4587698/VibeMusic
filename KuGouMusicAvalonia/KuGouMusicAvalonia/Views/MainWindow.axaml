@@ -25,6 +25,8 @@
                 </StackPanel>
         </lumina:LuminaWindow.TitleBarLeftContent>
 
-        <views:MainView />
+        <lumina:LuminaTopView>
+                <views:MainView />
+        </lumina:LuminaTopView>
 </lumina:LuminaWindow>
 

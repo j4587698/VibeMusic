@@ -12,8 +12,8 @@ internal sealed class MusicAppState
     public bool AutoReceiveVipBeforePlayback { get; set; } = true;
     public string ThemeMode { get; set; } = "深色";
     public bool StreamWhileDownloading { get; set; } = true;
-    public string DownloadDirectory { get; set; } = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
-    public string DefaultPlaybackQuality { get; set; } = "标准 128k";
+    public string DownloadDirectory { get; set; } = PlatformStoragePaths.DefaultDownloadDirectory;
+    public string DefaultPlaybackQuality { get; set; } = "无损 FLAC";
     public bool PreferKrc { get; set; } = true;
     public List<string> FavoriteSongKeys { get; set; } = new();
     public List<string> SearchHistories { get; set; } = new();

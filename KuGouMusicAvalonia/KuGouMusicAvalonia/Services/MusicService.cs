@@ -243,14 +243,14 @@ public static class MusicService
 
     public static string DownloadDirectory
     {
-        get => LocalMusicStore.Instance.GetStringSetting(LocalSettingKeys.DownloadDirectory, Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
-        set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.DownloadDirectory, string.IsNullOrWhiteSpace(value) ? Environment.GetFolderPath(Environment.SpecialFolder.MyMusic) : value);
+        get => PlatformStoragePaths.NormalizeDownloadDirectory(LocalMusicStore.Instance.GetStringSetting(LocalSettingKeys.DownloadDirectory, PlatformStoragePaths.DefaultDownloadDirectory));
+        set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.DownloadDirectory, PlatformStoragePaths.NormalizeDownloadDirectory(value));
     }
 
     public static string DefaultPlaybackQuality
     {
-        get => LocalMusicStore.Instance.GetStringSetting(LocalSettingKeys.DefaultPlaybackQuality, "标准 128k");
-        set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.DefaultPlaybackQuality, string.IsNullOrWhiteSpace(value) ? "标准 128k" : value);
+        get => LocalMusicStore.Instance.GetStringSetting(LocalSettingKeys.DefaultPlaybackQuality, "无损 FLAC");
+        set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.DefaultPlaybackQuality, string.IsNullOrWhiteSpace(value) ? "无损 FLAC" : value);
     }
 
     public static bool PreferKrc
@@ -261,10 +261,11 @@ public static class MusicService
 
     public static string DefaultPlaybackQualityValue => DefaultPlaybackQuality switch
     {
+        "标准 128k" => "128",
         "高品 320k" => "320",
         "无损 FLAC" => "flac",
         "高解析 High" => "high",
-        _ => "128"
+        _ => "flac"
     };
 
     public static void ClearSession()

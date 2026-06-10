@@ -55,8 +55,8 @@ internal sealed class LocalMusicStore
             AutoReceiveVipBeforePlayback = GetBoolSetting(LocalSettingKeys.AutoReceiveVipBeforePlayback, true),
             ThemeMode = GetStringSetting(LocalSettingKeys.ThemeMode, "深色"),
             StreamWhileDownloading = GetBoolSetting(LocalSettingKeys.StreamWhileDownloading, true),
-            DownloadDirectory = GetStringSetting(LocalSettingKeys.DownloadDirectory, Environment.GetFolderPath(Environment.SpecialFolder.MyMusic)),
-            DefaultPlaybackQuality = GetStringSetting(LocalSettingKeys.DefaultPlaybackQuality, "标准 128k"),
+            DownloadDirectory = PlatformStoragePaths.NormalizeDownloadDirectory(GetStringSetting(LocalSettingKeys.DownloadDirectory, PlatformStoragePaths.DefaultDownloadDirectory)),
+            DefaultPlaybackQuality = GetStringSetting(LocalSettingKeys.DefaultPlaybackQuality, "无损 FLAC"),
             FavoriteSongKeys = LoadFavoriteKeys().ToList()
         };
     }

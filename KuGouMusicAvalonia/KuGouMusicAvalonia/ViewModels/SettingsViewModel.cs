@@ -109,7 +109,7 @@ public partial class SettingsViewModel : ViewModelBase
     private string _downloadDirectory = string.Empty;
 
     [ObservableProperty]
-    private string _defaultPlaybackQuality = "标准 128k";
+    private string _defaultPlaybackQuality = "无损 FLAC";
 
     [ObservableProperty]
     private bool _minimizeToTrayOnClose;
@@ -137,6 +137,7 @@ public partial class SettingsViewModel : ViewModelBase
     public bool IsLoginPromptVisible => !IsLoggedIn;
     public bool HasVipDetail => !string.IsNullOrWhiteSpace(VipDetail);
     public bool IsWideLayout => !IsCompactLayout;
+    public bool IsDesktopSettingVisible => Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime;
 
     public SettingsViewModel()
     {
