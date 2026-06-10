@@ -149,7 +149,7 @@
             </Button>
             <icons:MaterialIcon Kind="VolumeHigh" Width="22" Height="22" Foreground="{DynamicResource MusicSecondaryBrush}" VerticalAlignment="Center" />
             <lumina:LuminaPlaybackSlider Minimum="0" Maximum="100" Value="{Binding Player.Volume, Mode=TwoWay}" Width="76" Height="22" MinHeight="0" MaxHeight="22" TrackHeight="3" ThumbSize="10" TrackBrush="#333333" BufferedBrush="#333333" ProgressBrush="{DynamicResource MusicSecondaryBrush}" ThumbBrush="{DynamicResource MusicSecondaryBrush}" VerticalAlignment="Center" />
-            <Button IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="34" Height="34" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="桌面歌词">
+            <Button IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="34" Height="34" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="悬浮歌词">
   <lumina:LuminaButton.Icon>
     <Grid>
                     <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsOpen}" Kind="SubtitlesOutline" Foreground="{DynamicResource MusicTextSoftBrush}" />
@@ -191,7 +191,7 @@
               <lumina:LuminaAutoScrollText Text="{Binding Player.StatusMessage}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" ToolTip.Tip="{Binding Player.LastErrorDetail}" />
               <TextBlock IsVisible="{Binding Player.IsDownloading}" Text="{Binding Player.DownloadProgressText}" FontSize="11" Foreground="{DynamicResource MusicPrimaryBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
             </StackPanel>
-            <Button Grid.Column="2" IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="桌面歌词">
+            <Button Grid.Column="2" IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="悬浮歌词">
   <lumina:LuminaButton.Icon>
     <Grid>
                     <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsOpen}" Kind="SubtitlesOutline" Foreground="{DynamicResource MusicPrimaryBrush}" />

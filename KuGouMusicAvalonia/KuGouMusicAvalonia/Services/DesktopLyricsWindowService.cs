@@ -6,7 +6,7 @@ using KuGouMusicAvalonia.Views;
 
 namespace KuGouMusicAvalonia.Services;
 
-public sealed class DesktopLyricsWindowService
+public sealed class DesktopLyricsWindowService : IFloatingLyricsController
 {
     public static DesktopLyricsWindowService Instance { get; } = new();
 
@@ -19,6 +19,15 @@ public sealed class DesktopLyricsWindowService
     public bool IsSupported => Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime;
 
     public bool IsOpen => _window is not null;
+
+    public bool SupportsCompactMode => false;
+
+    public bool IsCompactMode
+    {
+        get => false;
+        set { }
+    }
+
     public event EventHandler? StateChanged;
 
     private bool _isLocked;
@@ -61,7 +70,7 @@ public sealed class DesktopLyricsWindowService
         }
 
         var window = new DesktopLyricsWindow();
-        window.Closed += (_, _) => 
+        window.Closed += (_, _) =>
         {
             _window = null;
             _isLocked = false;

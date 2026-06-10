@@ -27,10 +27,10 @@
           <lumina:LuminaAutoScrollText Text="{Binding HeaderArtist}" FontSize="14" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
         </StackPanel>
 
-        <Button Grid.Column="2" Classes="Outline" Command="{Binding OpenDesktopLyricsCommand}" IsVisible="{Binding IsDesktopLyricSupported}" Height="40" CornerRadius="20" Padding="14,0" ToolTip.Tip="打开桌面歌词">
+        <Button Grid.Column="2" Classes="Outline" Command="{Binding OpenDesktopLyricsCommand}" IsVisible="{Binding IsDesktopLyricSupported}" Height="40" CornerRadius="20" Padding="14,0" ToolTip.Tip="打开悬浮歌词">
           <StackPanel Orientation="Horizontal" Spacing="8">
             <icons:MaterialIcon Kind="Monitor" Width="23" Height="23" Foreground="{DynamicResource MusicTextBrush}" />
-            <TextBlock Text="桌面歌词" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+            <TextBlock Text="悬浮歌词" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
           </StackPanel>
         </Button>
 

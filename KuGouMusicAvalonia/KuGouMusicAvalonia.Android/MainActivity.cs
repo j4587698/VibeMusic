@@ -23,9 +23,16 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
         base.OnCreate(savedInstanceState);
         EnsureNotificationPermission();
         AndroidMediaControlManager.Instance.Initialize(this);
+        AndroidFloatingLyricsController.Instance.Initialize(this);
 
         var intent = new Intent(this, typeof(PlaybackNotificationService));
         BindService(intent, this, Bind.AutoCreate);
+    }
+
+    protected override void OnResume()
+    {
+        base.OnResume();
+        AndroidFloatingLyricsController.Instance.RefreshOverlayPermission();
     }
 
     protected override void OnDestroy()
@@ -35,6 +42,7 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
             UnbindService(this);
             _isBound = false;
         }
+        AndroidFloatingLyricsController.Instance.Dispose();
         AndroidMediaControlManager.Instance.Dispose();
         base.OnDestroy();
     }
