@@ -14,8 +14,8 @@
   <Grid Background="{DynamicResource MusicBackgroundBrush}">
     <Border Background="{DynamicResource MusicHeroGradient}" Opacity="0.26" />
 
-    <Grid Margin="20,16,20,20" RowDefinitions="Auto,*,Auto,Auto,Auto" RowSpacing="14">
-      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12">
+    <Grid x:Name="NowPlayingRoot" Margin="20,8,20,10" RowDefinitions="Auto,*,Auto,Auto,Auto" RowSpacing="6">
+      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto" ColumnSpacing="12">
         <Button Classes="Ghost Icon" Width="40" Height="40" Command="{Binding CloseCommand}" ToolTip.Tip="返回" lumina:LuminaButton.IconSize="26">
   <lumina:LuminaButton.Icon>
     <icons:MaterialIcon Kind="ChevronDown" Width="26" Height="26" Foreground="{DynamicResource MusicPrimaryBrush}" />
@@ -31,12 +31,7 @@
     <icons:MaterialIcon Kind="Download" Width="24" Height="24" Foreground="{DynamicResource MusicTextSoftBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
-        <Button Grid.Column="3" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleQueueCommand}" ToolTip.Tip="播放队列" lumina:LuminaButton.IconSize="24">
-  <lumina:LuminaButton.Icon>
-    <icons:MaterialIcon Kind="PlaylistMusic" Width="24" Height="24" Foreground="{DynamicResource MusicTextSoftBrush}" />
-  </lumina:LuminaButton.Icon>
-</Button>
-        <Button Grid.Column="4" IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="桌面歌词" lumina:LuminaButton.IconSize="24">
+        <Button Grid.Column="3" IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="桌面歌词" lumina:LuminaButton.IconSize="24">
   <lumina:LuminaButton.Icon>
     <Grid>
                 <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsOpen}" Kind="SubtitlesOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
@@ -44,7 +39,7 @@
               </Grid>
   </lumina:LuminaButton.Icon>
 </Button>
-        <Button Grid.Column="5" IsVisible="{Binding IsDesktopLyricsOpen}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsLockCommand}" ToolTip.Tip="锁定/解锁桌面歌词" lumina:LuminaButton.IconSize="22">
+        <Button Grid.Column="4" IsVisible="{Binding IsDesktopLyricsOpen}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsLockCommand}" ToolTip.Tip="锁定/解锁桌面歌词" lumina:LuminaButton.IconSize="22">
   <lumina:LuminaButton.Icon>
     <Grid>
                 <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsLocked}" Kind="LockOpenOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
@@ -52,7 +47,7 @@
               </Grid>
   </lumina:LuminaButton.Icon>
 </Button>
-        <Button Grid.Column="6" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleFavoriteCommand}" ToolTip.Tip="{Binding Player.FavoriteStatusText}" lumina:LuminaButton.IconSize="24">
+        <Button Grid.Column="5" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleFavoriteCommand}" ToolTip.Tip="{Binding Player.FavoriteStatusText}" lumina:LuminaButton.IconSize="24">
   <lumina:LuminaButton.Icon>
     <Grid>
                 <icons:MaterialIcon IsVisible="{Binding !Player.IsCurrentSongFavorite}" Kind="HeartOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
@@ -62,9 +57,9 @@
 </Button>
       </Grid>
 
-      <Grid Grid.Row="1" IsVisible="{Binding IsWideLayout}" ColumnDefinitions="0.92*,1.08*" ColumnSpacing="34">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" Spacing="18">
-          <Grid Width="260" Height="260" HorizontalAlignment="Left">
+      <Grid Grid.Row="1" IsVisible="{Binding IsWideLayout}" ColumnDefinitions="Auto,*" ColumnSpacing="28">
+        <StackPanel Width="260" VerticalAlignment="Center" HorizontalAlignment="Left" Spacing="18">
+          <Grid Width="260" Height="260" HorizontalAlignment="Center">
             <Ellipse Fill="#C8000000" />
             <Ellipse Margin="22" Stroke="#222A2A2A" StrokeThickness="10" />
             <Ellipse Margin="78" Fill="{DynamicResource MusicCoverFallbackBrush}" />
@@ -78,24 +73,16 @@
           </Grid>
 
           <StackPanel Spacing="7" HorizontalAlignment="Stretch">
-            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" FontSize="30" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
-            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentAlbumText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" IdleTextAlignment="Center" FontSize="30" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" IdleTextAlignment="Center" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
+            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentAlbumText}" IdleTextAlignment="Center" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
           </StackPanel>
         </StackPanel>
 
-        <Grid Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="10" VerticalAlignment="Stretch">
-          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-            <StackPanel Spacing="2">
-              <TextBlock Text="歌词" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-              <TextBlock Text="{Binding Lyrics.StatusMessage}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" TextTrimming="CharacterEllipsis" />
-            </StackPanel>
-            <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding Lyrics.IsLoading}" Width="100" Height="4" VerticalAlignment="Center" />
-          </Grid>
-
-          <Grid Grid.Row="1">
-            <ScrollViewer x:Name="WideLyricsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ScrollChanged="OnLyricsScrollChanged">
-              <ItemsControl ItemsSource="{Binding Lyrics.Lines}">
+        <Grid Grid.Column="1" VerticalAlignment="Stretch" ClipToBounds="True">
+          <Grid ClipToBounds="True">
+            <ScrollViewer x:Name="WideLyricsScrollViewer" ClipToBounds="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ScrollChanged="OnLyricsScrollChanged">
+              <ItemsControl x:Name="WideLyricsItemsControl" ItemsSource="{Binding Lyrics.Lines}">
                 <ItemsControl.ItemsPanel>
                   <ItemsPanelTemplate>
                     <VirtualizingStackPanel />
@@ -103,25 +90,37 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="services:LyricLine">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" MinHeight="48" Margin="0,4">
-                      <Border Width="4" Height="30" CornerRadius="2" Background="{DynamicResource MusicPrimaryBrush}" Opacity="{Binding ActiveMarkerOpacity}" VerticalAlignment="Center" />
-                      <Panel Grid.Column="1" Opacity="{Binding DisplayOpacity}">
-                        <TextBlock Text="{Binding Text}" FontSize="{Binding DisplayFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" MaxLines="2" IsVisible="{Binding ShowPlain}" />
-                        <controls:KaraokeTextBlock
-                            Words="{Binding Words}"
-                            PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
-                            FontSize="{Binding DisplayFontSize}"
-                            FontWeight="Black"
-                            TextAlignment="Left"
-                            SungBrush="{DynamicResource MusicPrimaryBrush}"
-                            UnsungBrush="{DynamicResource MusicTextBrush}"
-                            IsVisible="{Binding ShowWords}" />
-                      </Panel>
+                    <Grid MinHeight="50" Margin="0,4" Opacity="{Binding DisplayOpacity}" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Text}" FontSize="{Binding DisplayFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding ShowPlain}" />
+                      <controls:KaraokeTextBlock
+                          Words="{Binding Words}"
+                          PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
+                          FontSize="{Binding DisplayFontSize}"
+                          FontWeight="Black"
+                          TextAlignment="Center"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Center"
+                          SungBrush="{DynamicResource MusicPrimaryBrush}"
+                          UnsungBrush="{DynamicResource MusicTextBrush}"
+                          IsVisible="{Binding ShowWords}" />
                     </Grid>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
             </ScrollViewer>
+
+            <TextBlock Text="{Binding Lyrics.EmptyLyricsText}"
+                       IsVisible="{Binding Lyrics.ShowEmptyLyrics}"
+                       FontSize="24"
+                       FontWeight="Black"
+                       Foreground="{DynamicResource MusicTextSoftBrush}"
+                       Opacity="0.72"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False" />
+
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding Lyrics.IsLoading}" Width="150" Height="4" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
 
             <Border IsVisible="{Binding IsLyricSeekPreviewVisible}" Height="2" Margin="0,0,106,0" Background="{DynamicResource MusicPrimaryBrush}" Opacity="0.72" VerticalAlignment="Center" IsHitTestVisible="False" />
             <Border IsVisible="{Binding IsLyricSeekPreviewVisible}" HorizontalAlignment="Right" VerticalAlignment="Center" MaxWidth="230" CornerRadius="18" Background="#E51E1717" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="10" BoxShadow="{DynamicResource MusicFloatingShadow}">
@@ -163,26 +162,18 @@
             </Grid>
 
             <StackPanel Spacing="7" HorizontalAlignment="Stretch">
-              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
-              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentAlbumText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" IdleTextAlignment="Center" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" IdleTextAlignment="Center" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentAlbumText}" IdleTextAlignment="Center" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
             </StackPanel>
           </StackPanel>
         </Border>
 
-        <Border IsVisible="{Binding IsLyricsModeVisible}" Background="Transparent">
-          <Grid RowDefinitions="Auto,*" RowSpacing="10">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-              <StackPanel Spacing="2">
-                <TextBlock Text="歌词" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-                <TextBlock Text="{Binding Lyrics.StatusMessage}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" TextTrimming="CharacterEllipsis" />
-              </StackPanel>
-              <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding Lyrics.IsLoading}" Width="100" Height="4" VerticalAlignment="Center" />
-            </Grid>
-
-            <Grid Grid.Row="1">
-              <ScrollViewer x:Name="CompactLyricsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ScrollChanged="OnLyricsScrollChanged">
-                <ItemsControl ItemsSource="{Binding Lyrics.Lines}">
+        <Border IsVisible="{Binding IsLyricsModeVisible}" Background="Transparent" ClipToBounds="True" Tapped="OnCompactLyricsTapped">
+          <Grid ClipToBounds="True">
+            <Grid ClipToBounds="True">
+              <ScrollViewer x:Name="CompactLyricsScrollViewer" ClipToBounds="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ScrollChanged="OnLyricsScrollChanged">
+                <ItemsControl x:Name="CompactLyricsItemsControl" ItemsSource="{Binding Lyrics.Lines}">
                   <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                       <VirtualizingStackPanel />
@@ -190,25 +181,37 @@
                   </ItemsControl.ItemsPanel>
                   <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="services:LyricLine">
-                      <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" MinHeight="50" Margin="0,4">
-                        <Border Width="4" Height="30" CornerRadius="2" Background="{DynamicResource MusicPrimaryBrush}" Opacity="{Binding ActiveMarkerOpacity}" VerticalAlignment="Center" />
-                      <Panel Grid.Column="1" Opacity="{Binding DisplayOpacity}">
-                        <TextBlock Text="{Binding Text}" FontSize="{Binding DisplayFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" MaxLines="2" IsVisible="{Binding ShowPlain}" />
+                      <Grid MinHeight="50" Margin="0,4" Opacity="{Binding DisplayOpacity}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Text}" FontSize="{Binding DisplayFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding ShowPlain}" />
                         <controls:KaraokeTextBlock
                             Words="{Binding Words}"
                             PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
                             FontSize="{Binding DisplayFontSize}"
                             FontWeight="Black"
-                            TextAlignment="Left"
+                            TextAlignment="Center"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
                             SungBrush="{DynamicResource MusicPrimaryBrush}"
                             UnsungBrush="{DynamicResource MusicTextBrush}"
                             IsVisible="{Binding ShowWords}" />
-                      </Panel>
                       </Grid>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
               </ScrollViewer>
+
+              <TextBlock Text="{Binding Lyrics.EmptyLyricsText}"
+                         IsVisible="{Binding Lyrics.ShowEmptyLyrics}"
+                         FontSize="22"
+                         FontWeight="Black"
+                         Foreground="{DynamicResource MusicTextSoftBrush}"
+                         Opacity="0.72"
+                         TextAlignment="Center"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         IsHitTestVisible="False" />
+
+              <ProgressBar IsIndeterminate="True" IsVisible="{Binding Lyrics.IsLoading}" Width="140" Height="4" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
 
               <Border IsVisible="{Binding IsLyricSeekPreviewVisible}" Height="2" Margin="0,0,106,0" Background="{DynamicResource MusicPrimaryBrush}" Opacity="0.72" VerticalAlignment="Center" IsHitTestVisible="False" />
               <Border IsVisible="{Binding IsLyricSeekPreviewVisible}" HorizontalAlignment="Right" VerticalAlignment="Center" MaxWidth="220" CornerRadius="18" Background="#E51E1717" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="10" BoxShadow="{DynamicResource MusicFloatingShadow}">
@@ -234,41 +237,82 @@
         </Border>
       </Grid>
 
-      <Grid Grid.Row="2" RowDefinitions="Auto,Auto" HorizontalAlignment="Stretch">
-        <lumina:LuminaPlaybackSlider Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="5" ThumbSize="14" TrackBrush="#332A2A2A" BufferedBrush="#555A403E" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" />
-        <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,7,0,0">
-          <TextBlock Text="{Binding Player.ProgressText}" Foreground="{DynamicResource MusicTextSoftBrush}" FontWeight="Bold" />
-          <TextBlock Grid.Column="1" Text="{Binding Player.DurationText}" Foreground="{DynamicResource MusicTextSoftBrush}" FontWeight="Bold" HorizontalAlignment="Right" />
+      <Grid Grid.Row="2" RowDefinitions="Auto,Auto" HorizontalAlignment="Stretch" IsVisible="{Binding !IsTightLandscape}">
+        <lumina:LuminaPlaybackSlider Height="22" MinHeight="0" MaxHeight="22" VerticalAlignment="Center" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="3" ThumbSize="10" TrackBrush="#332A2A2A" BufferedBrush="#555A403E" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" />
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,2,0,0">
+          <TextBlock Text="{Binding Player.ProgressText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" FontWeight="Bold" />
+          <TextBlock Grid.Column="1" Text="{Binding Player.DurationText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" FontWeight="Bold" HorizontalAlignment="Right" />
         </Grid>
       </Grid>
 
-      <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16">
-        <Button Classes="Ghost Icon" Width="42" Height="42" Command="{Binding CyclePlayModeCommand}" ToolTip.Tip="{Binding Player.PlayModeText}">
+      <Grid Grid.Row="2" IsVisible="{Binding IsTightLandscape}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" VerticalAlignment="Center" ClipToBounds="True" ZIndex="10" Background="{DynamicResource MusicBackgroundBrush}">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="6" VerticalAlignment="Center">
+          <Button Classes="Ghost Icon" Width="36" Height="36" Command="{Binding PreviousCommand}" ToolTip.Tip="上一首" lumina:LuminaButton.IconSize="23">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="SkipPrevious" Width="23" Height="23" Foreground="{DynamicResource MusicTextBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
+          <Button Classes="Primary Icon" Width="42" Height="42" CornerRadius="21" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding TogglePlayCommand}" ToolTip.Tip="{Binding Player.PlaybackStateText}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}" lumina:LuminaButton.IconSize="25">
   <lumina:LuminaButton.Icon>
     <Grid>
-                <icons:MaterialIcon IsVisible="{Binding Player.IsSequentialMode}" Kind="PlaylistPlay" Foreground="{DynamicResource MusicTextSoftBrush}" />
-                <icons:MaterialIcon IsVisible="{Binding Player.IsListLoopMode}" Kind="Repeat" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <icons:MaterialIcon IsVisible="{Binding Player.IsSingleLoopMode}" Kind="RepeatOnce" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <icons:MaterialIcon IsVisible="{Binding Player.IsShuffleActive}" Kind="Shuffle" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="25" Height="25" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="25" Height="25" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
               </Grid>
   </lumina:LuminaButton.Icon>
 </Button>
-        <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding PreviousCommand}" ToolTip.Tip="上一首">
+          <Button Classes="Ghost Icon" Width="36" Height="36" Command="{Binding NextCommand}" ToolTip.Tip="下一首" lumina:LuminaButton.IconSize="23">
   <lumina:LuminaButton.Icon>
-    <icons:MaterialIcon Kind="SkipPrevious" Foreground="{DynamicResource MusicTextBrush}" />
+    <icons:MaterialIcon Kind="SkipNext" Width="23" Height="23" Foreground="{DynamicResource MusicTextBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
-        <Button Classes="Primary Icon" Width="58" Height="58" CornerRadius="29" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding TogglePlayCommand}" ToolTip.Tip="{Binding Player.PlaybackStateText}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}" lumina:LuminaButton.IconSize="32">
+        </StackPanel>
+
+        <lumina:LuminaPlaybackSlider Grid.Column="1" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="4" ThumbSize="10" TrackBrush="#332A2A2A" BufferedBrush="#555A403E" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" VerticalAlignment="Center" />
+
+        <Button Grid.Column="2" Classes="Ghost Icon" Width="34" Height="34" Command="{Binding CyclePlayModeCommand}" ToolTip.Tip="{Binding Player.PlayModeText}" lumina:LuminaButton.IconSize="21">
   <lumina:LuminaButton.Icon>
     <Grid>
-                <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="32" Height="32" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="32" Height="32" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsSequentialMode}" Kind="PlaylistPlay" Width="21" Height="21" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsListLoopMode}" Kind="Repeat" Width="21" Height="21" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsSingleLoopMode}" Kind="RepeatOnce" Width="21" Height="21" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsShuffleActive}" Kind="Shuffle" Width="21" Height="21" Foreground="{DynamicResource MusicPrimaryBrush}" />
               </Grid>
   </lumina:LuminaButton.Icon>
 </Button>
-        <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding NextCommand}" ToolTip.Tip="下一首">
+      </Grid>
+
+      <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" IsVisible="{Binding !IsTightLandscape}">
+        <Button Classes="Ghost Icon" Width="34" Height="34" MinWidth="0" MinHeight="0" Padding="0" Command="{Binding CyclePlayModeCommand}" ToolTip.Tip="{Binding Player.PlayModeText}" lumina:LuminaButton.IconSize="20">
   <lumina:LuminaButton.Icon>
-    <icons:MaterialIcon Kind="SkipNext" Foreground="{DynamicResource MusicTextBrush}" />
+    <Grid>
+                <icons:MaterialIcon IsVisible="{Binding Player.IsSequentialMode}" Kind="PlaylistPlay" Width="20" Height="20" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsListLoopMode}" Kind="Repeat" Width="20" Height="20" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsSingleLoopMode}" Kind="RepeatOnce" Width="20" Height="20" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsShuffleActive}" Kind="Shuffle" Width="20" Height="20" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              </Grid>
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Classes="Ghost Icon" Width="34" Height="34" MinWidth="0" MinHeight="0" Padding="0" Command="{Binding PreviousCommand}" ToolTip.Tip="上一首" lumina:LuminaButton.IconSize="22">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="SkipPrevious" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Classes="Primary Icon" Width="38" Height="38" MinWidth="0" MinHeight="0" Padding="0" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding TogglePlayCommand}" ToolTip.Tip="{Binding Player.PlaybackStateText}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}" lumina:LuminaButton.IconSize="24">
+  <lumina:LuminaButton.Icon>
+    <Grid>
+                <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="24" Height="24" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="24" Height="24" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+              </Grid>
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Classes="Ghost Icon" Width="34" Height="34" MinWidth="0" MinHeight="0" Padding="0" Command="{Binding NextCommand}" ToolTip.Tip="下一首" lumina:LuminaButton.IconSize="22">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="SkipNext" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
+  </lumina:LuminaButton.Icon>
+</Button>
+        <Button Classes="Ghost Icon" Width="34" Height="34" MinWidth="0" MinHeight="0" Padding="0" Command="{Binding ToggleQueueCommand}" ToolTip.Tip="播放队列" lumina:LuminaButton.IconSize="21">
+  <lumina:LuminaButton.Icon>
+    <icons:MaterialIcon Kind="PlaylistMusic" Width="21" Height="21" Foreground="{DynamicResource MusicTextSoftBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
       </StackPanel>

@@ -1,4 +1,9 @@
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.VisualTree;
 using LuminaUI.Controls;
 using LuminaUI.Services;
 using KuGouMusicAvalonia.Services;
@@ -13,6 +18,40 @@ public partial class MainWindow : LuminaWindow
     }
 
     private bool _isRealClosing;
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+
+        if (e.Handled || e.Key != Key.Space || ShouldIgnoreSpaceShortcut(e.Source))
+        {
+            return;
+        }
+
+        PlayerService.Instance.TogglePlayPause();
+        e.Handled = true;
+    }
+
+    private static bool ShouldIgnoreSpaceShortcut(object? source)
+    {
+        if (source is not Visual visual)
+        {
+            return false;
+        }
+
+        return IsInteractiveSpaceTarget(source)
+            || visual.GetVisualAncestors().Any(IsInteractiveSpaceTarget);
+    }
+
+    private static bool IsInteractiveSpaceTarget(object? target)
+    {
+        return target is TextBox
+            or Button
+            or ToggleButton
+            or RepeatButton
+            or Slider
+            or ComboBox;
+    }
 
     protected override async void OnClosing(WindowClosingEventArgs e)
     {

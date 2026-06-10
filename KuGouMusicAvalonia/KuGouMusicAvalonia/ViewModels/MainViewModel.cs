@@ -30,6 +30,7 @@ public partial class MainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsSettingsActive))]
     [NotifyPropertyChangedFor(nameof(IsLyricsActive))]
     [NotifyPropertyChangedFor(nameof(ShowMiniPlayer))]
+    [NotifyPropertyChangedFor(nameof(ShowCompactChrome))]
     private string _activeNavigationKey = "NavDiscover";
 
     [ObservableProperty]
@@ -58,6 +59,7 @@ public partial class MainViewModel : ViewModelBase
     public bool IsSettingsActive => ActiveNavigationKey == "NavSettings";
     public bool IsLyricsActive => ActiveNavigationKey == "NavLyrics";
     public bool ShowMiniPlayer => Player.HasSong && ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
+    public bool ShowCompactChrome => ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
 
     public bool IsDesktopLyricsOpen => DesktopLyricsWindowService.Instance.IsOpen;
     public bool IsDesktopLyricsSupported => DesktopLyricsWindowService.Instance.IsSupported;

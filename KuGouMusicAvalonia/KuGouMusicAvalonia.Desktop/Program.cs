@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using Avalonia;
+using LuminaUI.Diagnostics;
 
 namespace KuGouMusicAvalonia.Desktop;
 
@@ -13,7 +15,7 @@ sealed class Program
     {
         AppDomain.CurrentDomain.UnhandledException += (s, e) =>
         {
-            System.IO.File.WriteAllText(@"C:\Users\j4587698\.gemini\antigravity\brain\647d1f64-1d56-4bc9-95ce-d037914ad6f8\scratch\crash.txt", e.ExceptionObject?.ToString() ?? "Unknown exception");
+            WriteCrashLog(e.ExceptionObject?.ToString() ?? "Unknown exception");
         };
 
         try
@@ -22,8 +24,24 @@ sealed class Program
         }
         catch (Exception ex)
         {
-            System.IO.File.WriteAllText(@"C:\Users\j4587698\.gemini\antigravity\brain\647d1f64-1d56-4bc9-95ce-d037914ad6f8\scratch\crash.txt", ex.ToString());
+            WriteCrashLog(ex.ToString());
             throw;
+        }
+    }
+
+    private static void WriteCrashLog(string content)
+    {
+        try
+        {
+            var directory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "VibeMusic");
+            Directory.CreateDirectory(directory);
+            File.WriteAllText(Path.Combine(directory, "crash.txt"), content);
+        }
+        catch
+        {
+            // Never let crash logging hide the original startup failure.
         }
     }
 
@@ -32,8 +50,20 @@ sealed class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
 #if DEBUG
-            .WithDeveloperTools()
+            .UseLuminaUIDiagnostics(options => options.StartImmediately = false)
+            .AfterSetup(_ => StartLuminaDiagnostics())
 #endif
             .WithInterFont()
             .LogToTrace();
+
+#if DEBUG
+    private static void StartLuminaDiagnostics()
+    {
+        var diagnosticsHost = LuminaUIDiagnosticsExtensions.GetLuminaUIDiagnosticsHost();
+        if (diagnosticsHost is { IsRunning: false })
+        {
+            diagnosticsHost.Start();
+        }
+    }
+#endif
 }
