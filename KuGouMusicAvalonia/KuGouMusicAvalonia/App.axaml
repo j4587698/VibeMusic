@@ -18,6 +18,7 @@
         <ResourceDictionary>
             <converters:EmptyStringToNullConverter x:Key="EmptyStringToNullConverter" />
             <converters:DurationConverter x:Key="DurationConverter" />
+            <converters:BooleanToSwitchTextConverter x:Key="BooleanToSwitchTextConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://KuGouMusicAvalonia/Styles/MusicTheme.axaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -72,6 +73,28 @@
         </Style>
         <Style Selector="Button icons|MaterialIcon">
             <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ToggleSwitch.SettingsSwitch">
+            <Setter Property="Width" Value="40" />
+            <Setter Property="MinWidth" Value="40" />
+            <Setter Property="OnContent" Value="" />
+            <Setter Property="OffContent" Value="" />
+        </Style>
+        <Style Selector="TextBlock.SettingsSwitchText">
+            <Setter Property="MinWidth" Value="14" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource MusicTextSoftBrush}" />
+        </Style>
+        <Style Selector="ToggleSwitch:checked /template/ Border#SwitchKnobBounds">
+            <Setter Property="Background" Value="{DynamicResource MusicPrimaryGradient}" />
+        </Style>
+        <Style Selector="ToggleSwitch:checked:pointerover /template/ Border#SwitchKnobBounds">
+            <Setter Property="Background" Value="{DynamicResource MusicPrimaryGradient}" />
+        </Style>
+        <Style Selector="ToggleSwitch:checked:pressed /template/ Border#SwitchKnobBounds">
+            <Setter Property="Background" Value="{DynamicResource MusicPrimaryGradient}" />
         </Style>
         <Style Selector="TextBox.MusicPillInput">
             <Setter Property="Background" Value="{DynamicResource MusicSurfaceHighBrush}" />

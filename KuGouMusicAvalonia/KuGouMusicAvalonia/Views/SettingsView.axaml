@@ -21,7 +21,7 @@
           <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="10">
             <TextBlock Text="酷狗账号" FontSize="30" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
             <TextBlock Text="登录后同步头像、歌单、云盘和最近播放" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
-            <Button Classes="Primary" Command="{Binding StartLoginCommand}" Height="42" CornerRadius="21" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="18,0" HorizontalAlignment="Left">
+            <Button Classes="Primary" Command="{Binding StartLoginCommand}" Height="42" CornerRadius="21" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="18,0" HorizontalAlignment="Left" Background="{DynamicResource MusicPrimaryGradient}">
               <StackPanel Orientation="Horizontal" Spacing="9">
                 <icons:MaterialIcon Kind="Login" Width="24" Height="24" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                 <TextBlock Text="登录" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
@@ -231,7 +231,7 @@
                           </lumina:LuminaAutoScrollText>
                           <lumina:LuminaAutoScrollText Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
                         </StackPanel>
-                        <Button Grid.Column="2" Classes="Primary Icon" Width="32" Height="32" CornerRadius="16" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).PlayHistorySongCommand}" CommandParameter="{Binding}">
+                        <Button Grid.Column="2" Classes="Primary Icon" Width="32" Height="32" CornerRadius="16" ToolTip.Tip="播放/暂停" Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).PlayHistorySongCommand}" CommandParameter="{Binding}" Background="{DynamicResource MusicPrimaryGradient}">
                           <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="20" Height="20">
                             <icons:MaterialIcon.Kind>
                               <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
@@ -253,7 +253,7 @@
       </Border>
 
       <Border CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
-        <Grid RowDefinitions="Auto,Auto" RowSpacing="14">
+        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="14">
           <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
             <StackPanel Spacing="4">
               <TextBlock Text="畅听与 VIP 权益" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
@@ -262,17 +262,23 @@
             <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsVipBusy}" Width="120" Height="4" VerticalAlignment="Center" />
           </Grid>
 
-          <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
-            <CheckBox IsChecked="{Binding AutoReceiveVipBeforePlayback, Mode=TwoWay}" VerticalAlignment="Center">
-              <TextBlock Text="播放前自动检查并领取今日畅听/VIP" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
-            </CheckBox>
+          <lumina:LuminaSettingsOption Grid.Row="1" Kind="Custom" Header="播放前自动检查并领取今日畅听/VIP" ShowChevron="False">
+            <lumina:LuminaSettingsOption.TrailingContent>
+              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Classes="SettingsSwitchText" Text="{Binding AutoReceiveVipBeforePlayback, Converter={StaticResource BooleanToSwitchTextConverter}}" />
+                <ToggleSwitch Classes="SettingsSwitch" IsChecked="{Binding AutoReceiveVipBeforePlayback, Mode=TwoWay}" />
+              </StackPanel>
+            </lumina:LuminaSettingsOption.TrailingContent>
+          </lumina:LuminaSettingsOption>
+
+          <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
             <Button Grid.Column="1" Classes="Outline" Command="{Binding RefreshVipStateCommand}" Height="40" CornerRadius="20" Padding="16,0">
               <StackPanel Orientation="Horizontal" Spacing="8">
                 <icons:MaterialIcon Kind="Refresh" Width="24" Height="24" Foreground="{DynamicResource MusicTextBrush}" />
                 <TextBlock Text="刷新" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" />
               </StackPanel>
             </Button>
-            <Button Grid.Column="2" Classes="Primary" Command="{Binding ClaimVipCommand}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="16,0">
+            <Button Grid.Column="2" Classes="Primary" Command="{Binding ClaimVipCommand}" Height="40" CornerRadius="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="16,0" Background="{DynamicResource MusicPrimaryGradient}">
               <StackPanel Orientation="Horizontal" Spacing="8">
                 <icons:MaterialIcon Kind="Crown" Width="24" Height="24" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                 <TextBlock Text="获取" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontWeight="Black" />
@@ -287,37 +293,38 @@
           <TextBlock Text="设置" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
 
           <Grid ColumnDefinitions="180,*" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="12">
-            <TextBlock Text="主题" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
-            <ComboBox Grid.Column="1" ItemsSource="{Binding ThemeModeOptions}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}" Height="40" />
+            <lumina:LuminaSettingsSelectOption Grid.ColumnSpan="2" Kind="Select" Header="主题" Value="{Binding ThemeMode}" SelectItemsSource="{Binding ThemeModeOptions}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}" />
 
-            <TextBlock Grid.Row="1" Text="边播边存" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
-            <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding StreamWhileDownloading, Mode=TwoWay}" VerticalAlignment="Center">
-              <TextBlock Text="已下载歌曲优先本地播放；未下载时边播边保存" Foreground="{DynamicResource MusicTextBrush}" />
-            </CheckBox>
-
-            <TextBlock Grid.Row="2" Text="逐字歌词" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
-            <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding PreferKrc, Mode=TwoWay}" VerticalAlignment="Center">
-              <TextBlock Text="优先获取并显示 KRC 逐字歌词 (卡拉OK效果)，否则使用标准 LRC 行歌词" Foreground="{DynamicResource MusicTextBrush}" />
-            </CheckBox>
-
-            <TextBlock Grid.Row="3" Text="关闭主界面" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
-            <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding MinimizeToTrayOnClose, Mode=TwoWay}" VerticalAlignment="Center">
-              <TextBlock Text="关闭窗口时最小化到系统托盘（仅电脑端）" Foreground="{DynamicResource MusicTextBrush}" />
-            </CheckBox>
-
-            <TextBlock Grid.Row="4" Text="存储位置" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
-            <Grid Grid.Row="4" Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="10">
-              <TextBox Grid.Column="0" Classes="Pill MusicPillInput" Text="{Binding DownloadDirectory, Mode=TwoWay}" Height="40" />
-              <Button Grid.Column="1" Classes="Outline" Height="40" CornerRadius="20" Padding="14,0" Command="{Binding PickDownloadDirectoryCommand}" ToolTip.Tip="选择下载目录">
-                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                  <icons:MaterialIcon Kind="FolderOpen" Width="20" Height="20" Foreground="{DynamicResource MusicTextBrush}" />
-                  <TextBlock Text="选择" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+            <lumina:LuminaSettingsOption Grid.Row="1" Grid.ColumnSpan="2" Kind="Custom" Header="边播边存" Description="已下载歌曲优先本地播放；未下载时边播边保存" ShowChevron="False">
+              <lumina:LuminaSettingsOption.TrailingContent>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <TextBlock Classes="SettingsSwitchText" Text="{Binding StreamWhileDownloading, Converter={StaticResource BooleanToSwitchTextConverter}}" />
+                  <ToggleSwitch Classes="SettingsSwitch" IsChecked="{Binding StreamWhileDownloading, Mode=TwoWay}" />
                 </StackPanel>
-              </Button>
-            </Grid>
+              </lumina:LuminaSettingsOption.TrailingContent>
+            </lumina:LuminaSettingsOption>
 
-            <TextBlock Grid.Row="5" Text="默认播放比特率" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
-            <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding PlaybackQualityOptions}" SelectedItem="{Binding DefaultPlaybackQuality, Mode=TwoWay}" Height="40" />
+            <lumina:LuminaSettingsOption Grid.Row="2" Grid.ColumnSpan="2" Kind="Custom" Header="逐字歌词" Description="优先获取并显示 KRC 逐字歌词 (卡拉OK效果)，否则使用标准 LRC 行歌词" ShowChevron="False">
+              <lumina:LuminaSettingsOption.TrailingContent>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <TextBlock Classes="SettingsSwitchText" Text="{Binding PreferKrc, Converter={StaticResource BooleanToSwitchTextConverter}}" />
+                  <ToggleSwitch Classes="SettingsSwitch" IsChecked="{Binding PreferKrc, Mode=TwoWay}" />
+                </StackPanel>
+              </lumina:LuminaSettingsOption.TrailingContent>
+            </lumina:LuminaSettingsOption>
+
+            <lumina:LuminaSettingsOption Grid.Row="3" Grid.ColumnSpan="2" Kind="Custom" Header="关闭主界面" Description="关闭窗口时最小化到系统托盘（仅电脑端）" ShowChevron="False" IsVisible="{Binding IsDesktopSettingVisible}">
+              <lumina:LuminaSettingsOption.TrailingContent>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <TextBlock Classes="SettingsSwitchText" Text="{Binding MinimizeToTrayOnClose, Converter={StaticResource BooleanToSwitchTextConverter}}" />
+                  <ToggleSwitch Classes="SettingsSwitch" IsChecked="{Binding MinimizeToTrayOnClose, Mode=TwoWay}" />
+                </StackPanel>
+              </lumina:LuminaSettingsOption.TrailingContent>
+            </lumina:LuminaSettingsOption>
+
+            <lumina:LuminaSettingsOption Grid.Row="4" Grid.ColumnSpan="2" Kind="Custom" Header="存储位置" Description="{Binding DownloadDirectory}" ShowChevron="True" Command="{Binding PickDownloadDirectoryCommand}" IsVisible="{Binding IsDesktopSettingVisible}" />
+
+            <lumina:LuminaSettingsSelectOption Grid.Row="5" Grid.ColumnSpan="2" Kind="Select" Header="默认播放比特率" Value="{Binding DefaultPlaybackQuality}" SelectItemsSource="{Binding PlaybackQualityOptions}" SelectedItem="{Binding DefaultPlaybackQuality, Mode=TwoWay}" />
           </Grid>
         </StackPanel>
       </Border>
@@ -364,7 +371,7 @@
               </StackPanel>
 
               <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <Button Classes="Primary" Command="{Binding StartQrLoginCommand}" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="14,0">
+                <Button Classes="Primary" Command="{Binding StartQrLoginCommand}" Height="40" CornerRadius="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="14,0" Background="{DynamicResource MusicPrimaryGradient}">
                   <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                     <icons:MaterialIcon Kind="Qrcode" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                     <TextBlock Text="生成二维码" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" VerticalAlignment="Center" />
@@ -387,7 +394,7 @@
                 </Button>
               </Grid>
 
-              <Button Classes="Primary" Command="{Binding LoginByPhoneCommand}" Height="42" CornerRadius="21" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}">
+              <Button Classes="Primary" Command="{Binding LoginByPhoneCommand}" Height="42" CornerRadius="21" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Background="{DynamicResource MusicPrimaryGradient}">
                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                   <icons:MaterialIcon Kind="Login" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                   <TextBlock Text="登录" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" VerticalAlignment="Center" />
