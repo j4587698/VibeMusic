@@ -5,11 +5,5 @@
 	<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-	<application android:label="VibeMusic" android:icon="@drawable/Icon">
-		<service
-			android:name="KuGouMusicAvalonia.Android.PlaybackNotificationService"
-			android:enabled="true"
-			android:exported="false"
-			android:foregroundServiceType="mediaPlayback" />
-	</application>
+	<application android:label="VibeMusic" android:icon="@drawable/Icon" android:usesCleartextTraffic="true" />
 </manifest>
