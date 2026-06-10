@@ -58,10 +58,14 @@ public partial class MainView : UserControl
     {
         if (DataContext is MainViewModel viewModel)
         {
-            viewModel.IsCompactLayout = Bounds.Width > 0 && Bounds.Width < 760;
-            if (Bounds.Width > 0)
+            var width = Bounds.Width;
+            var height = Bounds.Height;
+            var isShortLandscape = width > height && height > 0 && height <= 520;
+
+            viewModel.IsCompactLayout = width > 0 && (width < 760 || isShortLandscape);
+            if (width > 0)
             {
-                viewModel.QueuePopupWidth = Math.Clamp(Bounds.Width - 32, 320, 420);
+                viewModel.QueuePopupWidth = Math.Clamp(width - 32, 320, 420);
             }
         }
     }

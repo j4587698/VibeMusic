@@ -43,6 +43,7 @@ public sealed class KaraokeTextBlock : Control
     private TextLayout? _unsung;
     private TextLayout? _sung;
     private double _builtWidth = double.NaN;
+    private bool _usesLayoutAlignment;
     private string _text = string.Empty;
 
     public IReadOnlyList<LyricWord>? Words
@@ -113,6 +114,7 @@ public sealed class KaraokeTextBlock : Control
             change.Property == FontSizeProperty ||
             change.Property == FontWeightProperty ||
             change.Property == FontFamilyProperty ||
+            change.Property == TextAlignmentProperty ||
             change.Property == SungBrushProperty ||
             change.Property == UnsungBrushProperty)
         {
@@ -145,18 +147,21 @@ public sealed class KaraokeTextBlock : Control
             return;
         }
 
-        // 居中/右对齐通过平移实现，避免把对齐交给 TextLayout 的 MaxWidth
-        // （当可用宽度为无穷大时会导致布局抖动甚至测量死循环）。
+        // 有明确可用宽度时交给 TextLayout 做逐行对齐，保证换行后的每一行都能居中；
+        // 宽度无穷时继续用整体平移，避免无约束测量下布局抖动。
         var offsetX = 0d;
-        var extra = Bounds.Width - _unsung.Width;
-        if (extra > 0)
+        if (!_usesLayoutAlignment)
         {
-            offsetX = TextAlignment switch
+            var extra = Bounds.Width - _unsung.Width;
+            if (extra > 0)
             {
-                TextAlignment.Center => extra / 2,
-                TextAlignment.Right => extra,
-                _ => 0,
-            };
+                offsetX = TextAlignment switch
+                {
+                    TextAlignment.Center => extra / 2,
+                    TextAlignment.Right => extra,
+                    _ => 0,
+                };
+            }
         }
 
         using (context.PushTransform(Matrix.CreateTranslation(offsetX, 0)))
@@ -186,11 +191,12 @@ public sealed class KaraokeTextBlock : Control
         _text = sb.ToString();
 
         var typeface = new Typeface(FontFamily, FontStyle.Normal, FontWeight);
-        var constraint = double.IsFinite(maxWidth) && maxWidth > 0 ? maxWidth : double.PositiveInfinity;
+        _usesLayoutAlignment = double.IsFinite(maxWidth) && maxWidth > 0;
+        var constraint = _usesLayoutAlignment ? maxWidth : double.PositiveInfinity;
+        var alignment = _usesLayoutAlignment ? TextAlignment : TextAlignment.Left;
 
-        // 始终使用 Left 布局，对齐由 Render 的平移负责，确保命中测试矩形与绘制坐标一致。
-        _unsung = new TextLayout(_text, typeface, FontSize, UnsungBrush, TextAlignment.Left, TextWrapping.Wrap, maxWidth: constraint);
-        _sung = new TextLayout(_text, typeface, FontSize, SungBrush, TextAlignment.Left, TextWrapping.Wrap, maxWidth: constraint);
+        _unsung = new TextLayout(_text, typeface, FontSize, UnsungBrush, alignment, TextWrapping.Wrap, maxWidth: constraint);
+        _sung = new TextLayout(_text, typeface, FontSize, SungBrush, alignment, TextWrapping.Wrap, maxWidth: constraint);
     }
 
     private void DrawSung(DrawingContext context)

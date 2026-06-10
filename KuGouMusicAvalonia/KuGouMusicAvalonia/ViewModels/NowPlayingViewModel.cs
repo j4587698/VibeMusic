@@ -27,6 +27,9 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsLyricsModeVisible))]
     private bool _isCompactLyricsVisible;
 
+    [ObservableProperty]
+    private bool _isTightLandscape;
+
     private double _lyricSeekPreviewTime = -1;
 
     [ObservableProperty]

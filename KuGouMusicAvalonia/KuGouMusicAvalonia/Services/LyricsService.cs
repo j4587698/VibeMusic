@@ -22,6 +22,7 @@ public sealed partial class LyricsService : ObservableObject
     private int _activeLineIndex = -1;
     private const int FocusedLineCount = 9;
     private const int FocusedLineCenterIndex = FocusedLineCount / 2;
+    private const string NoLyricsText = "暂无歌词";
     private readonly DispatcherTimer _interpolationTimer;
     private readonly System.Diagnostics.Stopwatch _playbackClock = new();
     private double _clockAnchorSeconds;
@@ -36,13 +37,14 @@ public sealed partial class LyricsService : ObservableObject
     public ObservableCollection<LyricLine> FocusedLines { get; } = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEmptyLyrics))]
     private bool _isLoading;
 
     [ObservableProperty]
     private string _statusMessage = "播放歌曲后自动加载歌词";
 
     [ObservableProperty]
-    private string _currentLineText = "暂无歌词";
+    private string _currentLineText = NoLyricsText;
 
     [ObservableProperty]
     private string _nextLineText = string.Empty;
@@ -51,9 +53,14 @@ public sealed partial class LyricsService : ObservableObject
     [ObservableProperty]
     private double _wordPlaybackPosition;
 
+    public string EmptyLyricsText => NoLyricsText;
+
+    public bool ShowEmptyLyrics => !IsLoading && Lines.Count == 0 && _player.CurrentSong is not null;
+
     private LyricsService()
     {
         _player.PropertyChanged += OnPlayerPropertyChanged;
+        Lines.CollectionChanged += (_, _) => OnPropertyChanged(nameof(ShowEmptyLyrics));
         _interpolationTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromMilliseconds(33) // ~30 fps
@@ -69,8 +76,8 @@ public sealed partial class LyricsService : ObservableObject
             {
                 Lines.Clear();
                 SetActiveLineIndex(-1);
-                ResetFocusedLines("暂无歌词");
-                CurrentLineText = "暂无歌词";
+                ResetFocusedLines(NoLyricsText);
+                CurrentLineText = NoLyricsText;
                 NextLineText = string.Empty;
                 StatusMessage = "当前没有歌曲";
             });
@@ -118,7 +125,17 @@ public sealed partial class LyricsService : ObservableObject
                     Lines.Add(line);
                 }
 
-                StatusMessage = Lines.Count > 0 ? $"已加载 {Lines.Count} 行歌词" : "歌词内容为空";
+                if (Lines.Count == 0)
+                {
+                    SetActiveLineIndex(-1);
+                    ResetFocusedLines(NoLyricsText);
+                    CurrentLineText = NoLyricsText;
+                    NextLineText = string.Empty;
+                    StatusMessage = "歌词内容为空";
+                    return;
+                }
+
+                StatusMessage = string.Empty;
                 UpdateActiveLine();
             });
         }
@@ -252,9 +269,9 @@ public sealed partial class LyricsService : ObservableObject
             cancellationToken.ThrowIfCancellationRequested();
             Lines.Clear();
             SetActiveLineIndex(-1);
-            ResetFocusedLines(message);
+            ResetFocusedLines(NoLyricsText);
             StatusMessage = message;
-            CurrentLineText = message;
+            CurrentLineText = NoLyricsText;
             NextLineText = string.Empty;
         });
     }
@@ -264,7 +281,7 @@ public sealed partial class LyricsService : ObservableObject
         if (Lines.Count == 0)
         {
             SetActiveLineIndex(-1);
-            CurrentLineText = IsLoading ? "正在加载歌词" : "暂无歌词";
+            CurrentLineText = IsLoading ? "正在加载歌词" : NoLyricsText;
             NextLineText = string.Empty;
             ResetFocusedLines(CurrentLineText);
             return;
@@ -468,8 +485,6 @@ public sealed partial class LyricLine : ObservableObject
 
     public int DisplayFontSize => IsActive ? 31 : 20;
 
-    public double ActiveMarkerOpacity => IsActive ? 1 : 0;
-
     public bool ShowWords => IsActive && Words.Count > 0;
 
     public bool ShowPlain => !ShowWords;
@@ -477,7 +492,6 @@ public sealed partial class LyricLine : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DisplayOpacity))]
     [NotifyPropertyChangedFor(nameof(DisplayFontSize))]
-    [NotifyPropertyChangedFor(nameof(ActiveMarkerOpacity))]
     [NotifyPropertyChangedFor(nameof(ShowWords))]
     [NotifyPropertyChangedFor(nameof(ShowPlain))]
     private bool _isActive;

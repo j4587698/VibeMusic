@@ -1,25 +1,39 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using KuGouMusicAvalonia.Services;
 using KuGouMusicAvalonia.ViewModels;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 
 namespace KuGouMusicAvalonia.Views;
 
 public partial class NowPlayingView : UserControl
 {
-    private const double LyricLineHeight = 56;
+    private const double SplitLayoutMinWidth = 760;
+    private const double LyricLineHeight = 58;
+    private static readonly TimeSpan LyricSeekPreviewIdleTime = TimeSpan.FromSeconds(3);
+    private static readonly TimeSpan ProgrammaticLyricScrollSuppressionTime = TimeSpan.FromMilliseconds(500);
+    private readonly DispatcherTimer _lyricSeekPreviewIdleTimer;
     private bool _suppressLyricPreview;
+    private DateTime _suppressLyricPreviewUntilUtc = DateTime.MinValue;
     private bool _lyricsEventsAttached;
     private NowPlayingViewModel? _viewModel;
 
     public NowPlayingView()
     {
         AvaloniaXamlLoader.Load(this);
+        _lyricSeekPreviewIdleTimer = new DispatcherTimer
+        {
+            Interval = LyricSeekPreviewIdleTime
+        };
+        _lyricSeekPreviewIdleTimer.Tick += OnLyricSeekPreviewIdleTimerTick;
         SizeChanged += OnSizeChanged;
         DataContextChanged += OnDataContextChanged;
         AttachedToVisualTree += (_, _) => AttachLyricsEvents();
@@ -53,7 +67,14 @@ public partial class NowPlayingView : UserControl
     {
         if (DataContext is NowPlayingViewModel viewModel)
         {
-            viewModel.IsWideLayout = width >= 860 && width > height;
+            viewModel.IsWideLayout = width >= SplitLayoutMinWidth && width > height;
+            viewModel.IsTightLandscape = width > height && height <= 520;
+
+            if (this.FindControl<Grid>("NowPlayingRoot") is { } root)
+            {
+                root.Margin = viewModel.IsTightLandscape ? new Thickness(12, 8, 12, 10) : new Thickness(20, 8, 20, 10);
+                root.RowSpacing = 6;
+            }
         }
     }
 
@@ -89,7 +110,16 @@ public partial class NowPlayingView : UserControl
             e.PropertyName == nameof(NowPlayingViewModel.IsCompactLyricsVisible) ||
             e.PropertyName == nameof(NowPlayingViewModel.IsLyricSeekPreviewVisible))
         {
-            QueueScrollActiveLyricIntoView();
+            var isShowingLyricSeekPreview =
+                e.PropertyName == nameof(NowPlayingViewModel.IsLyricSeekPreviewVisible) &&
+                _viewModel?.IsLyricSeekPreviewVisible == true;
+
+            if (!isShowingLyricSeekPreview)
+            {
+                _lyricSeekPreviewIdleTimer.Stop();
+            }
+
+            QueueScrollActiveLyricIntoView(suppressLyricPreviewScroll: !isShowingLyricSeekPreview);
         }
     }
 
@@ -97,19 +127,31 @@ public partial class NowPlayingView : UserControl
     {
         if (e.PropertyName == nameof(LyricsService.ActiveLineIndex))
         {
+            if (_viewModel?.IsLyricSeekPreviewVisible == true)
+            {
+                HideLyricSeekPreviewAndResume();
+                return;
+            }
+
             QueueScrollActiveLyricIntoView();
         }
     }
 
     private void OnLyricsLinesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        _lyricSeekPreviewIdleTimer.Stop();
         _viewModel?.HideLyricSeekPreview();
         QueueScrollActiveLyricIntoView();
     }
 
     private void OnLyricsScrollChanged(object? sender, ScrollChangedEventArgs e)
     {
-        if (_suppressLyricPreview || sender is not ScrollViewer scrollViewer || DataContext is not NowPlayingViewModel viewModel)
+        if (sender is not ScrollViewer scrollViewer || DataContext is not NowPlayingViewModel viewModel)
+        {
+            return;
+        }
+
+        if (IsLyricPreviewScrollSuppressed())
         {
             return;
         }
@@ -119,15 +161,92 @@ public partial class NowPlayingView : UserControl
             return;
         }
 
-        var centerY = scrollViewer.Offset.Y + scrollViewer.Viewport.Height / 2;
-        var index = (int)Math.Round((centerY - LyricLineHeight / 2) / LyricLineHeight);
-        index = Math.Clamp(index, 0, LyricsService.Instance.Lines.Count - 1);
-        viewModel.ShowLyricSeekPreview(LyricsService.Instance.Lines[index]);
+        if (TryGetVisibleLyricsContext(viewModel, out var visibleScrollViewer, out var itemsControl) &&
+            ReferenceEquals(scrollViewer, visibleScrollViewer))
+        {
+            UpdateLyricsViewportPadding(scrollViewer, itemsControl);
+            var index = GetLyricIndexAtViewportCenter(scrollViewer, itemsControl);
+            viewModel.ShowLyricSeekPreview(LyricsService.Instance.Lines[index]);
+            RestartLyricSeekPreviewIdleTimer();
+        }
+    }
+
+    private void OnLyricSeekPreviewIdleTimerTick(object? sender, EventArgs e)
+    {
+        _lyricSeekPreviewIdleTimer.Stop();
+        HideLyricSeekPreviewAndResume();
+    }
+
+    private void OnCompactLyricsTapped(object? sender, TappedEventArgs e)
+    {
+        if (DataContext is not NowPlayingViewModel viewModel ||
+            viewModel.IsWideLayout ||
+            !viewModel.IsCompactLyricsVisible ||
+            IsTapFromInteractiveControl(e.Source))
+        {
+            return;
+        }
+
+        _lyricSeekPreviewIdleTimer.Stop();
+        viewModel.HideLyricSeekPreview();
+        viewModel.ToggleCompactLyricsCommand.Execute(null);
+        e.Handled = true;
+    }
+
+    private static bool IsTapFromInteractiveControl(object? source)
+    {
+        if (source is Button or ScrollBar)
+        {
+            return true;
+        }
+
+        return source is Visual visual &&
+            visual.GetVisualAncestors().Any(ancestor => ancestor is Button or ScrollBar);
+    }
+
+    private void HideLyricSeekPreviewAndResume()
+    {
+        if (_viewModel?.IsLyricSeekPreviewVisible == true)
+        {
+            _viewModel.HideLyricSeekPreview();
+        }
+
+        QueueScrollActiveLyricIntoView();
+    }
+
+    private void RestartLyricSeekPreviewIdleTimer()
+    {
+        _lyricSeekPreviewIdleTimer.Stop();
+        _lyricSeekPreviewIdleTimer.Start();
     }
 
     private void QueueScrollActiveLyricIntoView()
     {
+        QueueScrollActiveLyricIntoView(suppressLyricPreviewScroll: true);
+    }
+
+    private void QueueScrollActiveLyricIntoView(bool suppressLyricPreviewScroll)
+    {
+        if (suppressLyricPreviewScroll)
+        {
+            SuppressLyricPreviewScroll();
+        }
+
         Dispatcher.UIThread.Post(ScrollActiveLyricIntoView, DispatcherPriority.Background);
+    }
+
+    private bool IsLyricPreviewScrollSuppressed()
+    {
+        return _suppressLyricPreview || DateTime.UtcNow < _suppressLyricPreviewUntilUtc;
+    }
+
+    private void SuppressLyricPreviewScroll()
+    {
+        var until = DateTime.UtcNow + ProgrammaticLyricScrollSuppressionTime;
+        if (until > _suppressLyricPreviewUntilUtc)
+        {
+            _suppressLyricPreviewUntilUtc = until;
+        }
     }
 
     private void ScrollActiveLyricIntoView()
@@ -137,33 +256,145 @@ public partial class NowPlayingView : UserControl
             return;
         }
 
-        var scrollViewer = GetVisibleLyricsScrollViewer(viewModel);
         var activeLineIndex = LyricsService.Instance.ActiveLineIndex;
-        if (scrollViewer is null || activeLineIndex < 0 || scrollViewer.Viewport.Height <= 0 || scrollViewer.Extent.Height <= 0)
+        if (!TryGetVisibleLyricsContext(viewModel, out var scrollViewer, out var itemsControl) ||
+            activeLineIndex < 0 ||
+            scrollViewer.Viewport.Height <= 0 ||
+            scrollViewer.Extent.Height <= 0)
         {
             return;
         }
 
-        var targetY = activeLineIndex * LyricLineHeight - (scrollViewer.Viewport.Height - LyricLineHeight) / 2;
-        var maxY = Math.Max(0, scrollViewer.Extent.Height - scrollViewer.Viewport.Height);
-        targetY = Math.Clamp(targetY, 0, maxY);
-        if (Math.Abs(scrollViewer.Offset.Y - targetY) < 4)
-        {
-            return;
-        }
-
+        UpdateLyricsViewportPadding(scrollViewer, itemsControl);
+        SuppressLyricPreviewScroll();
         _suppressLyricPreview = true;
-        scrollViewer.Offset = new Vector(scrollViewer.Offset.X, targetY);
-        Dispatcher.UIThread.Post(() => _suppressLyricPreview = false, DispatcherPriority.Background);
+        itemsControl.ScrollIntoView(activeLineIndex);
+        Dispatcher.UIThread.Post(() =>
+        {
+            CenterLyricContainer(activeLineIndex);
+            Dispatcher.UIThread.Post(() => _suppressLyricPreview = false, DispatcherPriority.Background);
+        }, DispatcherPriority.Background);
     }
 
-    private ScrollViewer? GetVisibleLyricsScrollViewer(NowPlayingViewModel viewModel)
+    private void CenterLyricContainer(int index)
+    {
+        if (DataContext is not NowPlayingViewModel viewModel ||
+            viewModel.IsLyricSeekPreviewVisible ||
+            !TryGetVisibleLyricsContext(viewModel, out var scrollViewer, out var itemsControl))
+        {
+            return;
+        }
+
+        UpdateLyricsViewportPadding(scrollViewer, itemsControl);
+        var targetY = GetCenteredOffset(scrollViewer, itemsControl, index);
+        if (targetY < 0 || Math.Abs(scrollViewer.Offset.Y - targetY) < 2)
+        {
+            return;
+        }
+
+        scrollViewer.Offset = new Vector(scrollViewer.Offset.X, targetY);
+    }
+
+    private static double GetCenteredOffset(ScrollViewer scrollViewer, ItemsControl itemsControl, int index)
+    {
+        var container = itemsControl.ContainerFromIndex(index);
+        if (container is not null)
+        {
+            var center = container.TranslatePoint(new Point(container.Bounds.Width / 2, container.Bounds.Height / 2), scrollViewer);
+            if (center is not null)
+            {
+                return ClampOffset(scrollViewer, scrollViewer.Offset.Y + center.Value.Y - scrollViewer.Viewport.Height / 2);
+            }
+        }
+
+        var padding = GetLyricsViewportPadding(scrollViewer);
+        var estimatedY = padding + index * LyricLineHeight + LyricLineHeight / 2 - scrollViewer.Viewport.Height / 2;
+        return ClampOffset(scrollViewer, estimatedY);
+    }
+
+    private static int GetLyricIndexAtViewportCenter(ScrollViewer scrollViewer, ItemsControl itemsControl)
+    {
+        var bestIndex = -1;
+        var bestDistance = double.MaxValue;
+        var viewportCenterY = scrollViewer.Viewport.Height / 2;
+
+        foreach (var container in itemsControl.GetRealizedContainers())
+        {
+            var index = itemsControl.IndexFromContainer(container);
+            if (index < 0)
+            {
+                continue;
+            }
+
+            var center = container.TranslatePoint(new Point(container.Bounds.Width / 2, container.Bounds.Height / 2), scrollViewer);
+            if (center is null)
+            {
+                continue;
+            }
+
+            var distance = Math.Abs(center.Value.Y - viewportCenterY);
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestIndex = index;
+            }
+        }
+
+        if (bestIndex >= 0)
+        {
+            return bestIndex;
+        }
+
+        var centerY = scrollViewer.Offset.Y + scrollViewer.Viewport.Height / 2;
+        var padding = GetLyricsViewportPadding(scrollViewer);
+        var estimatedIndex = (int)Math.Round((centerY - padding - LyricLineHeight / 2) / LyricLineHeight);
+        return Math.Clamp(estimatedIndex, 0, LyricsService.Instance.Lines.Count - 1);
+    }
+
+    private static void UpdateLyricsViewportPadding(ScrollViewer scrollViewer, ItemsControl itemsControl)
+    {
+        var padding = GetLyricsViewportPadding(scrollViewer);
+        if (Math.Abs(itemsControl.Margin.Top - padding) < 0.5 &&
+            Math.Abs(itemsControl.Margin.Bottom - padding) < 0.5)
+        {
+            return;
+        }
+
+        itemsControl.Margin = new Thickness(0, padding, 0, padding);
+    }
+
+    private static double GetLyricsViewportPadding(ScrollViewer scrollViewer)
+    {
+        return Math.Max(0, (scrollViewer.Viewport.Height - LyricLineHeight) / 2);
+    }
+
+    private static double ClampOffset(ScrollViewer scrollViewer, double y)
+    {
+        var maxY = Math.Max(0, scrollViewer.Extent.Height - scrollViewer.Viewport.Height);
+        return Math.Clamp(y, 0, maxY);
+    }
+
+    private bool TryGetVisibleLyricsContext(
+        NowPlayingViewModel viewModel,
+        out ScrollViewer scrollViewer,
+        out ItemsControl itemsControl)
     {
         if (viewModel.IsWideLayout)
         {
-            return this.FindControl<ScrollViewer>("WideLyricsScrollViewer");
+            scrollViewer = this.FindControl<ScrollViewer>("WideLyricsScrollViewer")!;
+            itemsControl = this.FindControl<ItemsControl>("WideLyricsItemsControl")!;
+            return scrollViewer is not null && itemsControl is not null;
         }
 
-        return viewModel.IsLyricsModeVisible ? this.FindControl<ScrollViewer>("CompactLyricsScrollViewer") : null;
+        if (viewModel.IsLyricsModeVisible)
+        {
+            scrollViewer = this.FindControl<ScrollViewer>("CompactLyricsScrollViewer")!;
+            itemsControl = this.FindControl<ItemsControl>("CompactLyricsItemsControl")!;
+            return scrollViewer is not null && itemsControl is not null;
+        }
+
+        scrollViewer = null!;
+        itemsControl = null!;
+        return false;
     }
 }

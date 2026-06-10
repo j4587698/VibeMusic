@@ -89,13 +89,11 @@
         </Grid>
 
         <Border Grid.Column="1" CornerRadius="26" Background="#AA201F1F" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="34,20" BoxShadow="{DynamicResource MusicFloatingShadow}">
-          <Grid RowDefinitions="Auto,*">
-            <ProgressBar IsIndeterminate="True" IsVisible="{Binding Lyrics.IsLoading}" Width="150" Height="4" HorizontalAlignment="Center" Margin="0,0,0,14" />
-
-            <ItemsControl Grid.Row="1" ItemsSource="{Binding Lyrics.FocusedLines}" VerticalAlignment="Center">
+          <Grid>
+            <ItemsControl ItemsSource="{Binding Lyrics.FocusedLines}" VerticalAlignment="Center">
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="services:LyricLine">
-                  <Panel MinHeight="50" Margin="0,4">
+                  <Grid MinHeight="50" Margin="0,4" VerticalAlignment="Center">
                     <TextBlock Text="{Binding Text}"
                                FontSize="{Binding DisplayFontSize}"
                                FontWeight="Black"
@@ -104,6 +102,7 @@
                                TextAlignment="Center"
                                TextWrapping="Wrap"
                                MaxLines="2"
+                               VerticalAlignment="Center"
                                IsVisible="{Binding ShowPlain}" />
                     <controls:KaraokeTextBlock
                         Words="{Binding Words}"
@@ -116,10 +115,12 @@
                         SungBrush="{DynamicResource MusicPrimaryBrush}"
                         UnsungBrush="{DynamicResource MusicTextBrush}"
                         IsVisible="{Binding ShowWords}" />
-                  </Panel>
+                  </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
+
+            <ProgressBar IsIndeterminate="True" IsVisible="{Binding Lyrics.IsLoading}" Width="150" Height="4" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,56,0,0" IsHitTestVisible="False" />
           </Grid>
         </Border>
       </Grid>
@@ -193,13 +194,11 @@
 
         <TabItem Header="歌词">
           <Border CornerRadius="24" Background="#AA201F1F" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18,18" Margin="2,18,2,6">
-            <Grid RowDefinitions="Auto,*">
-              <ProgressBar IsIndeterminate="True" IsVisible="{Binding Lyrics.IsLoading}" Width="140" Height="4" HorizontalAlignment="Center" Margin="0,0,0,12" />
-
-              <ItemsControl Grid.Row="1" ItemsSource="{Binding Lyrics.FocusedLines}" VerticalAlignment="Center">
+            <Grid>
+              <ItemsControl ItemsSource="{Binding Lyrics.FocusedLines}" VerticalAlignment="Center">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate DataType="services:LyricLine">
-                    <Panel MinHeight="48" Margin="0,3">
+                    <Grid MinHeight="48" Margin="0,3" VerticalAlignment="Center">
                       <TextBlock Text="{Binding Text}"
                                  FontSize="{Binding DisplayFontSize}"
                                  FontWeight="Black"
@@ -208,6 +207,7 @@
                                  TextAlignment="Center"
                                  TextWrapping="Wrap"
                                  MaxLines="2"
+                                 VerticalAlignment="Center"
                                  IsVisible="{Binding ShowPlain}" />
                       <controls:KaraokeTextBlock
                           Words="{Binding Words}"
@@ -220,10 +220,12 @@
                           SungBrush="{DynamicResource MusicPrimaryBrush}"
                           UnsungBrush="{DynamicResource MusicTextBrush}"
                           IsVisible="{Binding ShowWords}" />
-                    </Panel>
+                    </Grid>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
+
+              <ProgressBar IsIndeterminate="True" IsVisible="{Binding Lyrics.IsLoading}" Width="140" Height="4" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,52,0,0" IsHitTestVisible="False" />
             </Grid>
           </Border>
         </TabItem>
