@@ -33,6 +33,9 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isTightLandscape;
 
+    [ObservableProperty]
+    private double _coverSize = 260;
+
     private double _lyricSeekPreviewTime = -1;
 
     [ObservableProperty]

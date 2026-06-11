@@ -2,7 +2,6 @@ using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
-using Android.Net;
 using Android.OS;
 using Android.Provider;
 using Android.Text;
@@ -12,6 +11,7 @@ using Android.Runtime;
 using KuGouMusicAvalonia.Services;
 using System;
 using System.ComponentModel;
+using AndroidUri = global::Android.Net.Uri;
 
 namespace KuGouMusicAvalonia.Android;
 
@@ -193,9 +193,9 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
     {
         var root = new LinearLayout(context)
         {
-            Orientation = Orientation.Vertical,
-            Gravity = GravityFlags.Center
+            Orientation = Orientation.Vertical
         };
+        root.SetGravity(GravityFlags.Center);
         root.SetPadding(Dp(18), Dp(10), Dp(18), Dp(10));
         root.SetMinimumWidth(Dp(280));
         root.Background = CreateBackground(isCompact: false);
@@ -376,7 +376,7 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             return;
         }
 
-        var packageUri = Android.Net.Uri.Parse($"package:{_context.PackageName}");
+        var packageUri = AndroidUri.Parse($"package:{_context.PackageName}");
         var intent = new Intent(Settings.ActionManageOverlayPermission, packageUri);
         intent.AddFlags(ActivityFlags.NewTask);
         (_activity ?? _context).StartActivity(intent);
@@ -401,7 +401,7 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         };
         textView.SetTextColor(color);
         textView.SetMaxLines(maxLines);
-        textView.IncludeFontPadding = false;
+        textView.SetIncludeFontPadding(false);
         return textView;
     }
 
@@ -414,13 +414,13 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
 
     private static int Dp(int value)
     {
-        var density = Android.App.Application.Context.Resources?.DisplayMetrics?.Density ?? 1f;
+        var density = global::Android.App.Application.Context.Resources?.DisplayMetrics?.Density ?? 1f;
         return (int)Math.Round(value * density);
     }
 
     private static int GetOverlayMaxWidth(int maxWidthDp)
     {
-        var displayMetrics = Android.App.Application.Context.Resources?.DisplayMetrics;
+        var displayMetrics = global::Android.App.Application.Context.Resources?.DisplayMetrics;
         if (displayMetrics is null)
         {
             return Dp(maxWidthDp);

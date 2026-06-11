@@ -268,7 +268,7 @@
     <Grid IsVisible="{Binding IsQueueOpen}" ZIndex="20">
       <Border Background="#7A000000" lumina:LuminaCommand.TappedCommand="{Binding CloseQueueCommand}" />
       <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="{Binding QueuePopupWidth}" Margin="16,16,16,90" CornerRadius="22" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="16" BoxShadow="{DynamicResource MusicFloatingShadow}">
-        <StackPanel Spacing="12">
+        <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
           <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <StackPanel Spacing="2">
               <TextBlock Text="播放队列" FontSize="20" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
@@ -286,7 +286,7 @@
 </Button>
           </Grid>
 
-          <Border IsVisible="{Binding Player.IsQueueEmpty}" CornerRadius="16" Background="{DynamicResource MusicSurfaceBrush}" Padding="18" MinHeight="110">
+          <Border Grid.Row="1" IsVisible="{Binding Player.IsQueueEmpty}" CornerRadius="16" Background="{DynamicResource MusicSurfaceBrush}" Padding="18" MinHeight="110">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
               <icons:MaterialIcon Kind="PlaylistMusic" Width="34" Height="34" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Center" />
               <TextBlock IsVisible="{Binding !Player.IsRadioMode}" Text="暂无播放队列" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Center" />
@@ -294,7 +294,7 @@
             </StackPanel>
           </Border>
 
-          <ListBox x:Name="QueueListBox" IsVisible="{Binding Player.HasQueue}" MaxHeight="440" ItemsSource="{Binding Player.Queue}" Background="Transparent" BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
+          <ListBox Grid.Row="2" x:Name="QueueListBox" IsVisible="{Binding Player.HasQueue}" MaxHeight="440" ItemsSource="{Binding Player.Queue}" Background="Transparent" BorderThickness="0" Padding="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto">
             <ListBox.ItemsPanel>
               <ItemsPanelTemplate>
                 <VirtualizingStackPanel />
@@ -367,7 +367,7 @@
               </DataTemplate>
             </ListBox.ItemTemplate>
           </ListBox>
-        </StackPanel>
+        </Grid>
       </Border>
     </Grid>
   </Grid>

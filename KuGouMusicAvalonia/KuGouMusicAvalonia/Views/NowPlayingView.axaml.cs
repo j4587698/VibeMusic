@@ -70,6 +70,12 @@ public partial class NowPlayingView : UserControl
             viewModel.IsWideLayout = width >= SplitLayoutMinWidth && width > height;
             viewModel.IsTightLandscape = width > height && height <= 520;
 
+            // Calculate cover size based on available height
+            // Reserve space for: top bar (~60), progress (~40), bottom controls (~50), margins (~40)
+            var availableForContent = height - 190;
+            var maxCoverSize = viewModel.IsTightLandscape ? 120 : 260;
+            viewModel.CoverSize = Math.Clamp(availableForContent, 100, maxCoverSize);
+
             if (this.FindControl<Grid>("NowPlayingRoot") is { } root)
             {
                 root.Margin = viewModel.IsTightLandscape ? new Thickness(12, 8, 12, 10) : new Thickness(20, 8, 20, 10);
