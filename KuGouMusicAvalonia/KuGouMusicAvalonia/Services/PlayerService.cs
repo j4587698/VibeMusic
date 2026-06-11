@@ -2,6 +2,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KuGou.Lite;
 using SimpleAudioPlayer;
+using SimpleAudioPlayer.Enums;
 using SimpleAudioPlayer.Handles;
 using System;
 using System.Collections.Generic;
@@ -580,42 +581,11 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
                     if (playbackSource.IsLocalFile)
                     {
                         var handle = await Task.Run(() => new CachedStreamHandle(File.OpenRead(playbackSource.Location)), cancellationToken).ConfigureAwait(false);
-                        cancellationToken.ThrowIfCancellationRequested();
-                        if (requestId != _playRequestId)
-                        {
-                            handle.Dispose();
-                            return;
-                        }
-
-                        try
-                        {
-                            await Task.Run(() => player.Load(handle), cancellationToken).ConfigureAwait(false);
-                        }
-                        catch
-                        {
-                            handle.Dispose();
-                            throw;
-                        }
+                        await LoadPlayerHandleAsync(player, handle, requestId, cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
-                        var handle = await HttpStreamHandle.CreateAsync(playbackSource.Location);
-                        cancellationToken.ThrowIfCancellationRequested();
-                        if (requestId != _playRequestId)
-                        {
-                            handle.Dispose();
-                            return;
-                        }
-
-                        try
-                        {
-                            await Task.Run(() => player.Load(handle), cancellationToken).ConfigureAwait(false);
-                        }
-                        catch
-                        {
-                            handle.Dispose();
-                            throw;
-                        }
+                        await LoadRemotePlaybackAsync(player, song, playbackSource, requestId, cancellationToken).ConfigureAwait(false);
                     }
 
                     var realDuration = player.GetDuration();
@@ -669,10 +639,6 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             StartProgressTimer();
             StartPlaybackHistory(song, playbackSource);
             PersistPlaybackState(force: true);
-            if (!playbackSource.IsLocalFile)
-            {
-                _ = AudioCacheService.Instance.CacheRemoteSourceAsync(song, playbackSource.Location, playbackSource.Quality);
-            }
         }
         catch (OperationCanceledException)
         {
@@ -1053,6 +1019,85 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         }
 
         return new PlaybackSource(source.Url, IsLocalFile: false, Quality: source.Quality);
+    }
+
+    private async Task LoadRemotePlaybackAsync(
+        AudioPlayer player,
+        KugouSong song,
+        PlaybackSource playbackSource,
+        int requestId,
+        CancellationToken cancellationToken)
+    {
+        var cachePath = AudioCacheService.Instance.GetProgressiveCacheTargetPath(song, playbackSource.Location, playbackSource.Quality);
+        if (!string.IsNullOrWhiteSpace(cachePath))
+        {
+            ProgressiveHttpStreamHandle? progressiveHandle = null;
+            try
+            {
+                progressiveHandle = await ProgressiveHttpStreamHandle
+                    .CreateAsync(playbackSource.Location, cachePath, overwrite: false, deletePartialOnDispose: true)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested && requestId == _playRequestId)
+            {
+                AudioCacheService.Instance.MarkProgressiveCacheFailed(song, cachePath, playbackSource.Quality, playbackSource.Location, ex);
+            }
+
+            if (progressiveHandle is not null)
+            {
+                RegisterProgressiveCacheEvents(progressiveHandle, song, playbackSource, cachePath);
+                await LoadPlayerHandleAsync(player, progressiveHandle, requestId, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+        }
+
+        var handle = await HttpStreamHandle.CreateAsync(playbackSource.Location).ConfigureAwait(false);
+        await LoadPlayerHandleAsync(player, handle, requestId, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task LoadPlayerHandleAsync(
+        AudioPlayer player,
+        IAudioCallbackHandler handle,
+        int requestId,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (requestId != _playRequestId)
+        {
+            handle.Dispose();
+            throw new OperationCanceledException();
+        }
+
+        try
+        {
+            await Task.Run(() => player.Load(handle), cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            handle.Dispose();
+            throw;
+        }
+    }
+
+    private static void RegisterProgressiveCacheEvents(
+        ProgressiveHttpStreamHandle handle,
+        KugouSong song,
+        PlaybackSource playbackSource,
+        string cachePath)
+    {
+        handle.DownloadStateChanged += (_, args) =>
+        {
+            if (args.State == ProgressiveDownloadState.Completed && !string.IsNullOrWhiteSpace(args.FinalFilePath))
+            {
+                AudioCacheService.Instance.MarkProgressiveCacheCompleted(song, args.FinalFilePath, playbackSource.Quality, playbackSource.Location);
+                return;
+            }
+
+            if (args.State == ProgressiveDownloadState.Failed && args.Error is not null)
+            {
+                AudioCacheService.Instance.MarkProgressiveCacheFailed(song, cachePath, playbackSource.Quality, playbackSource.Location, args.Error);
+            }
+        };
     }
 
     private void OnProgressTick(object? sender, EventArgs e)

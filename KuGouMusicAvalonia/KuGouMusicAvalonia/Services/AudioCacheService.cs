@@ -75,23 +75,6 @@ public sealed class AudioCacheService
         return null;
     }
 
-    public async Task CacheRemoteSourceAsync(KugouSong song, string url, string? quality, CancellationToken cancellationToken = default)
-    {
-        if (!MusicService.StreamWhileDownloading || !IsHttpUrl(url) || FindCachedFile(song) is not null)
-        {
-            return;
-        }
-
-        try
-        {
-            await DownloadCoreAsync(song, url, quality, cancellationToken, progress: null).ConfigureAwait(false);
-        }
-        catch
-        {
-            // 后台"边播边下"失败时静默忽略，错误状态已记录到 LocalMusicStore。
-        }
-    }
-
     /// <summary>
     /// 立即将远程歌曲下载到本地（不受"边播边下"开关限制）。返回本地文件路径，失败时抛出异常。
     /// </summary>
@@ -120,6 +103,43 @@ public sealed class AudioCacheService
         }
 
         return path;
+    }
+
+    public string? GetProgressiveCacheTargetPath(KugouSong song, string url, string? quality)
+    {
+        if (!MusicService.StreamWhileDownloading || !IsHttpUrl(url) || FindCachedFile(song) is not null)
+        {
+            return null;
+        }
+
+        var directory = MusicService.DownloadDirectory;
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return null;
+        }
+
+        Directory.CreateDirectory(directory);
+        return BuildTargetPath(directory, song, url, quality);
+    }
+
+    public void MarkProgressiveCacheCompleted(KugouSong song, string filePath, string? quality, string sourceUrl)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+        {
+            return;
+        }
+
+        LocalMusicStore.Instance.MarkDownloadCompleted(song, filePath, quality, sourceUrl);
+    }
+
+    public void MarkProgressiveCacheFailed(KugouSong song, string filePath, string? quality, string sourceUrl, Exception exception)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            return;
+        }
+
+        LocalMusicStore.Instance.MarkDownloadFailed(song, filePath, quality, sourceUrl, exception);
     }
 
     private async Task<string?> DownloadCoreAsync(
@@ -264,7 +284,9 @@ public sealed class AudioCacheService
         {
             var suffix = index <= 1 ? string.Empty : $" ({index})";
             var candidate = Path.Combine(directory, baseName + suffix + extension);
-            if (!File.Exists(candidate))
+            if (!File.Exists(candidate) &&
+                !File.Exists(candidate + ".download") &&
+                !File.Exists(candidate + ".part"))
             {
                 return candidate;
             }

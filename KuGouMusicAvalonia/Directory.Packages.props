@@ -14,7 +14,7 @@
     <PackageVersion Include="Avalonia.Android" Version="12.0.4" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageVersion Include="QRCoder" Version="1.6.0" />
-    <PackageVersion Include="SimpleAudioPlayer" Version="1.8.4" />
+    <PackageVersion Include="SimpleAudioPlayer" Version="2.0.0" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.15" />
     <PackageVersion Include="LuminaUI" Version="0.3.3" />
     <PackageVersion Include="LuminaUI.Diagnostics" Version="0.1.2" />
