@@ -11,10 +11,13 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
 {
     public NowPlayingViewModel()
     {
-        DesktopLyricsWindowService.Instance.StateChanged += (_, _) => 
+        FloatingLyricsService.Instance.StateChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(IsDesktopLyricsOpen));
+            OnPropertyChanged(nameof(IsDesktopLyricsSupported));
             OnPropertyChanged(nameof(IsDesktopLyricsLocked));
+            OnPropertyChanged(nameof(IsDesktopLyricsCompactMode));
+            OnPropertyChanged(nameof(ShowDesktopLyricsCompactModeButton));
         };
     }
     [ObservableProperty]
@@ -49,11 +52,16 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
 
     public bool IsLyricsModeVisible => IsWideLayout || IsCompactLyricsVisible;
 
-    public bool IsDesktopLyricsOpen => DesktopLyricsWindowService.Instance.IsOpen;
+    public bool IsDesktopLyricsOpen => FloatingLyricsService.Instance.IsOpen;
 
-    public bool IsDesktopLyricsSupported => DesktopLyricsWindowService.Instance.IsSupported;
+    public bool IsDesktopLyricsSupported => FloatingLyricsService.Instance.IsSupported;
 
-    public bool IsDesktopLyricsLocked => DesktopLyricsWindowService.Instance.IsLocked;
+    public bool IsDesktopLyricsLocked => FloatingLyricsService.Instance.IsLocked;
+
+    public bool IsDesktopLyricsCompactMode => FloatingLyricsService.Instance.IsCompactMode;
+
+    public bool ShowDesktopLyricsCompactModeButton =>
+        IsDesktopLyricsOpen && FloatingLyricsService.Instance.SupportsCompactMode;
 
     [RelayCommand]
     private void Close()
@@ -64,13 +72,19 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleDesktopLyrics()
     {
-        DesktopLyricsWindowService.Instance.Toggle();
+        FloatingLyricsService.Instance.Toggle();
     }
 
     [RelayCommand]
     private void ToggleDesktopLyricsLock()
     {
-        DesktopLyricsWindowService.Instance.IsLocked = !DesktopLyricsWindowService.Instance.IsLocked;
+        FloatingLyricsService.Instance.IsLocked = !FloatingLyricsService.Instance.IsLocked;
+    }
+
+    [RelayCommand]
+    private void ToggleDesktopLyricsCompactMode()
+    {
+        FloatingLyricsService.Instance.IsCompactMode = !FloatingLyricsService.Instance.IsCompactMode;
     }
 
     [RelayCommand]
