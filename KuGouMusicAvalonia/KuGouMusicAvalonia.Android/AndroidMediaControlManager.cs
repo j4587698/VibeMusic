@@ -1,5 +1,7 @@
 using Android.App;
+using Android;
 using Android.Content;
+using Android.Content.PM;
 using Android.Graphics;
 using Android.Media;
 using Android.Media.Session;
@@ -65,6 +67,11 @@ internal sealed class AndroidMediaControlManager : IDisposable
         _ = UpdateNowPlayingNotificationAsync();
     }
 
+    public void SyncNowPlayingNotification()
+    {
+        _ = UpdateNowPlayingNotificationAsync();
+    }
+
     public void HandleAction(string? action)
     {
         if (string.IsNullOrWhiteSpace(action))
@@ -118,6 +125,13 @@ internal sealed class AndroidMediaControlManager : IDisposable
                 return;
             }
 
+            if (!HasNotificationPermission())
+            {
+                _notificationManager.Cancel(NotificationId);
+                PlaybackNotificationService.RequestStop(_context);
+                return;
+            }
+
             var coverBitmap = await EnsureCoverBitmapAsync(player.CurrentCoverUrl).ConfigureAwait(false);
 
             UpdatePlaybackState(player);
@@ -141,12 +155,19 @@ internal sealed class AndroidMediaControlManager : IDisposable
         }
 
         var player = PlayerService.Instance;
-        if (!player.HasSong)
+        if (!player.HasSong || !HasNotificationPermission())
         {
             return null;
         }
 
         return BuildNotification(player, _cachedCoverBitmap);
+    }
+
+    private bool HasNotificationPermission()
+    {
+        return _context is not null
+            && (Build.VERSION.SdkInt < BuildVersionCodes.Tiramisu
+                || _context.CheckSelfPermission(Manifest.Permission.PostNotifications) == Permission.Granted);
     }
 
     private Notification BuildNotification(PlayerService player, Bitmap? coverBitmap)

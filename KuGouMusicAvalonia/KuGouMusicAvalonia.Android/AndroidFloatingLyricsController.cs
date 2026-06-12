@@ -153,10 +153,35 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         ApplyDisplayMode(updateLayout: false);
         UpdateTexts();
 
-        _windowManager.AddView(_rootView, _layoutParams);
+        if (!TryAddOverlayView())
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
         Subscribe();
         _isOpen = true;
         StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private bool TryAddOverlayView()
+    {
+        if (_rootView is null || _layoutParams is null || _windowManager is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            _windowManager.AddView(_rootView, _layoutParams);
+            return true;
+        }
+        catch (Java.Lang.RuntimeException)
+        {
+            ClearOverlayReferences();
+            _pendingOpenAfterPermission = false;
+            return false;
+        }
     }
 
     private void Close()
@@ -179,14 +204,19 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             }
         }
 
+        ClearOverlayReferences();
+        _isOpen = false;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ClearOverlayReferences()
+    {
         _rootView?.Dispose();
         _rootView = null;
         _layoutParams = null;
         _titleText = null;
         _currentLineText = null;
         _nextLineText = null;
-        _isOpen = false;
-        StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private LinearLayout CreateOverlayView(Context context)
@@ -248,7 +278,8 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
 
         if (updateLayout && _windowManager is not null && _rootView is not null && _layoutParams is not null)
         {
-            _windowManager.UpdateViewLayout(_rootView, _layoutParams);
+            ClampCurrentPosition();
+            UpdateOverlayLayout();
         }
     }
 
@@ -294,7 +325,7 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         }
 
         _layoutParams.Flags = GetBaseWindowFlags();
-        _windowManager.UpdateViewLayout(_rootView, _layoutParams);
+        UpdateOverlayLayout();
     }
 
     private void Subscribe()
@@ -440,9 +471,10 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         var location = new int[2];
         _rootView.GetLocationOnScreen(location);
         _layoutParams.Gravity = GravityFlags.Top | GravityFlags.Left;
-        _layoutParams.X = location[0];
-        _layoutParams.Y = location[1];
-        _windowManager.UpdateViewLayout(_rootView, _layoutParams);
+        var position = ClampOverlayPosition(location[0], location[1]);
+        _layoutParams.X = position.X;
+        _layoutParams.Y = position.Y;
+        UpdateOverlayLayout();
     }
 
     private void MoveOverlay(int x, int y)
@@ -452,9 +484,57 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             return;
         }
 
-        _layoutParams.X = x;
-        _layoutParams.Y = y;
-        _windowManager.UpdateViewLayout(_rootView, _layoutParams);
+        var position = ClampOverlayPosition(x, y);
+        _layoutParams.X = position.X;
+        _layoutParams.Y = position.Y;
+        UpdateOverlayLayout();
+    }
+
+    private void ClampCurrentPosition()
+    {
+        if (_layoutParams is null || (_layoutParams.Gravity & GravityFlags.Left) != GravityFlags.Left)
+        {
+            return;
+        }
+
+        var position = ClampOverlayPosition(_layoutParams.X, _layoutParams.Y);
+        _layoutParams.X = position.X;
+        _layoutParams.Y = position.Y;
+    }
+
+    private (int X, int Y) ClampOverlayPosition(int x, int y)
+    {
+        var displayMetrics = _context?.Resources?.DisplayMetrics ?? Android.App.Application.Context.Resources?.DisplayMetrics;
+        if (displayMetrics is null || _rootView is null)
+        {
+            return (x, y);
+        }
+
+        var viewWidth = Math.Max(_rootView.Width, _rootView.MeasuredWidth);
+        var viewHeight = Math.Max(_rootView.Height, _rootView.MeasuredHeight);
+        var maxX = viewWidth > 0 ? Math.Max(0, displayMetrics.WidthPixels - viewWidth) : displayMetrics.WidthPixels;
+        var maxY = viewHeight > 0 ? Math.Max(0, displayMetrics.HeightPixels - viewHeight) : displayMetrics.HeightPixels;
+
+        return (Math.Clamp(x, 0, maxX), Math.Clamp(y, 0, maxY));
+    }
+
+    private void UpdateOverlayLayout()
+    {
+        if (_rootView is null || _layoutParams is null || _windowManager is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _windowManager.UpdateViewLayout(_rootView, _layoutParams);
+        }
+        catch (Java.Lang.IllegalArgumentException)
+        {
+        }
+        catch (Java.Lang.RuntimeException)
+        {
+        }
     }
 
     private sealed class DragTouchListener(AndroidFloatingLyricsController owner) : Java.Lang.Object, View.IOnTouchListener
