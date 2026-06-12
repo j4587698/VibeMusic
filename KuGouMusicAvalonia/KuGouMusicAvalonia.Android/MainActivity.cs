@@ -16,6 +16,7 @@ namespace KuGouMusicAvalonia.Android;
     ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.UiMode)]
 public class MainActivity : AvaloniaMainActivity, IServiceConnection
 {
+    private const int NotificationPermissionRequestCode = 1001;
     private bool _isBound;
 
     protected override void OnCreate(Bundle? savedInstanceState)
@@ -33,6 +34,7 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
     {
         base.OnResume();
         AndroidFloatingLyricsController.Instance.RefreshOverlayPermission();
+        AndroidMediaControlManager.Instance.SyncNowPlayingNotification();
     }
 
     protected override void OnDestroy()
@@ -57,6 +59,18 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
         _isBound = false;
     }
 
+    public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+    {
+        base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == NotificationPermissionRequestCode
+            && grantResults.Length > 0
+            && grantResults[0] == Permission.Granted)
+        {
+            AndroidMediaControlManager.Instance.SyncNowPlayingNotification();
+        }
+    }
+
     private void EnsureNotificationPermission()
     {
         if (Build.VERSION.SdkInt < BuildVersionCodes.Tiramisu)
@@ -66,7 +80,7 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
 
         if (CheckSelfPermission(Manifest.Permission.PostNotifications) != Permission.Granted)
         {
-            RequestPermissions(new[] { Manifest.Permission.PostNotifications }, 1001);
+            RequestPermissions(new[] { Manifest.Permission.PostNotifications }, NotificationPermissionRequestCode);
         }
     }
 }
