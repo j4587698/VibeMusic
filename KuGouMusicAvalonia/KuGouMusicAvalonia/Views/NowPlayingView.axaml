@@ -66,7 +66,7 @@
       </Grid>
 
       <Grid Grid.Row="1" IsVisible="{Binding IsWideLayout}" ColumnDefinitions="Auto,*" ColumnSpacing="28">
-        <StackPanel Width="{Binding CoverSize}" VerticalAlignment="Center" HorizontalAlignment="Left" IsVisible="{Binding !IsTightLandscape}">
+        <StackPanel Width="{Binding CoverSize}" VerticalAlignment="Center" HorizontalAlignment="Left" Spacing="18" IsVisible="{Binding !IsTightLandscape}">
           <Grid Width="{Binding CoverSize}" Height="{Binding CoverSize}" HorizontalAlignment="Center">
             <Ellipse Fill="#C8000000" />
             <Ellipse Margin="22" Stroke="#222A2A2A" StrokeThickness="10" />
@@ -79,10 +79,21 @@
               <lumina:LuminaImage Source="{Binding Player.CurrentCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
             </Border>
           </Grid>
+
+          <StackPanel Spacing="7" HorizontalAlignment="Stretch">
+            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" IdleTextAlignment="Center" FontSize="30" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" IdleTextAlignment="Center" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
+            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentAlbumText}" IdleTextAlignment="Center" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+          </StackPanel>
         </StackPanel>
 
-        <Grid Grid.Column="1" VerticalAlignment="Stretch" ClipToBounds="True">
-          <Grid ClipToBounds="True">
+        <Grid Grid.Column="1" RowDefinitions="Auto,*" VerticalAlignment="Stretch" ClipToBounds="True">
+          <StackPanel Grid.Row="0" Spacing="2" Margin="0,0,0,4" IsVisible="{Binding IsTightLandscape}">
+            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" IdleTextAlignment="Center" FontSize="20" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+            <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" IdleTextAlignment="Center" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
+          </StackPanel>
+
+          <Grid Grid.Row="1" ClipToBounds="True">
             <ScrollViewer x:Name="WideLyricsScrollViewer" ClipToBounds="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ScrollChanged="OnLyricsScrollChanged">
               <ItemsControl x:Name="WideLyricsItemsControl" ItemsSource="{Binding Lyrics.Lines}">
                 <ItemsControl.ItemsPanel>
@@ -149,7 +160,7 @@
 
       <Grid Grid.Row="1" IsVisible="{Binding !IsWideLayout}">
         <Border IsVisible="{Binding IsCoverModeVisible, FallbackValue=False}" Background="Transparent" lumina:LuminaCommand.TappedCommand="{Binding ToggleCompactLyricsCommand}">
-          <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
+          <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" Spacing="18">
             <Grid Width="{Binding CoverSize}" Height="{Binding CoverSize}" HorizontalAlignment="Center">
               <Ellipse Fill="#C8000000" />
               <Ellipse Margin="22" Stroke="#222A2A2A" StrokeThickness="10" />
@@ -162,6 +173,12 @@
                 <lumina:LuminaImage Source="{Binding Player.CurrentCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
               </Border>
             </Grid>
+
+            <StackPanel Spacing="7" HorizontalAlignment="Stretch" IsVisible="{Binding !IsTightLandscape}">
+              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentTitle}" IdleTextAlignment="Center" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" IdleTextAlignment="Center" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
+              <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentAlbumText}" IdleTextAlignment="Center" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+            </StackPanel>
           </StackPanel>
         </Border>
 
