@@ -1,10 +1,11 @@
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 
 namespace KuGouMusicAvalonia.Android;
 
-[Service(Enabled = true, Exported = false)]
+[Service(Enabled = true, Exported = false, ForegroundServiceType = ForegroundService.TypeMediaPlayback)]
 internal sealed class PlaybackNotificationService : Service
 {
     public class PlaybackBinder : Binder
@@ -38,7 +39,18 @@ internal sealed class PlaybackNotificationService : Service
             return StartCommandResult.NotSticky;
         }
 
-        StartForeground(AndroidMediaControlManager.NotificationId, notification);
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+        {
+            StartForeground(
+                AndroidMediaControlManager.NotificationId,
+                notification,
+                ForegroundService.TypeMediaPlayback);
+        }
+        else
+        {
+            StartForeground(AndroidMediaControlManager.NotificationId, notification);
+        }
+
         return StartCommandResult.Sticky;
     }
 

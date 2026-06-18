@@ -2,6 +2,7 @@
 using Android.Runtime;
 using Avalonia;
 using Avalonia.Android;
+using KuGouMusicAvalonia;
 
 namespace KuGouMusicAvalonia.Android
 {

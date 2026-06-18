@@ -288,6 +288,68 @@
         </Grid>
       </Border>
 
+      <Border IsVisible="{Binding IsFloatingLyricsSupported}" CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
+        <StackPanel Spacing="16">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <StackPanel Spacing="4">
+              <TextBlock Text="悬浮歌词" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <TextBlock Text="{Binding FloatingLyricsStatusText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+            <icons:MaterialIcon Grid.Column="1" Kind="Subtitles" Width="28" Height="28" Foreground="{DynamicResource MusicPrimaryBrush}" VerticalAlignment="Center" />
+          </Grid>
+
+          <lumina:LuminaSettingsOption Kind="Custom" Header="显示悬浮歌词" Description="在桌面端打开独立置顶歌词窗；Android 端会请求系统悬浮窗权限" ShowChevron="False">
+            <lumina:LuminaSettingsOption.TrailingContent>
+              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Classes="SettingsSwitchText" Text="{Binding IsFloatingLyricsOpen, Converter={StaticResource BooleanToSwitchTextConverter}}" />
+                <ToggleSwitch Classes="SettingsSwitch" IsChecked="{Binding IsFloatingLyricsOpen, Mode=TwoWay}" />
+              </StackPanel>
+            </lumina:LuminaSettingsOption.TrailingContent>
+          </lumina:LuminaSettingsOption>
+
+          <lumina:LuminaSettingsOption Kind="Custom" Header="锁定浮窗" Description="锁定后鼠标/触摸穿透浮窗；需要解锁时回到这里关闭" ShowChevron="False">
+            <lumina:LuminaSettingsOption.TrailingContent>
+              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Classes="SettingsSwitchText" Text="{Binding IsFloatingLyricsLocked, Converter={StaticResource BooleanToSwitchTextConverter}}" />
+                <ToggleSwitch Classes="SettingsSwitch" IsChecked="{Binding IsFloatingLyricsLocked, Mode=TwoWay}" />
+              </StackPanel>
+            </lumina:LuminaSettingsOption.TrailingContent>
+          </lumina:LuminaSettingsOption>
+
+          <lumina:LuminaSettingsOption IsVisible="{Binding IsFloatingLyricsCompactModeSupported}" Kind="Custom" Header="紧凑模式" Description="只显示当前歌词，减少浮窗占用空间" ShowChevron="False">
+            <lumina:LuminaSettingsOption.TrailingContent>
+              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Classes="SettingsSwitchText" Text="{Binding IsFloatingLyricsCompactMode, Converter={StaticResource BooleanToSwitchTextConverter}}" />
+                <ToggleSwitch Classes="SettingsSwitch" IsChecked="{Binding IsFloatingLyricsCompactMode, Mode=TwoWay}" />
+              </StackPanel>
+            </lumina:LuminaSettingsOption.TrailingContent>
+          </lumina:LuminaSettingsOption>
+
+          <lumina:LuminaSettingsOption Kind="Custom" Header="主歌词字号" Description="{Binding FloatingLyricsFontSizeText, StringFormat='当前字号 {0}'}" ShowChevron="False">
+            <lumina:LuminaSettingsOption.TrailingContent>
+              <lumina:LuminaInputGroup Width="126" FillIndex="0">
+                <NumericUpDown Height="38"
+                               Minimum="{Binding FloatingLyricsMinFontSize}"
+                               Maximum="{Binding FloatingLyricsMaxFontSize}"
+                               Increment="1"
+                               FormatString="0"
+                               Value="{Binding FloatingLyricsFontSize, Mode=TwoWay}"
+                               FontSize="16"
+                               ShowButtonSpinner="False"
+                               TextAlignment="Center"
+                               HorizontalContentAlignment="Center"
+                               VerticalContentAlignment="Center" />
+                <Button Classes="Outline Icon" Width="38" Height="38" Command="{Binding ResetFloatingLyricsFontSizeCommand}" ToolTip.Tip="重置字号" lumina:LuminaButton.IconSize="20">
+                  <lumina:LuminaButton.Icon>
+                    <icons:MaterialIcon Kind="Refresh" Width="20" Height="20" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                  </lumina:LuminaButton.Icon>
+                </Button>
+              </lumina:LuminaInputGroup>
+            </lumina:LuminaSettingsOption.TrailingContent>
+          </lumina:LuminaSettingsOption>
+        </StackPanel>
+      </Border>
+
       <Border CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
         <StackPanel Spacing="16">
           <TextBlock Text="设置" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />

@@ -20,12 +20,21 @@ public sealed class DesktopLyricsWindowService : IFloatingLyricsController
 
     public bool IsOpen => _window is not null;
 
-    public bool SupportsCompactMode => false;
+    public bool SupportsCompactMode => true;
+
+    private bool _isCompactMode = MusicService.FloatingLyricsCompactMode;
 
     public bool IsCompactMode
     {
-        get => false;
-        set { }
+        get => _isCompactMode;
+        set
+        {
+            if (_isCompactMode != value)
+            {
+                _isCompactMode = value;
+                StateChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
     }
 
     public event EventHandler? StateChanged;
@@ -78,6 +87,11 @@ public sealed class DesktopLyricsWindowService : IFloatingLyricsController
         };
         _window = window;
         window.Show();
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplySettings()
+    {
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 }

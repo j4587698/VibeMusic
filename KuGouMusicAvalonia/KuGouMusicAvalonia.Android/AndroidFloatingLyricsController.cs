@@ -2,7 +2,6 @@ using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
-using Android.Net;
 using Android.OS;
 using Android.Provider;
 using Android.Text;
@@ -12,6 +11,7 @@ using Android.Runtime;
 using KuGouMusicAvalonia.Services;
 using System;
 using System.ComponentModel;
+using AndroidUri = global::Android.Net.Uri;
 
 namespace KuGouMusicAvalonia.Android;
 
@@ -132,6 +132,11 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         _mainHandler.Post(OpenOnMainThread);
     }
 
+    public void ApplySettings()
+    {
+        _mainHandler.Post(() => ApplyDisplayMode(updateLayout: true));
+    }
+
     public void Dispose()
     {
         CloseOnMainThread();
@@ -223,18 +228,18 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
     {
         var root = new LinearLayout(context)
         {
-            Orientation = Orientation.Vertical,
-            Gravity = GravityFlags.Center
+            Orientation = Orientation.Vertical
         };
+        root.SetGravity(GravityFlags.Center);
         root.SetPadding(Dp(18), Dp(10), Dp(18), Dp(10));
         root.SetMinimumWidth(Dp(280));
         root.Background = CreateBackground(isCompact: false);
         root.SetOnTouchListener(new DragTouchListener(this));
 
-        _titleText = CreateTextView(context, 12, Color.Argb(190, 255, 255, 255), maxLines: 1);
-        _currentLineText = CreateTextView(context, 22, Color.Rgb(255, 179, 173), maxLines: 2);
+        _titleText = CreateTextView(context, TitleTextSize(), Color.Argb(190, 255, 255, 255), maxLines: 1);
+        _currentLineText = CreateTextView(context, PrimaryTextSize(), Color.Rgb(255, 179, 173), maxLines: 2);
         _currentLineText.SetTypeface(Typeface.DefaultBold, TypefaceStyle.Bold);
-        _nextLineText = CreateTextView(context, 14, Color.Argb(205, 255, 255, 255), maxLines: 1);
+        _nextLineText = CreateTextView(context, NextLineTextSize(), Color.Argb(205, 255, 255, 255), maxLines: 1);
 
         root.AddView(_titleText, CreateChildLayoutParams());
         root.AddView(_currentLineText, CreateChildLayoutParams());
@@ -256,7 +261,9 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             _rootView.Background = CreateBackground(isCompact: true);
 
             _titleText.Visibility = ViewStates.Gone;
-            _currentLineText.TextSize = 15;
+            _titleText.TextSize = TitleTextSize();
+            _currentLineText.TextSize = CompactPrimaryTextSize();
+            _nextLineText.TextSize = NextLineTextSize();
             _currentLineText.SetMaxLines(1);
             _currentLineText.SetMaxWidth(GetOverlayMaxWidth(maxWidthDp: 420));
             _nextLineText.Visibility = ViewStates.Gone;
@@ -268,7 +275,9 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             _rootView.Background = CreateBackground(isCompact: false);
 
             _titleText.Visibility = ViewStates.Visible;
-            _currentLineText.TextSize = 22;
+            _titleText.TextSize = TitleTextSize();
+            _currentLineText.TextSize = PrimaryTextSize();
+            _nextLineText.TextSize = NextLineTextSize();
             _currentLineText.SetMaxLines(2);
             _currentLineText.SetMaxWidth(GetOverlayMaxWidth(maxWidthDp: 520));
             _nextLineText.SetMaxWidth(GetOverlayMaxWidth(maxWidthDp: 520));
@@ -407,7 +416,7 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             return;
         }
 
-        var packageUri = Android.Net.Uri.Parse($"package:{_context.PackageName}");
+        var packageUri = AndroidUri.Parse($"package:{_context.PackageName}");
         var intent = new Intent(Settings.ActionManageOverlayPermission, packageUri);
         intent.AddFlags(ActivityFlags.NewTask);
         (_activity ?? _context).StartActivity(intent);
@@ -432,8 +441,28 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         };
         textView.SetTextColor(color);
         textView.SetMaxLines(maxLines);
-        textView.IncludeFontPadding = false;
+        textView.SetIncludeFontPadding(false);
         return textView;
+    }
+
+    private static float PrimaryTextSize()
+    {
+        return (float)FloatingLyricsService.Instance.FontSize;
+    }
+
+    private static float CompactPrimaryTextSize()
+    {
+        return (float)Math.Max(12, FloatingLyricsService.Instance.FontSize * 15 / 22);
+    }
+
+    private static float TitleTextSize()
+    {
+        return (float)Math.Max(10, FloatingLyricsService.Instance.FontSize * 12 / 22);
+    }
+
+    private static float NextLineTextSize()
+    {
+        return (float)Math.Max(11, FloatingLyricsService.Instance.FontSize * 14 / 22);
     }
 
     private static LinearLayout.LayoutParams CreateChildLayoutParams()
@@ -445,13 +474,13 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
 
     private static int Dp(int value)
     {
-        var density = Android.App.Application.Context.Resources?.DisplayMetrics?.Density ?? 1f;
+        var density = global::Android.App.Application.Context.Resources?.DisplayMetrics?.Density ?? 1f;
         return (int)Math.Round(value * density);
     }
 
     private static int GetOverlayMaxWidth(int maxWidthDp)
     {
-        var displayMetrics = Android.App.Application.Context.Resources?.DisplayMetrics;
+        var displayMetrics = global::Android.App.Application.Context.Resources?.DisplayMetrics;
         if (displayMetrics is null)
         {
             return Dp(maxWidthDp);

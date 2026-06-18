@@ -61,9 +61,6 @@ public partial class MainViewModel : ViewModelBase
     public bool ShowMiniPlayer => Player.HasSong && ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
     public bool ShowCompactChrome => ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
 
-    public bool IsDesktopLyricsOpen => FloatingLyricsService.Instance.IsOpen;
-    public bool IsDesktopLyricsSupported => FloatingLyricsService.Instance.IsSupported;
-
     public MainViewModel()
     {
         _ = LyricsService.Instance;
@@ -74,11 +71,6 @@ public partial class MainViewModel : ViewModelBase
             {
                 OnPropertyChanged(nameof(ShowMiniPlayer));
             }
-        };
-        FloatingLyricsService.Instance.StateChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(IsDesktopLyricsOpen));
-            OnPropertyChanged(nameof(IsDesktopLyricsSupported));
         };
         ShellNavigationService.Instance.NavigationRequested += key => Navigate(key);
         ShellNavigationService.Instance.NowPlayingCloseRequested += CloseNowPlaying;
@@ -178,12 +170,6 @@ public partial class MainViewModel : ViewModelBase
     private void OpenLyrics()
     {
         ActiveNavigationKey = "NavLyrics";
-    }
-
-    [RelayCommand]
-    private void ToggleDesktopLyrics()
-    {
-        FloatingLyricsService.Instance.Toggle();
     }
 
     [RelayCommand]
