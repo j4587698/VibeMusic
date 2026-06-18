@@ -21,6 +21,7 @@ namespace KuGouMusicAvalonia.ViewModels;
 public partial class SettingsViewModel : ViewModelBase
 {
     private CancellationTokenSource? _qrPollingCts;
+    private decimal _lastValidFloatingLyricsFontSize = (decimal)FloatingLyricsService.DefaultFontSize;
 
     [ObservableProperty]
     private bool _isBusy;
@@ -117,6 +118,10 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _preferKrc;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FloatingLyricsFontSizeText))]
+    private decimal? _floatingLyricsFontSize = (decimal)FloatingLyricsService.DefaultFontSize;
+
     public IReadOnlyList<string> ThemeModeOptions { get; } = new[] { "跟随系统", "浅色", "深色" };
 
     public IReadOnlyList<string> PlaybackQualityOptions { get; } = new[] { "标准 128k", "高品 320k", "无损 FLAC", "高解析 High" };
@@ -138,6 +143,67 @@ public partial class SettingsViewModel : ViewModelBase
     public bool HasVipDetail => !string.IsNullOrWhiteSpace(VipDetail);
     public bool IsWideLayout => !IsCompactLayout;
     public bool IsDesktopSettingVisible => Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime;
+    public bool IsFloatingLyricsSupported => FloatingLyricsService.Instance.IsSupported;
+    public bool IsFloatingLyricsCompactModeSupported => FloatingLyricsService.Instance.SupportsCompactMode;
+    public string FloatingLyricsStatusText => IsFloatingLyricsSupported
+        ? (IsFloatingLyricsOpen ? "已开启" : "已关闭")
+        : "当前平台不支持";
+    public decimal FloatingLyricsMinFontSize => (decimal)FloatingLyricsService.MinFontSize;
+    public decimal FloatingLyricsMaxFontSize => (decimal)FloatingLyricsService.MaxFontSize;
+    public string FloatingLyricsFontSizeText => $"{FloatingLyricsFontSize ?? _lastValidFloatingLyricsFontSize:0}";
+
+    public bool IsFloatingLyricsOpen
+    {
+        get => FloatingLyricsService.Instance.IsOpen;
+        set
+        {
+            if (FloatingLyricsService.Instance.IsOpen == value)
+            {
+                return;
+            }
+
+            if (value)
+            {
+                FloatingLyricsService.Instance.ShowOrActivate();
+            }
+            else
+            {
+                FloatingLyricsService.Instance.Toggle();
+            }
+
+            NotifyFloatingLyricsStateChanged();
+        }
+    }
+
+    public bool IsFloatingLyricsLocked
+    {
+        get => FloatingLyricsService.Instance.IsLocked;
+        set
+        {
+            if (FloatingLyricsService.Instance.IsLocked == value)
+            {
+                return;
+            }
+
+            FloatingLyricsService.Instance.IsLocked = value;
+            NotifyFloatingLyricsStateChanged();
+        }
+    }
+
+    public bool IsFloatingLyricsCompactMode
+    {
+        get => FloatingLyricsService.Instance.IsCompactMode;
+        set
+        {
+            if (FloatingLyricsService.Instance.IsCompactMode == value)
+            {
+                return;
+            }
+
+            FloatingLyricsService.Instance.IsCompactMode = value;
+            NotifyFloatingLyricsStateChanged();
+        }
+    }
 
     public SettingsViewModel()
     {
@@ -148,6 +214,9 @@ public partial class SettingsViewModel : ViewModelBase
         DownloadDirectory = MusicService.DownloadDirectory;
         DefaultPlaybackQuality = MusicService.DefaultPlaybackQuality;
         PreferKrc = MusicService.PreferKrc;
+        _lastValidFloatingLyricsFontSize = (decimal)FloatingLyricsService.Instance.FontSize;
+        FloatingLyricsFontSize = _lastValidFloatingLyricsFontSize;
+        FloatingLyricsService.Instance.StateChanged += OnFloatingLyricsStateChanged;
         ApplyThemeMode(ThemeMode);
         RefreshLoginState();
         if (IsLoggedIn)
@@ -181,6 +250,25 @@ public partial class SettingsViewModel : ViewModelBase
     partial void OnPreferKrcChanged(bool value)
     {
         MusicService.PreferKrc = value;
+    }
+
+    partial void OnFloatingLyricsFontSizeChanged(decimal? value)
+    {
+        if (value is null || decimal.Truncate(value.Value) != value.Value)
+        {
+            RestoreFloatingLyricsFontSize();
+            return;
+        }
+
+        var normalized = Math.Clamp(value.Value, FloatingLyricsMinFontSize, FloatingLyricsMaxFontSize);
+        if (normalized != value.Value)
+        {
+            FloatingLyricsFontSize = normalized;
+            return;
+        }
+
+        _lastValidFloatingLyricsFontSize = normalized;
+        FloatingLyricsService.Instance.FontSize = (double)normalized;
     }
 
     partial void OnDownloadDirectoryChanged(string value)
@@ -651,6 +739,43 @@ public partial class SettingsViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsLoggedIn));
         OnPropertyChanged(nameof(IsLoggedInPanelVisible));
         OnPropertyChanged(nameof(IsLoginPromptVisible));
+    }
+
+    private void OnFloatingLyricsStateChanged(object? sender, EventArgs e)
+    {
+        var fontSize = (decimal)FloatingLyricsService.Instance.FontSize;
+        if (FloatingLyricsFontSize != fontSize)
+        {
+            _lastValidFloatingLyricsFontSize = fontSize;
+            FloatingLyricsFontSize = fontSize;
+        }
+
+        NotifyFloatingLyricsStateChanged();
+    }
+
+    private void NotifyFloatingLyricsStateChanged()
+    {
+        OnPropertyChanged(nameof(IsFloatingLyricsSupported));
+        OnPropertyChanged(nameof(IsFloatingLyricsOpen));
+        OnPropertyChanged(nameof(IsFloatingLyricsLocked));
+        OnPropertyChanged(nameof(IsFloatingLyricsCompactMode));
+        OnPropertyChanged(nameof(IsFloatingLyricsCompactModeSupported));
+        OnPropertyChanged(nameof(FloatingLyricsStatusText));
+        OnPropertyChanged(nameof(FloatingLyricsFontSizeText));
+    }
+
+    [RelayCommand]
+    private void ResetFloatingLyricsFontSize()
+    {
+        FloatingLyricsFontSize = (decimal)FloatingLyricsService.DefaultFontSize;
+    }
+
+    private void RestoreFloatingLyricsFontSize()
+    {
+        if (FloatingLyricsFontSize != _lastValidFloatingLyricsFontSize)
+        {
+            FloatingLyricsFontSize = _lastValidFloatingLyricsFontSize;
+        }
     }
 
     private static string CountText(int total, int fallback) => (total > 0 ? total : fallback).ToString();

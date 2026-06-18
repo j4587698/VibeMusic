@@ -9,17 +9,6 @@ namespace KuGouMusicAvalonia.ViewModels;
 
 public sealed partial class NowPlayingViewModel : ViewModelBase
 {
-    public NowPlayingViewModel()
-    {
-        FloatingLyricsService.Instance.StateChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(IsDesktopLyricsOpen));
-            OnPropertyChanged(nameof(IsDesktopLyricsSupported));
-            OnPropertyChanged(nameof(IsDesktopLyricsLocked));
-            OnPropertyChanged(nameof(IsDesktopLyricsCompactMode));
-            OnPropertyChanged(nameof(ShowDesktopLyricsCompactModeButton));
-        };
-    }
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCoverModeVisible))]
     [NotifyPropertyChangedFor(nameof(IsLyricsModeVisible))]
@@ -55,39 +44,10 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
 
     public bool IsLyricsModeVisible => IsWideLayout || IsCompactLyricsVisible;
 
-    public bool IsDesktopLyricsOpen => FloatingLyricsService.Instance.IsOpen;
-
-    public bool IsDesktopLyricsSupported => FloatingLyricsService.Instance.IsSupported;
-
-    public bool IsDesktopLyricsLocked => FloatingLyricsService.Instance.IsLocked;
-
-    public bool IsDesktopLyricsCompactMode => FloatingLyricsService.Instance.IsCompactMode;
-
-    public bool ShowDesktopLyricsCompactModeButton =>
-        IsDesktopLyricsOpen && FloatingLyricsService.Instance.SupportsCompactMode;
-
     [RelayCommand]
     private void Close()
     {
         ShellNavigationService.Instance.CloseNowPlaying();
-    }
-
-    [RelayCommand]
-    private void ToggleDesktopLyrics()
-    {
-        FloatingLyricsService.Instance.Toggle();
-    }
-
-    [RelayCommand]
-    private void ToggleDesktopLyricsLock()
-    {
-        FloatingLyricsService.Instance.IsLocked = !FloatingLyricsService.Instance.IsLocked;
-    }
-
-    [RelayCommand]
-    private void ToggleDesktopLyricsCompactMode()
-    {
-        FloatingLyricsService.Instance.IsCompactMode = !FloatingLyricsService.Instance.IsCompactMode;
     }
 
     [RelayCommand]

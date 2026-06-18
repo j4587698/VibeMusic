@@ -11,8 +11,6 @@ public sealed partial class LyricsViewModel : ViewModelBase
 
     public LyricsService Lyrics => LyricsService.Instance;
 
-    public bool IsDesktopLyricSupported => FloatingLyricsService.Instance.IsSupported;
-
     public string HeaderTitle => Player.CurrentTitle;
 
     public string HeaderArtist => Player.CurrentArtist;
@@ -20,7 +18,6 @@ public sealed partial class LyricsViewModel : ViewModelBase
     public LyricsViewModel()
     {
         Player.PropertyChanged += OnPlayerPropertyChanged;
-        FloatingLyricsService.Instance.StateChanged += (_, _) => OnPropertyChanged(nameof(IsDesktopLyricSupported));
     }
 
     [RelayCommand]
@@ -33,12 +30,6 @@ public sealed partial class LyricsViewModel : ViewModelBase
     private void OpenNowPlaying()
     {
         ShellNavigationService.Instance.Navigate("NavNowPlaying");
-    }
-
-    [RelayCommand]
-    private void OpenDesktopLyrics()
-    {
-        FloatingLyricsService.Instance.ShowOrActivate();
     }
 
     [RelayCommand]

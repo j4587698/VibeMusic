@@ -15,7 +15,7 @@
     <Border Background="{DynamicResource MusicHeroGradient}" Opacity="0.26" />
 
     <Grid x:Name="NowPlayingRoot" Margin="20,8,20,10" RowDefinitions="Auto,*,Auto,Auto,Auto" RowSpacing="6">
-      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12">
+      <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
         <Button Classes="Ghost Icon" Width="40" Height="40" Command="{Binding CloseCommand}" ToolTip.Tip="返回" lumina:LuminaButton.IconSize="26">
   <lumina:LuminaButton.Icon>
     <icons:MaterialIcon Kind="ChevronDown" Width="26" Height="26" Foreground="{DynamicResource MusicPrimaryBrush}" />
@@ -31,31 +31,7 @@
     <icons:MaterialIcon Kind="Download" Width="24" Height="24" Foreground="{DynamicResource MusicTextSoftBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
-        <Button Grid.Column="3" IsVisible="{Binding IsDesktopLyricsSupported}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsCommand}" ToolTip.Tip="悬浮歌词" lumina:LuminaButton.IconSize="24">
-  <lumina:LuminaButton.Icon>
-    <Grid>
-                <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsOpen}" Kind="SubtitlesOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />
-                <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsOpen}" Kind="Subtitles" Foreground="{DynamicResource MusicPrimaryBrush}" Width="24" Height="24" />
-              </Grid>
-  </lumina:LuminaButton.Icon>
-</Button>
-        <Button Grid.Column="4" IsVisible="{Binding ShowDesktopLyricsCompactModeButton}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsCompactModeCommand}" ToolTip.Tip="紧凑悬浮歌词" lumina:LuminaButton.IconSize="22">
-  <lumina:LuminaButton.Icon>
-    <Grid>
-                <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsCompactMode}" Kind="ArrowCollapseVertical" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
-                <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsCompactMode}" Kind="ArrowExpandVertical" Foreground="{DynamicResource MusicPrimaryBrush}" Width="22" Height="22" />
-              </Grid>
-  </lumina:LuminaButton.Icon>
-</Button>
-        <Button Grid.Column="5" IsVisible="{Binding IsDesktopLyricsOpen}" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleDesktopLyricsLockCommand}" ToolTip.Tip="锁定/解锁悬浮歌词" lumina:LuminaButton.IconSize="22">
-  <lumina:LuminaButton.Icon>
-    <Grid>
-                <icons:MaterialIcon IsVisible="{Binding !IsDesktopLyricsLocked}" Kind="LockOpenOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
-                <icons:MaterialIcon IsVisible="{Binding IsDesktopLyricsLocked}" Kind="Lock" Foreground="{DynamicResource MusicPrimaryBrush}" Width="22" Height="22" />
-              </Grid>
-  </lumina:LuminaButton.Icon>
-</Button>
-        <Button Grid.Column="6" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleFavoriteCommand}" ToolTip.Tip="{Binding Player.FavoriteStatusText}" lumina:LuminaButton.IconSize="24">
+        <Button Grid.Column="3" Classes="Ghost Icon" Width="40" Height="40" Command="{Binding ToggleFavoriteCommand}" ToolTip.Tip="{Binding Player.FavoriteStatusText}" lumina:LuminaButton.IconSize="24">
   <lumina:LuminaButton.Icon>
     <Grid>
                 <icons:MaterialIcon IsVisible="{Binding !Player.IsCurrentSongFavorite}" Kind="HeartOutline" Foreground="{DynamicResource MusicTextSoftBrush}" Width="24" Height="24" />

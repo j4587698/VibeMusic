@@ -132,6 +132,11 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         _mainHandler.Post(OpenOnMainThread);
     }
 
+    public void ApplySettings()
+    {
+        _mainHandler.Post(() => ApplyDisplayMode(updateLayout: true));
+    }
+
     public void Dispose()
     {
         CloseOnMainThread();
@@ -231,10 +236,10 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         root.Background = CreateBackground(isCompact: false);
         root.SetOnTouchListener(new DragTouchListener(this));
 
-        _titleText = CreateTextView(context, 12, Color.Argb(190, 255, 255, 255), maxLines: 1);
-        _currentLineText = CreateTextView(context, 22, Color.Rgb(255, 179, 173), maxLines: 2);
+        _titleText = CreateTextView(context, TitleTextSize(), Color.Argb(190, 255, 255, 255), maxLines: 1);
+        _currentLineText = CreateTextView(context, PrimaryTextSize(), Color.Rgb(255, 179, 173), maxLines: 2);
         _currentLineText.SetTypeface(Typeface.DefaultBold, TypefaceStyle.Bold);
-        _nextLineText = CreateTextView(context, 14, Color.Argb(205, 255, 255, 255), maxLines: 1);
+        _nextLineText = CreateTextView(context, NextLineTextSize(), Color.Argb(205, 255, 255, 255), maxLines: 1);
 
         root.AddView(_titleText, CreateChildLayoutParams());
         root.AddView(_currentLineText, CreateChildLayoutParams());
@@ -256,7 +261,9 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             _rootView.Background = CreateBackground(isCompact: true);
 
             _titleText.Visibility = ViewStates.Gone;
-            _currentLineText.TextSize = 15;
+            _titleText.TextSize = TitleTextSize();
+            _currentLineText.TextSize = CompactPrimaryTextSize();
+            _nextLineText.TextSize = NextLineTextSize();
             _currentLineText.SetMaxLines(1);
             _currentLineText.SetMaxWidth(GetOverlayMaxWidth(maxWidthDp: 420));
             _nextLineText.Visibility = ViewStates.Gone;
@@ -268,7 +275,9 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             _rootView.Background = CreateBackground(isCompact: false);
 
             _titleText.Visibility = ViewStates.Visible;
-            _currentLineText.TextSize = 22;
+            _titleText.TextSize = TitleTextSize();
+            _currentLineText.TextSize = PrimaryTextSize();
+            _nextLineText.TextSize = NextLineTextSize();
             _currentLineText.SetMaxLines(2);
             _currentLineText.SetMaxWidth(GetOverlayMaxWidth(maxWidthDp: 520));
             _nextLineText.SetMaxWidth(GetOverlayMaxWidth(maxWidthDp: 520));
@@ -434,6 +443,26 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         textView.SetMaxLines(maxLines);
         textView.SetIncludeFontPadding(false);
         return textView;
+    }
+
+    private static float PrimaryTextSize()
+    {
+        return (float)FloatingLyricsService.Instance.FontSize;
+    }
+
+    private static float CompactPrimaryTextSize()
+    {
+        return (float)Math.Max(12, FloatingLyricsService.Instance.FontSize * 15 / 22);
+    }
+
+    private static float TitleTextSize()
+    {
+        return (float)Math.Max(10, FloatingLyricsService.Instance.FontSize * 12 / 22);
+    }
+
+    private static float NextLineTextSize()
+    {
+        return (float)Math.Max(11, FloatingLyricsService.Instance.FontSize * 14 / 22);
     }
 
     private static LinearLayout.LayoutParams CreateChildLayoutParams()

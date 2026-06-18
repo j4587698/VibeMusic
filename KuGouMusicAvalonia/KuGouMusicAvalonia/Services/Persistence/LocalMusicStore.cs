@@ -732,4 +732,6 @@ internal static class LocalSettingKeys
     public const string DownloadDirectory = "settings.downloadDirectory";
     public const string DefaultPlaybackQuality = "settings.defaultPlaybackQuality";
     public const string PreferKrc = "settings.preferKrc";
+    public const string FloatingLyricsCompactMode = "settings.floatingLyrics.compactMode";
+    public const string FloatingLyricsFontSize = "settings.floatingLyrics.fontSize";
 }

@@ -1,6 +1,7 @@
 using KuGou.Lite;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -257,6 +258,31 @@ public static class MusicService
     {
         get => LocalMusicStore.Instance.GetBoolSetting(LocalSettingKeys.PreferKrc, true);
         set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.PreferKrc, value);
+    }
+
+    public static bool FloatingLyricsCompactMode
+    {
+        get => LocalMusicStore.Instance.GetBoolSetting(LocalSettingKeys.FloatingLyricsCompactMode, false);
+        set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.FloatingLyricsCompactMode, value);
+    }
+
+    public static double FloatingLyricsFontSize
+    {
+        get
+        {
+            var value = LocalMusicStore.Instance.GetStringSetting(
+                LocalSettingKeys.FloatingLyricsFontSize,
+                FloatingLyricsService.DefaultFontSize.ToString(CultureInfo.InvariantCulture));
+
+            return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
+                ? Math.Clamp(parsed, FloatingLyricsService.MinFontSize, FloatingLyricsService.MaxFontSize)
+                : FloatingLyricsService.DefaultFontSize;
+        }
+        set
+        {
+            var normalized = Math.Clamp(value, FloatingLyricsService.MinFontSize, FloatingLyricsService.MaxFontSize);
+            LocalMusicStore.Instance.SetSetting(LocalSettingKeys.FloatingLyricsFontSize, normalized.ToString(CultureInfo.InvariantCulture));
+        }
     }
 
     public static string DefaultPlaybackQualityValue => DefaultPlaybackQuality switch
