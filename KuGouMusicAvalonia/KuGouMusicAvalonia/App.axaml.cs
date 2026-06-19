@@ -19,6 +19,9 @@ namespace KuGouMusicAvalonia;
 public partial class App : Application
 {
     private MainViewModel? _mainViewModel;
+    private NativeMenu? _trayMenu;
+    private NativeMenuItem? _trayToggleFloatingLyricsMenuItem;
+    private NativeMenuItem? _trayToggleFloatingLyricsLockMenuItem;
 
     public override void Initialize()
     {
@@ -42,6 +45,7 @@ public partial class App : Application
             {
                 DataContext = _mainViewModel
             };
+            FloatingLyricsService.Instance.RestorePersistedState();
         }
         else if (ApplicationLifetime is IActivityApplicationLifetime singleViewFactoryApplicationLifetime)
         {
@@ -55,6 +59,9 @@ public partial class App : Application
             };
         }
 
+        TryResolveTrayMenu();
+        FloatingLyricsService.Instance.StateChanged += OnFloatingLyricsStateChanged;
+        UpdateTrayFloatingLyricsMenuItems();
         base.OnFrameworkInitializationCompleted();
     }
 
@@ -87,6 +94,59 @@ public partial class App : Application
             {
                 desktop.Shutdown();
             }
+        });
+    }
+
+    private void TrayMenu_NeedsUpdate(object? sender, EventArgs e)
+    {
+        _trayMenu = sender as NativeMenu;
+        ResolveTrayFloatingLyricsMenuItems();
+        UpdateTrayFloatingLyricsMenuItems();
+    }
+
+    private void ToggleFloatingLyrics_OnClick(object? sender, EventArgs e)
+    {
+        _trayToggleFloatingLyricsMenuItem = sender as NativeMenuItem ?? _trayToggleFloatingLyricsMenuItem;
+        Dispatcher.UIThread.Post(() =>
+        {
+            var floatingLyrics = FloatingLyricsService.Instance;
+            if (!floatingLyrics.IsSupported)
+            {
+                UpdateTrayFloatingLyricsMenuItems();
+                return;
+            }
+
+            if (MusicService.FloatingLyricsOpen || floatingLyrics.IsOpen)
+            {
+                MusicService.FloatingLyricsOpen = false;
+                if (floatingLyrics.IsOpen)
+                {
+                    floatingLyrics.Toggle();
+                }
+            }
+            else
+            {
+                floatingLyrics.ShowOrActivate();
+            }
+
+            UpdateTrayFloatingLyricsMenuItems();
+        });
+    }
+
+    private void ToggleFloatingLyricsLock_OnClick(object? sender, EventArgs e)
+    {
+        _trayToggleFloatingLyricsLockMenuItem = sender as NativeMenuItem ?? _trayToggleFloatingLyricsLockMenuItem;
+        Dispatcher.UIThread.Post(() =>
+        {
+            var floatingLyrics = FloatingLyricsService.Instance;
+            if (!floatingLyrics.IsSupported)
+            {
+                UpdateTrayFloatingLyricsMenuItems();
+                return;
+            }
+
+            floatingLyrics.IsLocked = !floatingLyrics.IsLocked;
+            UpdateTrayFloatingLyricsMenuItems();
         });
     }
 
@@ -150,5 +210,66 @@ public partial class App : Application
             // Window was already closed and cannot be re-shown.
             return false;
         }
+    }
+
+    private void OnFloatingLyricsStateChanged(object? sender, EventArgs e)
+    {
+        Dispatcher.UIThread.Post(UpdateTrayFloatingLyricsMenuItems);
+    }
+
+    private void UpdateTrayFloatingLyricsMenuItems()
+    {
+        TryResolveTrayMenu();
+        ResolveTrayFloatingLyricsMenuItems();
+
+        var floatingLyrics = FloatingLyricsService.Instance;
+        var isSupported = floatingLyrics.IsSupported;
+        var isOpen = MusicService.FloatingLyricsOpen || floatingLyrics.IsOpen;
+
+        if (_trayToggleFloatingLyricsMenuItem is not null)
+        {
+            _trayToggleFloatingLyricsMenuItem.Header = isOpen ? "关闭悬浮歌词" : "打开悬浮歌词";
+            _trayToggleFloatingLyricsMenuItem.IsEnabled = isSupported;
+        }
+
+        if (_trayToggleFloatingLyricsLockMenuItem is not null)
+        {
+            _trayToggleFloatingLyricsLockMenuItem.Header = floatingLyrics.IsLocked ? "解锁悬浮歌词" : "锁定悬浮歌词";
+            _trayToggleFloatingLyricsLockMenuItem.IsEnabled = isSupported && isOpen;
+        }
+    }
+
+    private void ResolveTrayFloatingLyricsMenuItems()
+    {
+        if (_trayMenu is null ||
+            (_trayToggleFloatingLyricsMenuItem is not null && _trayToggleFloatingLyricsLockMenuItem is not null))
+        {
+            return;
+        }
+
+        foreach (var item in _trayMenu.OfType<NativeMenuItem>())
+        {
+            switch (item.CommandParameter?.ToString())
+            {
+                case "ToggleFloatingLyrics":
+                    _trayToggleFloatingLyricsMenuItem = item;
+                    break;
+                case "ToggleFloatingLyricsLock":
+                    _trayToggleFloatingLyricsLockMenuItem = item;
+                    break;
+            }
+        }
+    }
+
+    private void TryResolveTrayMenu()
+    {
+        if (_trayMenu is not null)
+        {
+            return;
+        }
+
+        var trayIcons = TrayIcon.GetIcons(this);
+        var trayIcon = trayIcons?.FirstOrDefault();
+        _trayMenu = trayIcon?.Menu;
     }
 }

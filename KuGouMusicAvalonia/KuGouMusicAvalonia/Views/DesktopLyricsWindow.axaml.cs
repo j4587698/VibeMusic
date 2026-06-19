@@ -143,6 +143,7 @@ public partial class DesktopLyricsWindow : Window
 
     private void OnCloseWindow(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        KuGouMusicAvalonia.Services.MusicService.FloatingLyricsOpen = false;
         Close();
     }
 

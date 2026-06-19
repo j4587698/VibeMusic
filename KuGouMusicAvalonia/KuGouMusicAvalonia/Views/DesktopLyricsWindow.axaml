@@ -76,20 +76,21 @@
 
       <!-- Lyrics (Always visible) -->
       <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="6" Margin="0,4" IsHitTestVisible="False">
-        <Panel HorizontalAlignment="Center">
-          <TextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="{Binding CurrentLineFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="{Binding CurrentLineMaxLines}" IsVisible="{Binding Lyrics.ActiveLine.ShowPlain, FallbackValue=True}" />
+        <Grid HorizontalAlignment="Stretch">
+          <TextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="{Binding CurrentLineFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="{Binding CurrentLineMaxLines}" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding Lyrics.ActiveLine.ShowPlain, FallbackValue=True}" />
           <controls:KaraokeTextBlock
               Words="{Binding Lyrics.ActiveLine.Words}"
               PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
               FontSize="{Binding CurrentLineFontSize}"
               FontWeight="Black"
               TextAlignment="Center"
-              HorizontalAlignment="Center"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Center"
               SungBrush="{DynamicResource MusicPrimaryBrush}"
               UnsungBrush="#99FFFFFF"
               IsVisible="{Binding Lyrics.ActiveLine.ShowWords, FallbackValue=False}" />
-        </Panel>
-        <TextBlock Text="{Binding Lyrics.NextLineText}" FontSize="{Binding NextLineFontSize}" FontWeight="Bold" Foreground="#CCFFFFFF" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" IsVisible="{Binding ShowExpandedContent}" />
+        </Grid>
+        <TextBlock Text="{Binding Lyrics.NextLineText}" FontSize="{Binding NextLineFontSize}" FontWeight="Bold" Foreground="#CCFFFFFF" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" HorizontalAlignment="Stretch" IsVisible="{Binding ShowExpandedContent}" />
       </StackPanel>
 
       <!-- Progress Bar (Visible when hovered) -->

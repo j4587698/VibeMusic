@@ -57,6 +57,7 @@ internal sealed class LocalMusicStore
             StreamWhileDownloading = GetBoolSetting(LocalSettingKeys.StreamWhileDownloading, true),
             DownloadDirectory = PlatformStoragePaths.NormalizeDownloadDirectory(GetStringSetting(LocalSettingKeys.DownloadDirectory, PlatformStoragePaths.DefaultDownloadDirectory)),
             DefaultPlaybackQuality = GetStringSetting(LocalSettingKeys.DefaultPlaybackQuality, "无损 FLAC"),
+            PreferKrc = GetBoolSetting(LocalSettingKeys.PreferKrc, true),
             FavoriteSongKeys = LoadFavoriteKeys().ToList()
         };
     }
@@ -488,6 +489,7 @@ internal sealed class LocalMusicStore
         SetSetting(LocalSettingKeys.StreamWhileDownloading, legacyState.StreamWhileDownloading);
         SetSetting(LocalSettingKeys.DownloadDirectory, legacyState.DownloadDirectory);
         SetSetting(LocalSettingKeys.DefaultPlaybackQuality, legacyState.DefaultPlaybackQuality);
+        SetSetting(LocalSettingKeys.PreferKrc, legacyState.PreferKrc);
         SaveCookies(legacyState.Cookies);
 
         lock (_gate)
@@ -732,6 +734,8 @@ internal static class LocalSettingKeys
     public const string DownloadDirectory = "settings.downloadDirectory";
     public const string DefaultPlaybackQuality = "settings.defaultPlaybackQuality";
     public const string PreferKrc = "settings.preferKrc";
+    public const string FloatingLyricsOpen = "settings.floatingLyrics.open";
+    public const string FloatingLyricsLocked = "settings.floatingLyrics.locked";
     public const string FloatingLyricsCompactMode = "settings.floatingLyrics.compactMode";
     public const string FloatingLyricsFontSize = "settings.floatingLyrics.fontSize";
 }
