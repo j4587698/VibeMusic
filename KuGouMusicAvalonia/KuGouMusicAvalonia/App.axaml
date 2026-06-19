@@ -45,8 +45,12 @@
         <TrayIcons>
             <TrayIcon Icon="/Assets/vibe-logo.ico" ToolTipText="VibeMusic" Clicked="TrayIcon_OnClicked">
                 <TrayIcon.Menu>
-                    <NativeMenu>
+                    <NativeMenu NeedsUpdate="TrayMenu_NeedsUpdate" Opening="TrayMenu_NeedsUpdate">
                         <NativeMenuItem Header="显示主界面" Click="ShowMainWindow_OnClick" />
+                        <NativeMenuItemSeparator />
+                        <NativeMenuItem Header="打开悬浮歌词" CommandParameter="ToggleFloatingLyrics" Click="ToggleFloatingLyrics_OnClick" />
+                        <NativeMenuItem Header="锁定悬浮歌词" CommandParameter="ToggleFloatingLyricsLock" Click="ToggleFloatingLyricsLock_OnClick" />
+                        <NativeMenuItemSeparator />
                         <NativeMenuItem Header="退出" Click="ExitApp_OnClick" />
                     </NativeMenu>
                 </TrayIcon.Menu>

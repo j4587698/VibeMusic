@@ -31,14 +31,11 @@ public sealed class FloatingLyricsService : IFloatingLyricsController
     public static double MaxFontSize => OperatingSystem.IsAndroid() ? 32 : 56;
 
     private IFloatingLyricsController _controller = DesktopLyricsWindowService.Instance;
+    private bool _isRestoringPersistedState;
 
     private FloatingLyricsService()
     {
-        if (_controller.SupportsCompactMode)
-        {
-            _controller.IsCompactMode = MusicService.FloatingLyricsCompactMode;
-        }
-
+        ApplyPersistedControllerSettings();
         _controller.StateChanged += OnControllerStateChanged;
     }
 
@@ -49,7 +46,16 @@ public sealed class FloatingLyricsService : IFloatingLyricsController
     public bool IsLocked
     {
         get => _controller.IsLocked;
-        set => _controller.IsLocked = value;
+        set
+        {
+            if (_controller.IsLocked == value)
+            {
+                return;
+            }
+
+            MusicService.FloatingLyricsLocked = value;
+            _controller.IsLocked = value;
+        }
     }
 
     public bool SupportsCompactMode => _controller.SupportsCompactMode;
@@ -97,24 +103,64 @@ public sealed class FloatingLyricsService : IFloatingLyricsController
 
         _controller.StateChanged -= OnControllerStateChanged;
         _controller = controller;
-        if (_controller.SupportsCompactMode)
-        {
-            _controller.IsCompactMode = MusicService.FloatingLyricsCompactMode;
-        }
-
+        ApplyPersistedControllerSettings();
         _controller.ApplySettings();
         _controller.StateChanged += OnControllerStateChanged;
         StateChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void Toggle() => _controller.Toggle();
+    public void Toggle()
+    {
+        MusicService.FloatingLyricsOpen = !_controller.IsOpen;
+        _controller.Toggle();
+    }
 
-    public void ShowOrActivate() => _controller.ShowOrActivate();
+    public void ShowOrActivate()
+    {
+        MusicService.FloatingLyricsOpen = true;
+        _controller.ShowOrActivate();
+    }
 
     public void ApplySettings() => _controller.ApplySettings();
 
+    public void RestorePersistedState()
+    {
+        _isRestoringPersistedState = true;
+        try
+        {
+            ApplyPersistedControllerSettings();
+            _controller.ApplySettings();
+
+            if (MusicService.FloatingLyricsOpen && _controller.IsSupported && !_controller.IsOpen)
+            {
+                _controller.ShowOrActivate();
+            }
+        }
+        finally
+        {
+            _isRestoringPersistedState = false;
+        }
+
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ApplyPersistedControllerSettings()
+    {
+        if (_controller.SupportsCompactMode)
+        {
+            _controller.IsCompactMode = MusicService.FloatingLyricsCompactMode;
+        }
+
+        _controller.IsLocked = MusicService.FloatingLyricsLocked;
+    }
+
     private void OnControllerStateChanged(object? sender, EventArgs e)
     {
+        if (!_isRestoringPersistedState)
+        {
+            MusicService.FloatingLyricsLocked = _controller.IsLocked;
+        }
+
         StateChanged?.Invoke(this, e);
     }
 }

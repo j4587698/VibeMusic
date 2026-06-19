@@ -154,19 +154,21 @@ public partial class SettingsViewModel : ViewModelBase
 
     public bool IsFloatingLyricsOpen
     {
-        get => FloatingLyricsService.Instance.IsOpen;
+        get => MusicService.FloatingLyricsOpen;
         set
         {
-            if (FloatingLyricsService.Instance.IsOpen == value)
+            if (MusicService.FloatingLyricsOpen == value &&
+                (!value || FloatingLyricsService.Instance.IsOpen))
             {
                 return;
             }
 
+            MusicService.FloatingLyricsOpen = value;
             if (value)
             {
                 FloatingLyricsService.Instance.ShowOrActivate();
             }
-            else
+            else if (FloatingLyricsService.Instance.IsOpen)
             {
                 FloatingLyricsService.Instance.Toggle();
             }

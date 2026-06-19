@@ -5,6 +5,7 @@ using Android.OS;
 using Avalonia;
 using Avalonia.Android;
 using Android.Content;
+using KuGouMusicAvalonia.Services;
 
 namespace KuGouMusicAvalonia.Android;
 
@@ -25,6 +26,7 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
         EnsureNotificationPermission();
         AndroidMediaControlManager.Instance.Initialize(this);
         AndroidFloatingLyricsController.Instance.Initialize(this);
+        FloatingLyricsService.Instance.RestorePersistedState();
 
         var intent = new Intent(this, typeof(PlaybackNotificationService));
         BindService(intent, this, Bind.AutoCreate);

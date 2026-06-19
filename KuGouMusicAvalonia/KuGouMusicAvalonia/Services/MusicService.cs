@@ -260,6 +260,18 @@ public static class MusicService
         set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.PreferKrc, value);
     }
 
+    public static bool FloatingLyricsOpen
+    {
+        get => LocalMusicStore.Instance.GetBoolSetting(LocalSettingKeys.FloatingLyricsOpen, false);
+        set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.FloatingLyricsOpen, value);
+    }
+
+    public static bool FloatingLyricsLocked
+    {
+        get => LocalMusicStore.Instance.GetBoolSetting(LocalSettingKeys.FloatingLyricsLocked, false);
+        set => LocalMusicStore.Instance.SetSetting(LocalSettingKeys.FloatingLyricsLocked, value);
+    }
+
     public static bool FloatingLyricsCompactMode
     {
         get => LocalMusicStore.Instance.GetBoolSetting(LocalSettingKeys.FloatingLyricsCompactMode, false);

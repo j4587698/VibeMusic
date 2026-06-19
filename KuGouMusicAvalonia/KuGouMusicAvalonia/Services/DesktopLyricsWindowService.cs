@@ -82,7 +82,6 @@ public sealed class DesktopLyricsWindowService : IFloatingLyricsController
         window.Closed += (_, _) =>
         {
             _window = null;
-            _isLocked = false;
             StateChanged?.Invoke(this, EventArgs.Empty);
         };
         _window = window;
