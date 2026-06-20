@@ -45,39 +45,39 @@
 
     <ListBox.DataTemplates>
       <DataTemplate DataType="vm:ArtistsHeaderSection">
-        <StackPanel Margin="20,0,20,8" Spacing="22">
-          <Border CornerRadius="24" MinHeight="190" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True" BoxShadow="{DynamicResource MusicFloatingShadow}">
-            <Grid Margin="24" ColumnDefinitions="*,156" ColumnSpacing="24">
-              <StackPanel VerticalAlignment="Center" Spacing="10">
+        <StackPanel Margin="12,0,12,8" Spacing="18">
+          <Border CornerRadius="22" MinHeight="176" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True" BoxShadow="{DynamicResource MusicFloatingShadow}">
+            <Grid Margin="18" ColumnDefinitions="*,112" ColumnSpacing="16">
+              <StackPanel VerticalAlignment="Center" Spacing="8" MinWidth="0">
                 <TextBlock Text="ARTISTS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <TextBlock Text="歌手" FontSize="36" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+                <TextBlock Text="歌手" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" MaxLines="2" />
                 <TextBlock Text="按地区、性别和音乐人分类浏览，点开歌手后进入独立详情页。" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
-                <StackPanel Orientation="Horizontal" Spacing="22" Margin="0,8,0,0">
-                  <StackPanel>
+                <WrapPanel Margin="0,8,0,0">
+                  <StackPanel Margin="0,0,18,8">
                     <TextBlock Text="当前分类" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
                     <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).SelectedCategoryName}" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
                   </StackPanel>
-                  <StackPanel>
+                  <StackPanel Margin="0,0,18,8">
                     <TextBlock Text="已加载" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
                     <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).VisibleArtistCountText}" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
                   </StackPanel>
-                </StackPanel>
+                </WrapPanel>
               </StackPanel>
-              <Border Grid.Column="1" Width="140" Height="140" CornerRadius="70" Background="#33000000" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <icons:MaterialIcon Kind="AccountMusic" Width="86" Height="86" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              <Border Grid.Column="1" Width="104" Height="104" CornerRadius="52" Background="#33000000" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <icons:MaterialIcon Kind="AccountMusic" Width="62" Height="62" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
               </Border>
             </Grid>
           </Border>
 
-          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-            <StackPanel>
+          <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+            <StackPanel MinWidth="0">
               <TextBlock Text="歌手分类" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
               <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).StatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
               <ProgressBar IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).IsLoading}" Width="110" Height="4" VerticalAlignment="Center" />
-              <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).LoadArtistsCommand}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0">
-                <TextBlock Text="刷新" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+              <Button Classes="Ghost Icon" Command="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).LoadArtistsCommand}" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="0" ToolTip.Tip="刷新" lumina:LuminaButton.IconSize="21">
+                <icons:MaterialIcon Kind="Refresh" Width="21" Height="21" Foreground="{DynamicResource MusicTextBrush}" />
               </Button>
             </StackPanel>
           </Grid>
@@ -119,7 +119,7 @@
       </DataTemplate>
 
       <DataTemplate DataType="vm:ArtistCardRow">
-        <ItemsControl ItemsSource="{Binding Artists}" Margin="20,0,20,0">
+        <ItemsControl ItemsSource="{Binding Artists}" Margin="12,0,12,0">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
               <StackPanel Orientation="Horizontal" />
@@ -127,11 +127,11 @@
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate DataType="kugou:KugouArtist">
-              <lumina:LuminaCard Width="150" Height="208" Margin="0,0,10,12" Padding="10" Classes="Glass Interactive" CornerRadius="15" Cursor="Hand"
+              <lumina:LuminaCard Width="144" Height="202" Margin="0,0,10,12" Padding="9" Classes="Glass Interactive" CornerRadius="14" Cursor="Hand"
                                  lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).OpenArtistCommand}"
                                  lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                 <StackPanel Spacing="12" HorizontalAlignment="Stretch">
-                  <Border Width="108" Height="108" CornerRadius="54" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" HorizontalAlignment="Center">
+                  <Border Width="104" Height="104" CornerRadius="52" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" HorizontalAlignment="Center">
                     <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                   </Border>
                   <StackPanel Spacing="5">
@@ -147,7 +147,7 @@
       </DataTemplate>
 
       <DataTemplate DataType="vm:ArtistsFooterSection">
-        <StackPanel HorizontalAlignment="Center" Spacing="10" Margin="20,8,20,30">
+        <StackPanel HorizontalAlignment="Center" Spacing="10" Margin="12,8,12,30">
           <ProgressBar IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).IsLoadingMore}" Width="120" Height="4" />
           <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).LoadMoreCommand}" IsVisible="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).CanLoadMore}" Height="38" CornerRadius="19" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="18,0">
             <TextBlock Text="加载更多" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />

@@ -45,34 +45,28 @@
 
     <ListBox.DataTemplates>
       <DataTemplate DataType="vm:CloudHeaderSection">
-        <StackPanel Margin="20,0,20,18" Spacing="18">
+        <StackPanel Margin="12,0,12,16" Spacing="16">
           <Border Padding="4,14,4,6" Background="Transparent">
-            <Grid ColumnDefinitions="160,*" ColumnSpacing="24">
-              <Border Width="160" Height="160" CornerRadius="16" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True" BoxShadow="0 8 32 0 #33000000">
-                <icons:MaterialIcon Kind="Cloud" Width="64" Height="64" Foreground="{DynamicResource MusicTextMutedBrush}" />
+            <Grid ColumnDefinitions="112,*" ColumnSpacing="16">
+              <Border Width="112" Height="112" CornerRadius="16" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True" BoxShadow="0 8 32 0 #33000000">
+                <icons:MaterialIcon Kind="Cloud" Width="48" Height="48" Foreground="{DynamicResource MusicTextMutedBrush}" />
               </Border>
 
-              <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="16">
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="10" MinWidth="0">
                 <TextBlock Text="账号资产" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <TextBlock Text="云盘/收藏" FontSize="36" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
-                <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                <TextBlock Text="云盘/收藏" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" MaxLines="2" />
+                <WrapPanel>
                   <TextBlock Text="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).SongCountText}" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" />
-                  <TextBlock Text="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).StatusMessage}" FontSize="14" Foreground="{DynamicResource MusicTextMutedBrush}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                  <Button Classes="Primary" CornerRadius="20" Padding="20,10" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).PlayAllCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                      <icons:MaterialIcon Kind="Play" Width="20" Height="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                      <TextBlock Text="播放全部" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                    </StackPanel>
+                  <TextBlock Text="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).StatusMessage}" FontSize="14" Foreground="{DynamicResource MusicTextMutedBrush}" Margin="16,0,0,0" />
+                </WrapPanel>
+                <WrapPanel Margin="0,4,0,0">
+                  <Button Classes="Primary Icon" Width="38" Height="38" CornerRadius="19" Padding="0" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).PlayAllCommand}" ToolTip.Tip="播放全部" Margin="0,0,10,10" lumina:LuminaButton.IconSize="22">
+                    <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                   </Button>
-                  <Button Classes="Outline" CornerRadius="20" Padding="20,10" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).RefreshCommand}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                      <icons:MaterialIcon Kind="Sync" Width="20" Height="20" />
-                      <TextBlock Text="刷新" FontSize="14" FontWeight="Bold" />
-                    </StackPanel>
+                  <Button Classes="Outline Icon" Width="38" Height="38" CornerRadius="19" Padding="0" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).RefreshCommand}" ToolTip.Tip="刷新" Margin="0,0,10,10" lumina:LuminaButton.IconSize="22">
+                    <icons:MaterialIcon Kind="Sync" Width="22" Height="22" />
                   </Button>
-                </StackPanel>
+                </WrapPanel>
               </StackPanel>
             </Grid>
           </Border>
@@ -80,7 +74,7 @@
       </DataTemplate>
 
       <DataTemplate DataType="kugou:KugouSong">
-        <Border Margin="20,0,20,8" CornerRadius="14" Background="{DynamicResource MusicSurfaceBrush}" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="1" Padding="10">
+        <Border Margin="12,0,12,8" CornerRadius="14" Background="{DynamicResource MusicSurfaceBrush}" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="1" Padding="10">
           <Grid ColumnDefinitions="52,*,Auto" ColumnSpacing="12">
             <Border Width="46" Height="46" CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
               <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
@@ -106,8 +100,8 @@
               </StackPanel>
               <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
             </StackPanel>
-            <Button Grid.Column="2" Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
-              <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="24" Height="24">
+            <Button Grid.Column="2" Classes="Primary Icon" Width="36" Height="36" CornerRadius="18" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
+              <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="22" Height="22">
                 <icons:MaterialIcon.Kind>
                   <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
                     <Binding />
@@ -122,7 +116,7 @@
       </DataTemplate>
 
       <DataTemplate DataType="vm:CloudLoadMoreSection">
-        <StackPanel Margin="20,10,20,24" Spacing="10" HorizontalAlignment="Center">
+        <StackPanel Margin="12,10,12,24" Spacing="10" HorizontalAlignment="Center">
           <ProgressBar IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).IsLoadingMore}" Width="120" Height="4" />
           <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).LoadMoreCommand}" IsVisible="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).CanLoadMore}" Height="38" CornerRadius="19" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="18,0">
             <TextBlock Text="加载更多" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />

@@ -56,8 +56,8 @@ public partial class ArtistsView : UserControl
             return;
         }
 
-        var availableWidth = Math.Max(150, Bounds.Width - 40);
-        var cardsPerRow = Math.Max(1, (int)((availableWidth + 10) / 160));
+        var availableWidth = Math.Max(144, Bounds.Width - 24);
+        var cardsPerRow = Math.Max(1, (int)((availableWidth + 10) / 154));
         viewModel.SetCardsPerRow(cardsPerRow);
     }
 

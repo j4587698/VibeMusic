@@ -24,18 +24,15 @@
   </UserControl.Styles>
   <Grid>
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="20,0,20,30" Spacing="18">
-      <Border IsVisible="{Binding IsLoginPromptVisible}" CornerRadius="22" MinHeight="170" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
-        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="22" Margin="24">
-          <lumina:LuminaAvatar Content="K" Size="96" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontSize="34" FontWeight="Black" />
-          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="10">
-            <TextBlock Text="酷狗账号" FontSize="30" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+    <StackPanel Margin="12,0,12,30" Spacing="18">
+      <Border IsVisible="{Binding IsLoginPromptVisible}" CornerRadius="20" MinHeight="156" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" Margin="18">
+          <lumina:LuminaAvatar Content="K" Size="80" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontSize="28" FontWeight="Black" />
+          <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8" MinWidth="0">
+            <TextBlock Text="酷狗账号" FontSize="26" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" MaxLines="2" />
             <TextBlock Text="登录后同步头像、歌单、云盘和最近播放" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
-            <Button Classes="Primary" Command="{Binding StartLoginCommand}" Height="42" CornerRadius="21" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="18,0" HorizontalAlignment="Left" Background="{DynamicResource MusicPrimaryGradient}">
-              <StackPanel Orientation="Horizontal" Spacing="9">
-                <icons:MaterialIcon Kind="Login" Width="24" Height="24" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                <TextBlock Text="登录" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-              </StackPanel>
+            <Button Classes="Primary Icon" Command="{Binding StartLoginCommand}" Width="40" Height="40" CornerRadius="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="0" HorizontalAlignment="Left" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="登录" lumina:LuminaButton.IconSize="22">
+              <icons:MaterialIcon Kind="Login" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
             </Button>
           </StackPanel>
         </Grid>
@@ -286,20 +283,14 @@
             </lumina:LuminaSettingsOption.TrailingContent>
           </lumina:LuminaSettingsOption>
 
-          <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
-            <Button Grid.Column="1" Classes="Outline" Command="{Binding RefreshVipStateCommand}" Height="40" CornerRadius="20" Padding="16,0">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="Refresh" Width="24" Height="24" Foreground="{DynamicResource MusicTextBrush}" />
-                <TextBlock Text="刷新" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" />
-              </StackPanel>
+          <WrapPanel Grid.Row="2" HorizontalAlignment="Right">
+            <Button Classes="Outline Icon" Command="{Binding RefreshVipStateCommand}" Width="40" Height="40" CornerRadius="20" Padding="0" Margin="0,0,10,10" ToolTip.Tip="刷新" lumina:LuminaButton.IconSize="22">
+              <icons:MaterialIcon Kind="Refresh" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
             </Button>
-            <Button Grid.Column="2" Classes="Primary" Command="{Binding ClaimVipCommand}" Height="40" CornerRadius="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="16,0" Background="{DynamicResource MusicPrimaryGradient}">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="Crown" Width="24" Height="24" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                <TextBlock Text="获取" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontWeight="Black" />
-              </StackPanel>
+            <Button Classes="Primary Icon" Command="{Binding ClaimVipCommand}" Width="40" Height="40" CornerRadius="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="0" Margin="0,0,10,10" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="获取" lumina:LuminaButton.IconSize="22">
+              <icons:MaterialIcon Kind="Crown" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
             </Button>
-          </Grid>
+          </WrapPanel>
         </Grid>
       </Border>
 
