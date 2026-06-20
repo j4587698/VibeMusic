@@ -23,6 +23,11 @@ public partial class App : Application
     private NativeMenuItem? _trayToggleFloatingLyricsMenuItem;
     private NativeMenuItem? _trayToggleFloatingLyricsLockMenuItem;
 
+    public App()
+    {
+        AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+    }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -271,5 +276,10 @@ public partial class App : Application
         var trayIcons = TrayIcon.GetIcons(this);
         var trayIcon = trayIcons?.FirstOrDefault();
         _trayMenu = trayIcon?.Menu;
+    }
+
+    private static void OnProcessExit(object? sender, EventArgs e)
+    {
+        LocalMusicStore.Shutdown();
     }
 }

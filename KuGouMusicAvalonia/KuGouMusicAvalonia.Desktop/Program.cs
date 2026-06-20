@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using Avalonia;
 using LuminaUI.Diagnostics;
 
@@ -7,6 +8,8 @@ namespace KuGouMusicAvalonia.Desktop;
 
 sealed class Program
 {
+    private const string SingleInstanceMutexName = "KuGouMusicAvalonia.VibeMusic.SingleInstance";
+
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
@@ -18,14 +21,42 @@ sealed class Program
             WriteCrashLog(e.ExceptionObject?.ToString() ?? "Unknown exception");
         };
 
+        using var singleInstanceMutex = new Mutex(false, SingleInstanceMutexName);
+        var hasSingleInstance = false;
+
         try
         {
+            hasSingleInstance = TryAcquireSingleInstance(singleInstanceMutex);
+            if (!hasSingleInstance)
+            {
+                return;
+            }
+
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
         catch (Exception ex)
         {
             WriteCrashLog(ex.ToString());
             throw;
+        }
+        finally
+        {
+            if (hasSingleInstance)
+            {
+                singleInstanceMutex.ReleaseMutex();
+            }
+        }
+    }
+
+    private static bool TryAcquireSingleInstance(Mutex mutex)
+    {
+        try
+        {
+            return mutex.WaitOne(TimeSpan.Zero);
+        }
+        catch (AbandonedMutexException)
+        {
+            return true;
         }
     }
 
@@ -50,6 +81,7 @@ sealed class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
 #if DEBUG
+            .WithDeveloperTools()
             .UseLuminaUIDiagnostics(options => options.StartImmediately = false)
             .AfterSetup(_ => StartLuminaDiagnostics())
 #endif

@@ -45,7 +45,7 @@
 
     <ListBox.DataTemplates>
       <DataTemplate DataType="vm:ArtistsHeaderSection">
-        <StackPanel Margin="20,20,20,8" Spacing="22">
+        <StackPanel Margin="20,0,20,8" Spacing="22">
           <Border CornerRadius="24" MinHeight="190" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True" BoxShadow="{DynamicResource MusicFloatingShadow}">
             <Grid Margin="24" ColumnDefinitions="*,156" ColumnSpacing="24">
               <StackPanel VerticalAlignment="Center" Spacing="10">

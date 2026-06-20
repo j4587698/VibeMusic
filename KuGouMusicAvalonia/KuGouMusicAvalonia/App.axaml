@@ -19,6 +19,7 @@
             <converters:EmptyStringToNullConverter x:Key="EmptyStringToNullConverter" />
             <converters:DurationConverter x:Key="DurationConverter" />
             <converters:BooleanToSwitchTextConverter x:Key="BooleanToSwitchTextConverter" />
+            <converters:ShellPageContentPaddingConverter x:Key="ShellPageContentPaddingConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://KuGouMusicAvalonia/Styles/MusicTheme.axaml" />
             </ResourceDictionary.MergedDictionaries>

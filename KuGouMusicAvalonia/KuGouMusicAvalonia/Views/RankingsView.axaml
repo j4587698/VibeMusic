@@ -11,7 +11,7 @@
              x:DataType="vm:RankingsViewModel"
              x:CompileBindings="True">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="16,16,16,28" Spacing="18">
+    <StackPanel Margin="16,0,16,28" Spacing="18">
       <Border CornerRadius="18" MinHeight="158" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
         <Grid Margin="18" ColumnDefinitions="*,96" ColumnSpacing="14" VerticalAlignment="Center">
           <StackPanel Spacing="9" VerticalAlignment="Center">

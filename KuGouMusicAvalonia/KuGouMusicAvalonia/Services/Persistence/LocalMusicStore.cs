@@ -1,6 +1,7 @@
 using KuGou.Lite;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using TinyDb.Collections;
@@ -8,10 +9,11 @@ using TinyDb.Core;
 
 namespace KuGouMusicAvalonia.Services;
 
-internal sealed class LocalMusicStore
+internal sealed class LocalMusicStore : IDisposable
 {
     public static string DatabasePath { get; } = Path.Combine(AppStateStore.AppDirectory, "music.db");
-    public static LocalMusicStore Instance { get; } = new();
+    private static readonly Lazy<LocalMusicStore> InstanceHolder = new(() => new LocalMusicStore());
+    public static LocalMusicStore Instance => InstanceHolder.Value;
 
     private const string LegacyImportSettingKey = "migration.sessionJson.v1";
     private const string CurrentPlaybackStateId = "current";
@@ -22,29 +24,191 @@ internal sealed class LocalMusicStore
     private const string FailedDownloadStatus = "Failed";
 
     private readonly object _gate = new();
-    private readonly TinyDbEngine _database;
-    private readonly ITinyCollection<AppSettingRecord> _settings;
-    private readonly ITinyCollection<CookieRecord> _cookies;
-    private readonly ITinyCollection<LocalSongRecord> _songs;
-    private readonly ITinyCollection<FavoriteSongRecord> _favorites;
-    private readonly ITinyCollection<DownloadRecord> _downloads;
-    private readonly ITinyCollection<PlaybackStateRecord> _playbackStates;
-    private readonly ITinyCollection<PlaybackQueueItemRecord> _queueItems;
-    private readonly ITinyCollection<PlaybackHistoryRecord> _history;
+    private TinyDbEngine? _database;
+    private ITinyCollection<AppSettingRecord> _settings = null!;
+    private ITinyCollection<CookieRecord> _cookies = null!;
+    private ITinyCollection<LocalSongRecord> _songs = null!;
+    private ITinyCollection<FavoriteSongRecord> _favorites = null!;
+    private ITinyCollection<DownloadRecord> _downloads = null!;
+    private ITinyCollection<PlaybackStateRecord> _playbackStates = null!;
+    private ITinyCollection<PlaybackQueueItemRecord> _queueItems = null!;
+    private ITinyCollection<PlaybackHistoryRecord> _history = null!;
+    private bool _disposed;
 
     private LocalMusicStore()
     {
         Directory.CreateDirectory(AppStateStore.AppDirectory);
-        _database = new TinyDbEngine(DatabasePath, new TinyDbOptions { EnableJournaling = true });
-        _settings = _database.GetCollection<AppSettingRecord>();
-        _cookies = _database.GetCollection<CookieRecord>();
-        _songs = _database.GetCollection<LocalSongRecord>();
-        _favorites = _database.GetCollection<FavoriteSongRecord>();
-        _downloads = _database.GetCollection<DownloadRecord>();
-        _playbackStates = _database.GetCollection<PlaybackStateRecord>();
-        _queueItems = _database.GetCollection<PlaybackQueueItemRecord>();
-        _history = _database.GetCollection<PlaybackHistoryRecord>();
-        MigrateLegacyAppStateIfNeeded();
+        try
+        {
+            OpenDatabase();
+            MigrateLegacyAppStateIfNeeded();
+        }
+        catch (Exception ex) when (IsRecoverableDatabaseException(ex))
+        {
+            try
+            {
+                DisposeDatabase();
+            }
+            catch
+            {
+                // Best effort: recovery continues by moving the broken store away.
+            }
+
+            BackupCorruptDatabase(ex);
+            OpenDatabase();
+            MigrateLegacyAppStateIfNeeded();
+        }
+    }
+
+    public static void Shutdown()
+    {
+        try
+        {
+            if (InstanceHolder.IsValueCreated)
+            {
+                InstanceHolder.Value.Dispose();
+            }
+        }
+        catch
+        {
+            // Shutdown must not mask the original application exit path.
+        }
+    }
+
+    public void Dispose()
+    {
+        lock (_gate)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+            DisposeDatabase();
+        }
+
+        GC.SuppressFinalize(this);
+    }
+
+    private void OpenDatabase()
+    {
+        var database = new TinyDbEngine(DatabasePath, new TinyDbOptions { EnableJournaling = true });
+        _database = database;
+        _settings = database.GetCollection<AppSettingRecord>();
+        _cookies = database.GetCollection<CookieRecord>();
+        _songs = database.GetCollection<LocalSongRecord>();
+        _favorites = database.GetCollection<FavoriteSongRecord>();
+        _downloads = database.GetCollection<DownloadRecord>();
+        _playbackStates = database.GetCollection<PlaybackStateRecord>();
+        _queueItems = database.GetCollection<PlaybackQueueItemRecord>();
+        _history = database.GetCollection<PlaybackHistoryRecord>();
+    }
+
+    private void DisposeDatabase()
+    {
+        _database?.Dispose();
+        _database = null;
+    }
+
+    private static bool IsRecoverableDatabaseException(Exception exception)
+    {
+        return EnumerateExceptions(exception).Any(item =>
+            item is InvalidDataException ||
+            item.Message.Contains("Failed to load metadata", StringComparison.OrdinalIgnoreCase) ||
+            item.Message.Contains("Failed to deserialize document", StringComparison.OrdinalIgnoreCase) ||
+            item.Message.Contains("Invalid document size", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static IEnumerable<Exception> EnumerateExceptions(Exception exception)
+    {
+        if (exception is AggregateException aggregateException)
+        {
+            foreach (var inner in aggregateException.Flatten().InnerExceptions)
+            {
+                foreach (var item in EnumerateExceptions(inner))
+                {
+                    yield return item;
+                }
+            }
+
+            yield break;
+        }
+
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            yield return current;
+        }
+    }
+
+    private static void BackupCorruptDatabase(Exception exception)
+    {
+        Directory.CreateDirectory(AppStateStore.AppDirectory);
+        var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
+
+        foreach (var path in GetDatabaseFilePaths())
+        {
+            if (!File.Exists(path))
+            {
+                continue;
+            }
+
+            File.Move(path, GetUniqueBackupPath(path, timestamp));
+        }
+
+        var logPath = GetUniqueFilePath(Path.Combine(AppStateStore.AppDirectory, $"music.corrupt-{timestamp}.log"));
+        File.WriteAllText(logPath, exception.ToString());
+    }
+
+    private static IEnumerable<string> GetDatabaseFilePaths()
+    {
+        yield return DatabasePath;
+
+        var directory = Path.GetDirectoryName(DatabasePath);
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            yield break;
+        }
+
+        var fileName = Path.GetFileNameWithoutExtension(DatabasePath);
+        var extension = Path.GetExtension(DatabasePath);
+        yield return Path.Combine(directory, $"{fileName}-wal{extension}");
+    }
+
+    private static string GetUniqueBackupPath(string sourcePath, string timestamp)
+    {
+        var directory = Path.GetDirectoryName(sourcePath) ?? AppStateStore.AppDirectory;
+        var fileName = Path.GetFileNameWithoutExtension(sourcePath);
+        var extension = Path.GetExtension(sourcePath);
+        var candidate = Path.Combine(directory, $"{fileName}.corrupt-{timestamp}{extension}");
+
+        for (var index = 1; File.Exists(candidate); index++)
+        {
+            candidate = Path.Combine(directory, $"{fileName}.corrupt-{timestamp}-{index}{extension}");
+        }
+
+        return candidate;
+    }
+
+    private static string GetUniqueFilePath(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return path;
+        }
+
+        var directory = Path.GetDirectoryName(path) ?? AppStateStore.AppDirectory;
+        var fileName = Path.GetFileNameWithoutExtension(path);
+        var extension = Path.GetExtension(path);
+
+        for (var index = 1;; index++)
+        {
+            var candidate = Path.Combine(directory, $"{fileName}-{index}{extension}");
+            if (!File.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
     }
 
     public MusicAppState LoadAppState()

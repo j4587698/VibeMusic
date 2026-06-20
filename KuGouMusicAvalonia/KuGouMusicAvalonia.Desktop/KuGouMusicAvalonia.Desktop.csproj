@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" />
     <PackageReference Include="LuminaUI.Diagnostics" />
   </ItemGroup>
 
