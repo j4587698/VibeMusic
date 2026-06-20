@@ -47,9 +47,9 @@
 
     <ListBox.DataTemplates>
       <DataTemplate DataType="vm:SearchHeaderSection">
-        <StackPanel Margin="20,0,20,18" Spacing="22">
+        <StackPanel Margin="12,0,12,16" Spacing="18">
           <StackPanel Spacing="10">
-            <TextBlock Text="搜索" FontSize="34" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+            <TextBlock Text="搜索" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
               <TextBox Classes="Pill Search MusicPillInput MusicSearchBox"
                        Text="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).Keyword}"
@@ -61,16 +61,16 @@
                   </Grid>
                 </TextBox.InnerLeftContent>
               </TextBox>
-              <Button Grid.Column="1" Classes="Primary" Height="48" CornerRadius="24" Padding="20,0" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchCommand}" Background="{DynamicResource MusicPrimaryGradient}">
-                <TextBlock Text="搜索" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontWeight="Black" />
+              <Button Grid.Column="1" Classes="Primary Icon" Width="44" Height="44" CornerRadius="22" Padding="0" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchCommand}" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="搜索" lumina:LuminaButton.IconSize="23">
+                <icons:MaterialIcon Kind="Magnify" Width="23" Height="23" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
               </Button>
             </Grid>
 
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <Button Classes="Ghost" Content="单曲" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Song}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" />
-              <Button Classes="Ghost" Content="歌单" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Playlist}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" />
-              <Button Classes="Ghost" Content="歌手" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Artist}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" />
-            </StackPanel>
+            <WrapPanel>
+              <Button Classes="Ghost" Content="单曲" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Song}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" Margin="0,0,8,8" />
+              <Button Classes="Ghost" Content="歌单" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Playlist}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" Margin="0,0,8,8" />
+              <Button Classes="Ghost" Content="歌手" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Artist}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" Margin="0,0,8,8" />
+            </WrapPanel>
           </StackPanel>
 
           <StackPanel Spacing="12">
@@ -94,11 +94,22 @@
           <StackPanel Spacing="12" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchHistories.Count}">
             <Grid ColumnDefinitions="*,Auto">
               <TextBlock Text="搜索历史" FontSize="18" FontWeight="Black" Foreground="{DynamicResource MusicTextSoftBrush}" VerticalAlignment="Center" />
-              <Button Grid.Column="1" Classes="Ghost Icon" Width="32" Height="32" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).ClearHistoryCommand}" ToolTip.Tip="清空历史记录" lumina:LuminaButton.IconSize="18">
-  <lumina:LuminaButton.Icon>
-    <icons:MaterialIcon Kind="DeleteOutline" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" />
-  </lumina:LuminaButton.Icon>
-</Button>
+              <lumina:LuminaPopConfirm Grid.Column="1"
+                                        Classes="Danger"
+                                        PopupHeader="清空搜索历史？"
+                                        PopupContent="此操作会删除当前搜索历史记录，无法撤销。"
+                                        ConfirmText="清空"
+                                        CancelText="取消"
+                                        ConfirmCommand="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).ClearHistoryCommand}">
+                <lumina:LuminaPopConfirm.Icon>
+                  <icons:MaterialIcon Kind="DeleteAlert" Width="20" Height="20" />
+                </lumina:LuminaPopConfirm.Icon>
+                <Button Classes="Ghost Icon" Width="32" Height="32" ToolTip.Tip="清空历史记录" lumina:LuminaButton.IconSize="18">
+                  <lumina:LuminaButton.Icon>
+                    <icons:MaterialIcon Kind="DeleteOutline" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                  </lumina:LuminaButton.Icon>
+                </Button>
+              </lumina:LuminaPopConfirm>
             </Grid>
             <ItemsControl ItemsSource="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SearchHistories}">
               <ItemsControl.ItemsPanel>
@@ -116,17 +127,17 @@
             </ItemsControl>
           </StackPanel>
 
-          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-            <StackPanel>
+          <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+            <StackPanel MinWidth="0">
               <TextBlock Text="搜索结果" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
               <TextBlock Text="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).StatusMessage}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
             </StackPanel>
-            <WrapPanel Grid.Column="1" VerticalAlignment="Center">
-              <Button Classes="Primary" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlayAllCommand}" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).IsSongSearch}" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" Padding="14,0" Margin="0,0,8,8">
-                <TextBlock Text="播放全部" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+            <WrapPanel Grid.Row="1">
+              <Button Classes="Primary Icon" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlayAllCommand}" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).IsSongSearch}" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" Padding="0" Margin="0,0,8,8" ToolTip.Tip="播放全部" lumina:LuminaButton.IconSize="21">
+                <icons:MaterialIcon Kind="Play" Width="21" Height="21" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
               </Button>
-              <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).QueueAllCommand}" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).IsSongSearch}" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,0" Margin="0,0,8,8">
-                <TextBlock Text="加入队列" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+              <Button Classes="Ghost Icon" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).QueueAllCommand}" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).IsSongSearch}" Width="36" Height="36" CornerRadius="18" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="0" Margin="0,0,8,8" ToolTip.Tip="加入队列" lumina:LuminaButton.IconSize="21">
+                <icons:MaterialIcon Kind="PlaylistMusic" Width="21" Height="21" Foreground="{DynamicResource MusicTextBrush}" />
               </Button>
               <ProgressBar IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).IsLoading}" Width="100" Height="4" VerticalAlignment="Center" Margin="0,0,8,8" />
             </WrapPanel>
@@ -135,7 +146,7 @@
       </DataTemplate>
 
       <DataTemplate DataType="kugou:KugouSong">
-        <Border Padding="12" Margin="20,0,20,8" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource LuminaBorderDefaultBrush}" Background="{DynamicResource MusicGlassBrush}">
+        <Border Padding="10" Margin="12,0,12,8" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource LuminaBorderDefaultBrush}" Background="{DynamicResource MusicGlassBrush}">
           <Grid ColumnDefinitions="50,*,Auto" ColumnSpacing="12">
             <Border Width="44" Height="44" CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
               <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
@@ -164,13 +175,13 @@
             </StackPanel>
 
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-              <Button Classes="Ghost Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="下载到本地" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).DownloadSongCommand}" CommandParameter="{Binding}" lumina:LuminaButton.IconSize="22">
+              <Button Classes="Ghost Icon" Width="36" Height="36" CornerRadius="18" ToolTip.Tip="下载到本地" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).DownloadSongCommand}" CommandParameter="{Binding}" lumina:LuminaButton.IconSize="20">
   <lumina:LuminaButton.Icon>
-    <icons:MaterialIcon Kind="Download" Foreground="{DynamicResource MusicTextSoftBrush}" Width="22" Height="22" />
+    <icons:MaterialIcon Kind="Download" Foreground="{DynamicResource MusicTextSoftBrush}" Width="20" Height="20" />
   </lumina:LuminaButton.Icon>
 </Button>
-              <Button Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
-                <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="24" Height="24">
+              <Button Classes="Primary Icon" Width="36" Height="36" CornerRadius="18" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
+                <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="22" Height="22">
                   <icons:MaterialIcon.Kind>
                     <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
                       <Binding />
@@ -186,7 +197,7 @@
       </DataTemplate>
 
       <DataTemplate DataType="kugou:KugouPlaylist">
-        <Button Classes="Ghost" Margin="20,0,20,8" Height="64" CornerRadius="14" Padding="12" Background="{DynamicResource MusicGlassBrush}" HorizontalContentAlignment="Left"
+        <Button Classes="Ghost" Margin="12,0,12,8" Height="60" CornerRadius="14" Padding="10" Background="{DynamicResource MusicGlassBrush}" HorizontalContentAlignment="Left"
                 Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).OpenPlaylistCommand}" CommandParameter="{Binding}">
           <Grid ColumnDefinitions="40,*" ColumnSpacing="12" HorizontalAlignment="Stretch">
             <Border Width="40" Height="40" CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
@@ -201,7 +212,7 @@
       </DataTemplate>
 
       <DataTemplate DataType="kugou:KugouArtist">
-        <Button Classes="Ghost" Margin="20,0,20,8" Height="64" CornerRadius="32" Padding="12" Background="{DynamicResource MusicGlassBrush}" HorizontalContentAlignment="Left"
+        <Button Classes="Ghost" Margin="12,0,12,8" Height="60" CornerRadius="30" Padding="10" Background="{DynamicResource MusicGlassBrush}" HorizontalContentAlignment="Left"
                 Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).OpenArtistCommand}" CommandParameter="{Binding}">
           <Grid ColumnDefinitions="40,*" ColumnSpacing="12" HorizontalAlignment="Stretch">
             <Border Width="40" Height="40" CornerRadius="20" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">

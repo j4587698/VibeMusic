@@ -11,21 +11,18 @@
              x:DataType="vm:RankingsViewModel"
              x:CompileBindings="True">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="16,0,16,28" Spacing="18">
-      <Border CornerRadius="18" MinHeight="158" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
-        <Grid Margin="18" ColumnDefinitions="*,96" ColumnSpacing="14" VerticalAlignment="Center">
+    <StackPanel Margin="12,0,12,28" Spacing="18">
+      <Border CornerRadius="18" MinHeight="150" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
+        <Grid Margin="16" ColumnDefinitions="*,88" ColumnSpacing="12" VerticalAlignment="Center">
           <StackPanel Spacing="9" VerticalAlignment="Center">
             <TextBlock Text="KUGOU CHARTS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-            <TextBlock Text="酷狗排行榜" FontSize="28" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
+            <TextBlock Text="酷狗排行榜" FontSize="26" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
             <TextBlock Text="{Binding StatusMessage}" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
-            <Button Classes="Primary" Command="{Binding LoadRankingsCommand}" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Left" Padding="18,0">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="Refresh" Width="23" Height="23" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                <TextBlock Text="刷新榜单" FontWeight="Bold" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-              </StackPanel>
+            <Button Classes="Primary Icon" Command="{Binding LoadRankingsCommand}" Width="38" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Left" Padding="0" ToolTip.Tip="刷新榜单" lumina:LuminaButton.IconSize="22">
+              <icons:MaterialIcon Kind="Refresh" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
             </Button>
           </StackPanel>
-          <Border Grid.Column="1" Width="92" Height="92" CornerRadius="18" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
+          <Border Grid.Column="1" Width="84" Height="84" CornerRadius="16" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
             <lumina:LuminaImage Source="{Binding SelectedRankPic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
           </Border>
         </Grid>
