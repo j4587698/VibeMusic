@@ -12,6 +12,16 @@
              x:Class="KuGouMusicAvalonia.Views.SettingsView"
              x:DataType="vm:SettingsViewModel"
              x:CompileBindings="True">
+  <UserControl.Styles>
+    <Style Selector="Border.UserLibraryMetric">
+      <Setter Property="Background" Value="{DynamicResource MusicGlassLightBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource MusicOutlineBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.UserLibraryMetric:pointerover">
+      <Setter Property="Background" Value="{DynamicResource MusicSurfaceHighBrush}" />
+    </Style>
+  </UserControl.Styles>
   <Grid>
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <StackPanel Margin="20,0,20,30" Spacing="18">
@@ -110,18 +120,38 @@
           </Grid>
 
           <UniformGrid Columns="3">
-            <StackPanel Spacing="3" Margin="0,0,10,0">
-              <TextBlock Text="{Binding UserPlaylistCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
-              <TextBlock Text="歌单" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
-            </StackPanel>
-            <StackPanel Spacing="3" Margin="0,0,10,0">
-              <TextBlock Text="{Binding UserCollectionCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
-              <TextBlock Text="云盘/收藏" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
-            </StackPanel>
-            <StackPanel Spacing="3">
-              <TextBlock Text="{Binding UserHistoryCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
-              <TextBlock Text="最近播放" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
-            </StackPanel>
+            <Border Classes="UserLibraryMetric"
+                    Margin="0,0,10,0"
+                    Padding="12,10"
+                    CornerRadius="12"
+                    Cursor="Hand"
+                    lumina:LuminaCommand.TappedCommand="{Binding OpenUserPlaylistsCommand}">
+              <StackPanel Spacing="3" MinWidth="0">
+                <TextBlock Text="{Binding UserPlaylistCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <TextBlock Text="歌单" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              </StackPanel>
+            </Border>
+            <Border Classes="UserLibraryMetric"
+                    Margin="0,0,10,0"
+                    Padding="12,10"
+                    CornerRadius="12"
+                    Cursor="Hand"
+                    lumina:LuminaCommand.TappedCommand="{Binding OpenUserCloudCommand}">
+              <StackPanel Spacing="3" MinWidth="0">
+                <TextBlock Text="{Binding UserCollectionCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <TextBlock Text="云盘/收藏" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              </StackPanel>
+            </Border>
+            <Border Classes="UserLibraryMetric"
+                    Padding="12,10"
+                    CornerRadius="12"
+                    Cursor="Hand"
+                    lumina:LuminaCommand.TappedCommand="{Binding OpenUserHistoryCommand}">
+              <StackPanel Spacing="3" MinWidth="0">
+                <TextBlock Text="{Binding UserHistoryCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <TextBlock Text="最近播放" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              </StackPanel>
+            </Border>
           </UniformGrid>
 
           <StackPanel IsVisible="{Binding IsCompactLayout}" Spacing="10">
@@ -147,107 +177,92 @@
           </StackPanel>
 
           <Grid IsVisible="{Binding IsWideLayout}" ColumnDefinitions="*,*,*" ColumnSpacing="14">
-            <StackPanel Spacing="8">
-              <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="我的歌单" FontSize="16" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" VerticalAlignment="Center" />
-                <Button Grid.Column="1" Classes="Ghost" Content="全部" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" Padding="8,4" Command="{Binding ViewAllPlaylistsCommand}" />
-              </Grid>
-              <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding UserPlaylists}">
-                  <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <VirtualizingStackPanel />
-                    </ItemsPanelTemplate>
-                  </ItemsControl.ItemsPanel>
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:UserLibraryItem">
-                      <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
-                        <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
-                          <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
-                        </Border>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                          <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-                          <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
-                        </StackPanel>
-                      </Grid>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </ScrollViewer>
-            </StackPanel>
+            <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding UserPlaylists}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:UserLibraryItem">
+                    <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
+                      <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                        <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                      </Border>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
+                        <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                        <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
+                      </StackPanel>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
 
-            <StackPanel Grid.Column="1" Spacing="8">
-              <TextBlock Text="云盘/收藏" FontSize="16" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-              <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding UserCollections}">
-                  <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <VirtualizingStackPanel />
-                    </ItemsPanelTemplate>
-                  </ItemsControl.ItemsPanel>
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:UserLibraryItem">
-                      <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
-                        <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
-                          <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
-                        </Border>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                          <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-                          <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
-                        </StackPanel>
-                      </Grid>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </ScrollViewer>
-            </StackPanel>
+            <ScrollViewer Grid.Column="1" MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding UserCollections}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:UserLibraryItem">
+                    <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
+                      <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                        <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                      </Border>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
+                        <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                        <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
+                      </StackPanel>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
 
-            <StackPanel Grid.Column="2" Spacing="8">
-              <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="最近播放" FontSize="16" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" VerticalAlignment="Center" />
-                <Button Grid.Column="1" Classes="Ghost" Content="全部" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" Padding="8,4" Command="{Binding ViewAllHistoryCommand}" />
-              </Grid>
-              <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding UserHistory}">
-                  <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <VirtualizingStackPanel />
-                    </ItemsPanelTemplate>
-                  </ItemsControl.ItemsPanel>
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="kugou:KugouSong">
-                      <Grid ColumnDefinitions="42,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
-                        <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
-                          <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
-                        </Border>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                          <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" HorizontalAlignment="Stretch">
-                            <lumina:LuminaAutoScrollText.Foreground>
-                              <MultiBinding Converter="{x:Static converters:SongPlayingBrushConverter.Instance}">
-                                <Binding />
-                                <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
-                              </MultiBinding>
-                            </lumina:LuminaAutoScrollText.Foreground>
-                          </lumina:LuminaAutoScrollText>
-                          <lumina:LuminaAutoScrollText Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
-                        </StackPanel>
-                        <Button Grid.Column="2" Classes="Primary Icon" Width="32" Height="32" CornerRadius="16" ToolTip.Tip="播放/暂停" Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).PlayHistorySongCommand}" CommandParameter="{Binding}" Background="{DynamicResource MusicPrimaryGradient}">
-                          <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="20" Height="20">
-                            <icons:MaterialIcon.Kind>
-                              <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
-                                <Binding />
-                                <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
-                                <Binding Path="IsPlaying" Source="{x:Static services:PlayerService.Instance}" />
-                              </MultiBinding>
-                            </icons:MaterialIcon.Kind>
-                          </icons:MaterialIcon>
-                        </Button>
-                      </Grid>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </ScrollViewer>
-            </StackPanel>
+            <ScrollViewer Grid.Column="2" MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+              <ItemsControl ItemsSource="{Binding UserHistory}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="kugou:KugouSong">
+                    <Grid ColumnDefinitions="42,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
+                      <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                        <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                      </Border>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
+                        <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" HorizontalAlignment="Stretch">
+                          <lumina:LuminaAutoScrollText.Foreground>
+                            <MultiBinding Converter="{x:Static converters:SongPlayingBrushConverter.Instance}">
+                              <Binding />
+                              <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                            </MultiBinding>
+                          </lumina:LuminaAutoScrollText.Foreground>
+                        </lumina:LuminaAutoScrollText>
+                        <lumina:LuminaAutoScrollText Text="{Binding Artist}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
+                      </StackPanel>
+                      <Button Grid.Column="2" Classes="Primary Icon" Width="32" Height="32" CornerRadius="16" ToolTip.Tip="播放/暂停" Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).PlayHistorySongCommand}" CommandParameter="{Binding}" Background="{DynamicResource MusicPrimaryGradient}">
+                        <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="20" Height="20">
+                          <icons:MaterialIcon.Kind>
+                            <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
+                              <Binding />
+                              <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                              <Binding Path="IsPlaying" Source="{x:Static services:PlayerService.Instance}" />
+                            </MultiBinding>
+                          </icons:MaterialIcon.Kind>
+                        </icons:MaterialIcon>
+                      </Button>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
           </Grid>
         </StackPanel>
       </Border>

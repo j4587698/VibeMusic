@@ -10,6 +10,7 @@ public partial class MainViewModel : ViewModelBase
 {
     private readonly DiscoverViewModel _discoverViewModel = new();
     private readonly PlaylistsViewModel _playlistsViewModel = new();
+    private readonly CloudViewModel _cloudViewModel = new();
     private readonly ArtistsViewModel _artistsViewModel = new();
     private readonly RankingsViewModel _rankingsViewModel = new();
     private readonly HistoryViewModel _historyViewModel = new();
@@ -110,6 +111,7 @@ public partial class MainViewModel : ViewModelBase
         {
             "NavDiscover" => _discoverViewModel,
             "NavPlaylists" => _playlistsViewModel,
+            "NavCloud" => RefreshCloudPage(),
             "NavArtists" => _artistsViewModel,
             "NavRankings" => _rankingsViewModel,
             "NavHistory" => _historyViewModel,
@@ -119,6 +121,12 @@ public partial class MainViewModel : ViewModelBase
             "NavLyrics" => _lyricsViewModel,
             _ => _discoverViewModel
         };
+    }
+
+    private object RefreshCloudPage()
+    {
+        _cloudViewModel.RefreshCommand.Execute(null);
+        return _cloudViewModel;
     }
 
     [RelayCommand]

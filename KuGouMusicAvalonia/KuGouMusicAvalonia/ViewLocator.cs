@@ -21,6 +21,7 @@ public class ViewLocator : IDataTemplate
             MainViewModel => new Views.MainView(),
             DiscoverViewModel => new Views.DiscoverView(),
             PlaylistsViewModel => new Views.PlaylistsView(),
+            CloudViewModel => new Views.CloudView(),
             ArtistsViewModel => new Views.ArtistsView(),
             PlaylistDetailViewModel => new Views.PlaylistDetailView(),
             RankingsViewModel => new Views.RankingsView(),

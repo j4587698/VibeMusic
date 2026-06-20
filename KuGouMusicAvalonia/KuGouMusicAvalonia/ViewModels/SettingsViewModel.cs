@@ -691,7 +691,6 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         RefreshLocalHistory();
-
         RebuildUserLibraryPreview();
     }
 
@@ -831,6 +830,7 @@ public partial class SettingsViewModel : ViewModelBase
         var png = new PngByteQRCode(data).GetGraphic(8);
         return new Bitmap(new MemoryStream(png));
     }
+
     [RelayCommand]
     private async Task PlayHistorySongAsync(KugouSong song)
     {
@@ -845,15 +845,21 @@ public partial class SettingsViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ViewAllHistory()
+    private void OpenUserHistory()
     {
         ShellNavigationService.Instance.Navigate("NavHistory");
     }
 
     [RelayCommand]
-    private void ViewAllPlaylists()
+    private void OpenUserPlaylists()
     {
         ShellNavigationService.Instance.Navigate("NavPlaylists");
+    }
+
+    [RelayCommand]
+    private void OpenUserCloud()
+    {
+        ShellNavigationService.Instance.Navigate("NavCloud");
     }
 
     public void RefreshLocalHistory()

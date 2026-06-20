@@ -1,0 +1,134 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:services="using:KuGouMusicAvalonia.Services"
+             xmlns:converters="using:KuGouMusicAvalonia.Converters"
+             xmlns:controls="using:KuGouMusicAvalonia.Controls"
+             xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="KuGouMusicAvalonia.Views.CloudView"
+             x:DataType="vm:CloudViewModel">
+  <ListBox ItemsSource="{Binding PageItems}"
+           Background="Transparent"
+           BorderThickness="0"
+           Padding="0"
+           Focusable="False"
+           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+           ScrollViewer.VerticalScrollBarVisibility="Auto">
+    <ListBox.ItemsPanel>
+      <ItemsPanelTemplate>
+        <VirtualizingStackPanel />
+      </ItemsPanelTemplate>
+    </ListBox.ItemsPanel>
+    <ListBox.Styles>
+      <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </ControlTemplate>
+        </Setter>
+      </Style>
+    </ListBox.Styles>
+
+    <ListBox.DataTemplates>
+      <DataTemplate DataType="vm:CloudHeaderSection">
+        <StackPanel Margin="20,0,20,18" Spacing="18">
+          <Border Padding="4,14,4,6" Background="Transparent">
+            <Grid ColumnDefinitions="160,*" ColumnSpacing="24">
+              <Border Width="160" Height="160" CornerRadius="16" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True" BoxShadow="0 8 32 0 #33000000">
+                <icons:MaterialIcon Kind="Cloud" Width="64" Height="64" Foreground="{DynamicResource MusicTextMutedBrush}" />
+              </Border>
+
+              <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Spacing="16">
+                <TextBlock Text="账号资产" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <TextBlock Text="云盘/收藏" FontSize="36" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).SongCountText}" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                  <TextBlock Text="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).StatusMessage}" FontSize="14" Foreground="{DynamicResource MusicTextMutedBrush}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                  <Button Classes="Primary" CornerRadius="20" Padding="20,10" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).PlayAllCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <icons:MaterialIcon Kind="Play" Width="20" Height="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                      <TextBlock Text="播放全部" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                    </StackPanel>
+                  </Button>
+                  <Button Classes="Outline" CornerRadius="20" Padding="20,10" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).RefreshCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                      <icons:MaterialIcon Kind="Sync" Width="20" Height="20" />
+                      <TextBlock Text="刷新" FontSize="14" FontWeight="Bold" />
+                    </StackPanel>
+                  </Button>
+                </StackPanel>
+              </StackPanel>
+            </Grid>
+          </Border>
+        </StackPanel>
+      </DataTemplate>
+
+      <DataTemplate DataType="kugou:KugouSong">
+        <Border Margin="20,0,20,8" CornerRadius="14" Background="{DynamicResource MusicSurfaceBrush}" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="1" Padding="10">
+          <Grid ColumnDefinitions="52,*,Auto" ColumnSpacing="12">
+            <Border Width="46" Height="46" CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+              <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <controls:PlayingIndicator VerticalAlignment="Center">
+                  <controls:PlayingIndicator.IsVisible>
+                    <MultiBinding Converter="{x:Static converters:SongEqualityConverter.Instance}">
+                      <Binding />
+                      <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                    </MultiBinding>
+                  </controls:PlayingIndicator.IsVisible>
+                </controls:PlayingIndicator>
+                <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontWeight="Black" HorizontalAlignment="Stretch">
+                  <lumina:LuminaAutoScrollText.Foreground>
+                    <MultiBinding Converter="{x:Static converters:SongPlayingBrushConverter.Instance}">
+                      <Binding />
+                      <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                    </MultiBinding>
+                  </lumina:LuminaAutoScrollText.Foreground>
+                </lumina:LuminaAutoScrollText>
+              </StackPanel>
+              <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+            </StackPanel>
+            <Button Grid.Column="2" Classes="Primary Icon" Width="40" Height="40" CornerRadius="20" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
+              <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="24" Height="24">
+                <icons:MaterialIcon.Kind>
+                  <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
+                    <Binding />
+                    <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                    <Binding Path="IsPlaying" Source="{x:Static services:PlayerService.Instance}" />
+                  </MultiBinding>
+                </icons:MaterialIcon.Kind>
+              </icons:MaterialIcon>
+            </Button>
+          </Grid>
+        </Border>
+      </DataTemplate>
+
+      <DataTemplate DataType="vm:CloudLoadMoreSection">
+        <StackPanel Margin="20,10,20,24" Spacing="10" HorizontalAlignment="Center">
+          <ProgressBar IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).IsLoadingMore}" Width="120" Height="4" />
+          <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).LoadMoreCommand}" IsVisible="{Binding $parent[UserControl].((vm:CloudViewModel)DataContext).CanLoadMore}" Height="38" CornerRadius="19" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="18,0">
+            <TextBlock Text="加载更多" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" />
+          </Button>
+        </StackPanel>
+      </DataTemplate>
+    </ListBox.DataTemplates>
+  </ListBox>
+</UserControl>
