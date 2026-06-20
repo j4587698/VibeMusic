@@ -47,7 +47,7 @@
 
     <ListBox.DataTemplates>
       <DataTemplate DataType="vm:SearchHeaderSection">
-        <StackPanel Margin="20,20,20,18" Spacing="22">
+        <StackPanel Margin="20,0,20,18" Spacing="22">
           <StackPanel Spacing="10">
             <TextBlock Text="搜索" FontSize="34" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">

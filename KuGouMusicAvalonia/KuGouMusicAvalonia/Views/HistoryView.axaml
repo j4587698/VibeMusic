@@ -45,7 +45,7 @@
 
     <ListBox.DataTemplates>
       <DataTemplate DataType="vm:HistoryHeaderSection">
-        <StackPanel Margin="20,18,20,18" Spacing="18">
+        <StackPanel Margin="20,0,20,18" Spacing="18">
           <Border Padding="4,14,4,6" Background="Transparent">
             <Grid ColumnDefinitions="160,*" ColumnSpacing="24">
               <!-- Cover -->

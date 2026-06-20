@@ -14,7 +14,7 @@
              x:CompileBindings="True">
   <Grid>
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="20,20,20,30" Spacing="18">
+    <StackPanel Margin="20,0,20,30" Spacing="18">
       <Border IsVisible="{Binding IsLoginPromptVisible}" CornerRadius="22" MinHeight="170" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="22" Margin="24">
           <lumina:LuminaAvatar Content="K" Size="96" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontSize="34" FontWeight="Black" />

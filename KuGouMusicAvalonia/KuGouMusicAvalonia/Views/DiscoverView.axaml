@@ -11,7 +11,7 @@
              x:DataType="vm:DiscoverViewModel"
              x:CompileBindings="True">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="20,20,20,30" Spacing="24">
+    <StackPanel Margin="20,0,20,30" Spacing="24">
       <Border CornerRadius="22" MinHeight="210" ClipToBounds="True" Background="{DynamicResource MusicHeroGradient}" BoxShadow="{DynamicResource MusicFloatingShadow}">
         <Grid>
           <Border Background="#70000000" />

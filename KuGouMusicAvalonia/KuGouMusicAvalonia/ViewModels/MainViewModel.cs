@@ -31,6 +31,8 @@ public partial class MainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsLyricsActive))]
     [NotifyPropertyChangedFor(nameof(ShowMiniPlayer))]
     [NotifyPropertyChangedFor(nameof(ShowCompactChrome))]
+    [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
+    [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
     private string _activeNavigationKey = "NavDiscover";
 
     [ObservableProperty]
@@ -38,7 +40,12 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDesktopLayout))]
+    [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
+    [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
     private bool _isCompactLayout;
+
+    [ObservableProperty]
+    private bool _isShellMenuOpen;
 
     [ObservableProperty]
     private bool _isQueueOpen;
@@ -60,6 +67,8 @@ public partial class MainViewModel : ViewModelBase
     public bool IsLyricsActive => ActiveNavigationKey == "NavLyrics";
     public bool ShowMiniPlayer => Player.HasSong && ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
     public bool ShowCompactChrome => ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
+    public bool ShowShellChrome => IsDesktopLayout || ShowCompactChrome;
+    public bool ShowShellHeader => IsCompactLayout && ShowCompactChrome;
 
     public MainViewModel()
     {
@@ -83,7 +92,16 @@ public partial class MainViewModel : ViewModelBase
     partial void OnActiveNavigationKeyChanged(string value)
     {
         IsQueueOpen = false;
+        if (IsCompactLayout)
+        {
+            IsShellMenuOpen = false;
+        }
         CurrentPage = ResolveNavigationPage(value);
+    }
+
+    partial void OnIsCompactLayoutChanged(bool value)
+    {
+        IsShellMenuOpen = !value;
     }
 
     private object ResolveNavigationPage(string value)
