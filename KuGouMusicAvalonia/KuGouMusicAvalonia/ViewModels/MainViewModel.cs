@@ -116,7 +116,7 @@ public partial class MainViewModel : ViewModelBase
             "NavRankings" => _rankingsViewModel,
             "NavHistory" => _historyViewModel,
             "NavSearch" => _searchViewModel,
-            "NavSettings" => _settingsViewModel,
+            "NavSettings" => RefreshSettingsPage(),
             "NavNowPlaying" => _nowPlayingViewModel,
             "NavLyrics" => _lyricsViewModel,
             _ => _discoverViewModel
@@ -127,6 +127,12 @@ public partial class MainViewModel : ViewModelBase
     {
         _cloudViewModel.RefreshCommand.Execute(null);
         return _cloudViewModel;
+    }
+
+    private object RefreshSettingsPage()
+    {
+        _ = _settingsViewModel.ActivateAsync();
+        return _settingsViewModel;
     }
 
     [RelayCommand]

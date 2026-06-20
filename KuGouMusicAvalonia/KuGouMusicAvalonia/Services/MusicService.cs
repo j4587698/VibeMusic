@@ -309,6 +309,7 @@ public static class MusicService
     public static void ClearSession()
     {
         LocalMusicStore.Instance.ClearCookies();
+        LocalMusicStore.Instance.ClearUserProfileCache();
         _client?.Dispose();
         _client = CreateClient(loadSavedCookies: false);
     }

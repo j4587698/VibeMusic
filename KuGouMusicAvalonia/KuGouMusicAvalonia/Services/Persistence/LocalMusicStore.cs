@@ -16,6 +16,7 @@ internal sealed class LocalMusicStore : IDisposable
     public static LocalMusicStore Instance => InstanceHolder.Value;
 
     private const string LegacyImportSettingKey = "migration.sessionJson.v1";
+    private const string CurrentUserProfileCacheId = "current";
     private const string CurrentPlaybackStateId = "current";
     private const string CurrentQueueId = "current";
     private const string MissingDownloadStatus = "Missing";
@@ -27,6 +28,8 @@ internal sealed class LocalMusicStore : IDisposable
     private TinyDbEngine? _database;
     private ITinyCollection<AppSettingRecord> _settings = null!;
     private ITinyCollection<CookieRecord> _cookies = null!;
+    private ITinyCollection<UserProfileCacheRecord> _userProfileCache = null!;
+    private ITinyCollection<UserLibraryCacheItemRecord> _userLibraryCacheItems = null!;
     private ITinyCollection<LocalSongRecord> _songs = null!;
     private ITinyCollection<FavoriteSongRecord> _favorites = null!;
     private ITinyCollection<DownloadRecord> _downloads = null!;
@@ -97,6 +100,8 @@ internal sealed class LocalMusicStore : IDisposable
         _database = database;
         _settings = database.GetCollection<AppSettingRecord>();
         _cookies = database.GetCollection<CookieRecord>();
+        _userProfileCache = database.GetCollection<UserProfileCacheRecord>();
+        _userLibraryCacheItems = database.GetCollection<UserLibraryCacheItemRecord>();
         _songs = database.GetCollection<LocalSongRecord>();
         _favorites = database.GetCollection<FavoriteSongRecord>();
         _downloads = database.GetCollection<DownloadRecord>();
@@ -264,6 +269,70 @@ internal sealed class LocalMusicStore : IDisposable
         lock (_gate)
         {
             _cookies.DeleteAll();
+        }
+    }
+
+    public UserProfileCacheSnapshot? LoadUserProfileCache()
+    {
+        lock (_gate)
+        {
+            var profile = _userProfileCache.FindById(CurrentUserProfileCacheId);
+            if (profile is null)
+            {
+                return null;
+            }
+
+            var items = _userLibraryCacheItems
+                .FindAll()
+                .OrderBy(item => item.Category, StringComparer.Ordinal)
+                .ThenBy(item => item.Position)
+                .ToList();
+
+            return new UserProfileCacheSnapshot(
+                profile.DisplayName,
+                profile.AvatarUrl,
+                profile.UserIdText,
+                profile.PlaylistCountText,
+                profile.CollectionCountText,
+                items.Where(item => item.Category == UserLibraryCacheCategories.Playlist).Select(ToCacheItem).ToList(),
+                items.Where(item => item.Category == UserLibraryCacheCategories.Collection).Select(ToCacheItem).ToList(),
+                profile.UpdatedAtUtc);
+        }
+    }
+
+    public void SaveUserProfileCache(UserProfileCacheSnapshot snapshot)
+    {
+        lock (_gate)
+        {
+            var now = DateTime.UtcNow;
+            _userProfileCache.Upsert(new UserProfileCacheRecord
+            {
+                Id = CurrentUserProfileCacheId,
+                DisplayName = snapshot.DisplayName,
+                AvatarUrl = snapshot.AvatarUrl,
+                UserIdText = snapshot.UserIdText,
+                PlaylistCountText = snapshot.PlaylistCountText,
+                CollectionCountText = snapshot.CollectionCountText,
+                UpdatedAtUtc = now
+            });
+
+            _userLibraryCacheItems.DeleteAll();
+            var records = snapshot.Playlists.Select((item, index) => ToCacheRecord(UserLibraryCacheCategories.Playlist, index, item, now))
+                .Concat(snapshot.Collections.Select((item, index) => ToCacheRecord(UserLibraryCacheCategories.Collection, index, item, now)))
+                .ToList();
+            if (records.Count > 0)
+            {
+                _userLibraryCacheItems.Insert(records);
+            }
+        }
+    }
+
+    public void ClearUserProfileCache()
+    {
+        lock (_gate)
+        {
+            _userProfileCache.DeleteAll();
+            _userLibraryCacheItems.DeleteAll();
         }
     }
 
@@ -888,6 +957,43 @@ internal sealed class LocalMusicStore : IDisposable
     {
         return values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? string.Empty;
     }
+
+    private static UserLibraryCacheItem ToCacheItem(UserLibraryCacheItemRecord record)
+    {
+        return new UserLibraryCacheItem(record.Title, record.Subtitle, record.CoverUrl);
+    }
+
+    private static UserLibraryCacheItemRecord ToCacheRecord(string category, int position, UserLibraryCacheItem item, DateTime updatedAtUtc)
+    {
+        return new UserLibraryCacheItemRecord
+        {
+            Id = $"{category}:{position:D4}",
+            Category = category,
+            Position = position,
+            Title = item.Title,
+            Subtitle = item.Subtitle,
+            CoverUrl = item.CoverUrl,
+            UpdatedAtUtc = updatedAtUtc
+        };
+    }
+}
+
+internal sealed record UserProfileCacheSnapshot(
+    string DisplayName,
+    string AvatarUrl,
+    string UserIdText,
+    string PlaylistCountText,
+    string CollectionCountText,
+    IReadOnlyList<UserLibraryCacheItem> Playlists,
+    IReadOnlyList<UserLibraryCacheItem> Collections,
+    DateTime UpdatedAtUtc);
+
+internal sealed record UserLibraryCacheItem(string Title, string Subtitle, string CoverUrl);
+
+internal static class UserLibraryCacheCategories
+{
+    public const string Playlist = "playlist";
+    public const string Collection = "collection";
 }
 
 internal static class LocalSettingKeys
