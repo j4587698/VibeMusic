@@ -51,8 +51,8 @@
             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8">
               <lumina:LuminaAutoScrollText Text="{Binding UserDisplayName}" FontSize="30" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
               <TextBlock Text="{Binding UserIdText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
-              <TextBlock Text="{Binding UserExpireText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
-              <TextBlock Text="{Binding UserProfileStatus}" FontSize="13" Foreground="{DynamicResource MusicTextMutedBrush}" TextWrapping="Wrap" />
+              <TextBlock IsVisible="{Binding HasUserExpireText}" Text="{Binding UserExpireText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+              <TextBlock IsVisible="{Binding HasUserProfileStatus}" Text="{Binding UserProfileStatus}" FontSize="13" Foreground="{DynamicResource MusicTextMutedBrush}" TextWrapping="Wrap" />
             </StackPanel>
 
             <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="10">
@@ -84,8 +84,8 @@
               <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Center" MinWidth="0">
                 <lumina:LuminaAutoScrollText Text="{Binding UserDisplayName}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
                 <TextBlock Text="{Binding UserIdText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Text="{Binding UserExpireText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
-                <TextBlock Text="{Binding UserProfileStatus}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" TextWrapping="Wrap" MaxLines="2" />
+                <TextBlock IsVisible="{Binding HasUserExpireText}" Text="{Binding UserExpireText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
+                <TextBlock IsVisible="{Binding HasUserProfileStatus}" Text="{Binding UserProfileStatus}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" TextWrapping="Wrap" MaxLines="2" />
               </StackPanel>
             </Grid>
 
@@ -111,7 +111,7 @@
           <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
             <StackPanel Spacing="4">
               <TextBlock Text="我的资料" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-              <TextBlock Text="歌单、云盘/收藏和最近播放会随登录态刷新" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+              <TextBlock Text="歌单、云盘/收藏读取本地缓存，点击同步刷新服务端资料" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
             </StackPanel>
             <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsProfileBusy}" Width="120" Height="4" VerticalAlignment="Center" />
           </Grid>
@@ -274,7 +274,7 @@
             <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsVipBusy}" Width="120" Height="4" VerticalAlignment="Center" />
           </Grid>
 
-          <lumina:LuminaSettingsOption Grid.Row="1" Kind="Custom" Header="播放前自动检查并领取今日畅听/VIP" ShowChevron="False">
+          <lumina:LuminaSettingsOption Grid.Row="1" Kind="Custom" Header="自动领取权益" Description="播放前检查并领取今日畅听/VIP，失败时继续播放" ShowChevron="False">
             <lumina:LuminaSettingsOption.TrailingContent>
               <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <TextBlock Classes="SettingsSwitchText" Text="{Binding AutoReceiveVipBeforePlayback, Converter={StaticResource BooleanToSwitchTextConverter}}" />
@@ -361,7 +361,7 @@
           <TextBlock Text="设置" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
 
           <Grid ColumnDefinitions="180,*" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="12">
-            <lumina:LuminaSettingsSelectOption Grid.ColumnSpan="2" Kind="Select" Header="主题" Value="{Binding ThemeMode}" SelectItemsSource="{Binding ThemeModeOptions}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}" />
+            <lumina:LuminaSettingsSelectOption Grid.ColumnSpan="2" Kind="Select" Header="主题" SelectItemsSource="{Binding ThemeModeOptions}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}" />
 
             <lumina:LuminaSettingsOption Grid.Row="1" Grid.ColumnSpan="2" Kind="Custom" Header="边播边存" Description="已下载歌曲优先本地播放；未下载时边播边保存" ShowChevron="False">
               <lumina:LuminaSettingsOption.TrailingContent>
@@ -392,7 +392,7 @@
 
             <lumina:LuminaSettingsOption Grid.Row="4" Grid.ColumnSpan="2" Kind="Custom" Header="存储位置" Description="{Binding DownloadDirectory}" ShowChevron="True" Command="{Binding PickDownloadDirectoryCommand}" IsVisible="{Binding IsDesktopSettingVisible}" />
 
-            <lumina:LuminaSettingsSelectOption Grid.Row="5" Grid.ColumnSpan="2" Kind="Select" Header="默认播放比特率" Value="{Binding DefaultPlaybackQuality}" SelectItemsSource="{Binding PlaybackQualityOptions}" SelectedItem="{Binding DefaultPlaybackQuality, Mode=TwoWay}" />
+            <lumina:LuminaSettingsSelectOption Grid.Row="5" Grid.ColumnSpan="2" Kind="Select" Header="默认播放比特率" SelectItemsSource="{Binding PlaybackQualityOptions}" SelectedItem="{Binding DefaultPlaybackQuality, Mode=TwoWay}" />
           </Grid>
         </StackPanel>
       </Border>

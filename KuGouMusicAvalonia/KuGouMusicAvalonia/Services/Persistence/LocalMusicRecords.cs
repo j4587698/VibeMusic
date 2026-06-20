@@ -22,6 +22,34 @@ public sealed partial class CookieRecord
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
 
+[Entity("user_profile_cache")]
+public sealed partial class UserProfileCacheRecord
+{
+    [Id]
+    public string Id { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public string AvatarUrl { get; set; } = string.Empty;
+    public string UserIdText { get; set; } = string.Empty;
+    public string PlaylistCountText { get; set; } = string.Empty;
+    public string CollectionCountText { get; set; } = string.Empty;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
+[Entity("user_library_cache_items")]
+public sealed partial class UserLibraryCacheItemRecord
+{
+    [Id]
+    public string Id { get; set; } = string.Empty;
+    [Index]
+    public string Category { get; set; } = string.Empty;
+    [Index]
+    public int Position { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Subtitle { get; set; } = string.Empty;
+    public string CoverUrl { get; set; } = string.Empty;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+
 [Entity("songs")]
 public sealed partial class LocalSongRecord
 {

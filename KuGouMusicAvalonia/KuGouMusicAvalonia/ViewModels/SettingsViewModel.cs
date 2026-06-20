@@ -22,6 +22,7 @@ public partial class SettingsViewModel : ViewModelBase
 {
     private CancellationTokenSource? _qrPollingCts;
     private decimal _lastValidFloatingLyricsFontSize = (decimal)FloatingLyricsService.DefaultFontSize;
+    private static readonly TimeSpan ProfileRetryDelay = TimeSpan.FromMilliseconds(1500);
 
     [ObservableProperty]
     private bool _isBusy;
@@ -69,9 +70,11 @@ public partial class SettingsViewModel : ViewModelBase
     private string _userIdText = "userid -";
 
     [ObservableProperty]
-    private string _userExpireText = "登录到期：未同步";
+    [NotifyPropertyChangedFor(nameof(HasUserExpireText))]
+    private string _userExpireText = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUserProfileStatus))]
     private string _userProfileStatus = "登录后同步账号资料";
 
     [ObservableProperty]
@@ -140,6 +143,8 @@ public partial class SettingsViewModel : ViewModelBase
     public bool IsLoggedIn => MusicService.Client.GetLoginState().IsLoggedIn;
     public bool IsLoggedInPanelVisible => IsLoggedIn;
     public bool IsLoginPromptVisible => !IsLoggedIn;
+    public bool HasUserExpireText => !string.IsNullOrWhiteSpace(UserExpireText);
+    public bool HasUserProfileStatus => !string.IsNullOrWhiteSpace(UserProfileStatus);
     public bool HasVipDetail => !string.IsNullOrWhiteSpace(VipDetail);
     public bool IsWideLayout => !IsCompactLayout;
     public bool IsDesktopSettingVisible => Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime;
@@ -221,10 +226,22 @@ public partial class SettingsViewModel : ViewModelBase
         FloatingLyricsService.Instance.StateChanged += OnFloatingLyricsStateChanged;
         ApplyThemeMode(ThemeMode);
         RefreshLoginState();
-        if (IsLoggedIn)
+    }
+
+    public async Task ActivateAsync()
+    {
+        RefreshLoginState();
+        if (!IsLoggedIn)
         {
-            _ = RefreshUserDataAsync();
-            _ = RefreshVipStateAsync();
+            ClearUserProfile();
+            return;
+        }
+
+        RefreshLocalHistory();
+        RebuildUserLibraryPreview();
+        if (!ApplyUserProfileCache())
+        {
+            await RefreshUserDataAsync();
         }
     }
 
@@ -627,10 +644,16 @@ public partial class SettingsViewModel : ViewModelBase
         {
             await VipPrivilegeService.Instance.EnsureLoginFreshAsync();
             RefreshLoginState();
-            await LoadProfileAsync();
-            await LoadUserAssetsAsync();
+            await LoadProfileWithRetryAsync();
+            var assetsSynced = await LoadUserAssetsAsync();
             await SyncFavoriteStateAsync();
-            UserProfileStatus = "账号资料已同步";
+            var profileSynced = HasProfileContent();
+            if (assetsSynced && profileSynced)
+            {
+                SaveUserProfileCache();
+            }
+
+            UserProfileStatus = assetsSynced && profileSynced ? "账号资料已同步" : "部分账号资料同步失败";
         }
         catch (Exception ex)
         {
@@ -654,44 +677,64 @@ public partial class SettingsViewModel : ViewModelBase
         MusicService.SaveSession();
     }
 
-    private async Task LoadUserAssetsAsync()
+    private async Task LoadProfileWithRetryAsync()
     {
-        UserPlaylists.Clear();
-        UserCollections.Clear();
-        UserHistory.Clear();
+        await LoadProfileAsync();
+        if (HasProfileContent())
+        {
+            return;
+        }
+
+        await Task.Delay(ProfileRetryDelay);
+        await LoadProfileAsync();
+    }
+
+    private async Task<bool> LoadUserAssetsAsync()
+    {
+        var synced = true;
 
         try
         {
             var playlists = await MusicService.Client.GetUserPlaylistsTypedAsync(page: 1, pageSize: 40);
+            ApplyProfileFallbackFromPlaylists(playlists.Items);
+            var playlistItems = playlists.Items
+                .Take(4)
+                .Select(playlist => new UserLibraryItem(playlist.Name, $"{playlist.Count} 首 · {playlist.PlayCount} 播放", playlist.Pic, "歌单"))
+                .ToList();
             UserPlaylistCountText = CountText(playlists.Total, playlists.Items.Count);
-            foreach (var playlist in playlists.Items.Take(4))
-            {
-                UserPlaylists.Add(new UserLibraryItem(playlist.Name, $"{playlist.Count} 首 · {playlist.PlayCount} 播放", playlist.Pic, "歌单"));
-            }
+            ReplaceUserLibraryItems(UserPlaylists, playlistItems);
         }
-        catch (Exception ex)
+        catch
         {
-            UserPlaylistCountText = "同步失败";
-            UserPlaylists.Add(new UserLibraryItem("歌单同步失败", ex.Message, string.Empty, "歌单"));
+            synced = false;
+            if (UserPlaylists.Count == 0)
+            {
+                UserPlaylistCountText = "同步失败";
+            }
         }
 
         try
         {
             var cloud = await MusicService.Client.GetUserCloudTypedAsync(page: 1, pageSize: 8);
+            var collectionItems = cloud.Items
+                .Take(4)
+                .Select(song => new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "云盘/收藏"))
+                .ToList();
             UserCollectionCountText = CountText(cloud.Total, cloud.Items.Count);
-            foreach (var song in cloud.Items.Take(4))
-            {
-                UserCollections.Add(new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "云盘/收藏"));
-            }
+            ReplaceUserLibraryItems(UserCollections, collectionItems);
         }
-        catch (Exception ex)
+        catch
         {
-            UserCollectionCountText = "同步失败";
-            UserCollections.Add(new UserLibraryItem("云盘/收藏同步失败", ex.Message, string.Empty, "云盘/收藏"));
+            synced = false;
+            if (UserCollections.Count == 0)
+            {
+                UserCollectionCountText = "同步失败";
+            }
         }
 
         RefreshLocalHistory();
         RebuildUserLibraryPreview();
+        return synced;
     }
 
     private async Task SyncFavoriteStateAsync()
@@ -711,7 +754,7 @@ public partial class SettingsViewModel : ViewModelBase
         UserDisplayName = "未登录";
         UserAvatarUrl = string.Empty;
         UserIdText = "userid -";
-        UserExpireText = "登录到期：未同步";
+        UserExpireText = string.Empty;
         UserProfileStatus = "登录后同步账号资料";
         UserPlaylistCountText = "0";
         UserCollectionCountText = "0";
@@ -720,6 +763,78 @@ public partial class SettingsViewModel : ViewModelBase
         UserCollections.Clear();
         UserHistory.Clear();
         UserLibraryPreview.Clear();
+    }
+
+    private void ApplyProfileFallbackFromPlaylists(IReadOnlyList<KugouPlaylist> playlists)
+    {
+        var owner = playlists.FirstOrDefault(playlist =>
+            !string.IsNullOrWhiteSpace(playlist.Nickname) ||
+            !string.IsNullOrWhiteSpace(playlist.UserPic));
+        if (owner is null)
+        {
+            return;
+        }
+
+        var state = MusicService.Client.GetLoginState();
+        if (IsFallbackDisplayName(UserDisplayName, state.UserId) && !string.IsNullOrWhiteSpace(owner.Nickname))
+        {
+            UserDisplayName = owner.Nickname;
+        }
+
+        if (string.IsNullOrWhiteSpace(UserAvatarUrl) && !string.IsNullOrWhiteSpace(owner.UserPic))
+        {
+            UserAvatarUrl = owner.UserPic;
+        }
+    }
+
+    private bool HasProfileContent()
+    {
+        var state = MusicService.Client.GetLoginState();
+        return !string.IsNullOrWhiteSpace(UserAvatarUrl) || !IsFallbackDisplayName(UserDisplayName, state.UserId);
+    }
+
+    private static bool IsFallbackDisplayName(string value, string? userId)
+    {
+        return string.IsNullOrWhiteSpace(value) ||
+            string.Equals(value, "未登录", StringComparison.Ordinal) ||
+            string.Equals(value, "酷狗用户", StringComparison.Ordinal) ||
+            !string.IsNullOrWhiteSpace(userId) && string.Equals(value, userId, StringComparison.Ordinal);
+    }
+
+    private bool ApplyUserProfileCache()
+    {
+        var cache = LocalMusicStore.Instance.LoadUserProfileCache();
+        if (cache is null)
+        {
+            return false;
+        }
+
+        var state = MusicService.Client.GetLoginState();
+        UserDisplayName = FirstNonEmpty(cache.DisplayName, "酷狗用户");
+        UserAvatarUrl = cache.AvatarUrl;
+        UserIdText = FirstNonEmpty(cache.UserIdText, "userid -");
+        UserExpireText = FormatLoginExpireText(state, null);
+        UserPlaylistCountText = FirstNonEmpty(cache.PlaylistCountText, "0");
+        UserCollectionCountText = FirstNonEmpty(cache.CollectionCountText, "0");
+        ReplaceUserLibraryItems(UserPlaylists, cache.Playlists.Select(item => ToUserLibraryItem(item, "歌单")));
+        ReplaceUserLibraryItems(UserCollections, cache.Collections.Select(item => ToUserLibraryItem(item, "云盘/收藏")));
+        RefreshLocalHistory();
+        RebuildUserLibraryPreview();
+        UserProfileStatus = string.Empty;
+        return true;
+    }
+
+    private void SaveUserProfileCache()
+    {
+        LocalMusicStore.Instance.SaveUserProfileCache(new UserProfileCacheSnapshot(
+            UserDisplayName,
+            UserAvatarUrl,
+            UserIdText,
+            UserPlaylistCountText,
+            UserCollectionCountText,
+            UserPlaylists.Select(ToCacheItem).ToList(),
+            UserCollections.Select(ToCacheItem).ToList(),
+            DateTime.UtcNow));
     }
 
     private void RebuildUserLibraryPreview()
@@ -733,6 +848,25 @@ public partial class SettingsViewModel : ViewModelBase
         {
             UserLibraryPreview.Add(new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "最近播放"));
         }
+    }
+
+    private static void ReplaceUserLibraryItems(ObservableCollection<UserLibraryItem> target, IEnumerable<UserLibraryItem> items)
+    {
+        target.Clear();
+        foreach (var item in items)
+        {
+            target.Add(item);
+        }
+    }
+
+    private static UserLibraryItem ToUserLibraryItem(UserLibraryCacheItem item, string category)
+    {
+        return new UserLibraryItem(item.Title, item.Subtitle, item.CoverUrl, category);
+    }
+
+    private static UserLibraryCacheItem ToCacheItem(UserLibraryItem item)
+    {
+        return new UserLibraryCacheItem(item.Title, item.Subtitle, item.CoverUrl);
     }
 
     private void NotifyLoginStateChanged()
@@ -789,7 +923,7 @@ public partial class SettingsViewModel : ViewModelBase
         var expiresAt = state.TokenExpiresAt ?? ConvertUserExpires(userExpires);
         if (expiresAt is null)
         {
-            return "登录到期：服务端未返回，已完成资料同步";
+            return string.Empty;
         }
 
         return $"登录到期：{expiresAt.Value.ToLocalTime():yyyy-MM-dd HH:mm}";
