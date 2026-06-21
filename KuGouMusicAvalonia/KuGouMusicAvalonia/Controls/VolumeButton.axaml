@@ -1,0 +1,131 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:KuGouMusicAvalonia.Controls"
+             xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="KuGouMusicAvalonia.Controls.VolumeButton"
+             x:DataType="controls:VolumeButton"
+             x:Name="Root"
+             Width="34"
+             Height="34">
+  <UserControl.Resources>
+    <ControlTheme x:Key="VolumeFlyoutPresenterTheme"
+                  TargetType="FlyoutPresenter">
+      <Setter Property="Width" Value="50" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="Padding" Value="4" />
+      <Setter Property="Background" Value="{DynamicResource LuminaPopoverBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource LuminaBorderDefaultBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+      <Setter Property="ClipToBounds" Value="False" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel Margin="6" ClipToBounds="False">
+            <Border Background="{TemplateBinding Background}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    BoxShadow="0 2 10 #22000000" />
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}">
+              <ContentPresenter Margin="{TemplateBinding Padding}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Stretch" />
+            </Border>
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+    </ControlTheme>
+  </UserControl.Resources>
+
+  <Button Classes="Ghost Icon"
+          Width="34"
+          Height="34"
+          Click="OpenFlyout_Click"
+          ToolTip.Tip="{Binding #Root.ToolTipText}"
+          lumina:LuminaButton.IconSize="22">
+    <Button.Flyout>
+      <Flyout Placement="Top"
+              FlyoutPresenterTheme="{StaticResource VolumeFlyoutPresenterTheme}">
+        <Grid RowDefinitions="Auto,*,Auto"
+              RowSpacing="5"
+              Width="30"
+              MinHeight="150"
+              ClipToBounds="False">
+          <Button Grid.Row="0"
+                  Classes="Ghost Icon"
+                  Width="30"
+                  Height="30"
+                  HorizontalAlignment="Center"
+                  Click="ToggleMute_Click"
+                  ToolTip.Tip="{Binding #Root.MuteToolTip}"
+                  lumina:LuminaButton.IconSize="20">
+            <lumina:LuminaButton.Icon>
+              <icons:MaterialIcon Kind="{Binding #Root.VolumeIcon}"
+                                  Width="20"
+                                  Height="20"
+                                  Foreground="{DynamicResource MusicSecondaryBrush}" />
+            </lumina:LuminaButton.Icon>
+          </Button>
+
+          <Border Grid.Row="1"
+                  Width="18"
+                  Height="106"
+                  Background="Transparent"
+                  HorizontalAlignment="Center"
+                  ClipToBounds="False"
+                  PointerPressed="VolumeSlider_PointerPressed"
+                  PointerMoved="VolumeSlider_PointerMoved"
+                  PointerReleased="VolumeSlider_PointerReleased"
+                  PointerCaptureLost="VolumeSlider_PointerCaptureLost">
+            <Grid ClipToBounds="False">
+              <Border Width="4"
+                      Margin="0,5"
+                      CornerRadius="2"
+                      Background="{DynamicResource LuminaBorderBrush}"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"
+                      IsHitTestVisible="False" />
+              <Border Width="4"
+                      Height="{Binding #Root.SelectionHeight}"
+                      Margin="0,0,0,5"
+                      CornerRadius="2"
+                      Background="{DynamicResource LuminaPrimaryBrush}"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Bottom"
+                      IsHitTestVisible="False" />
+              <Border Width="10"
+                      Height="10"
+                      Margin="{Binding #Root.ThumbMargin}"
+                      CornerRadius="5"
+                      Background="{DynamicResource LuminaPrimaryBrush}"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Bottom"
+                      IsHitTestVisible="False" />
+            </Grid>
+          </Border>
+
+          <TextBlock Grid.Row="2"
+                     Text="{Binding #Root.VolumeText}"
+                     FontSize="12"
+                     FontWeight="Bold"
+                     Foreground="{DynamicResource MusicTextBrush}"
+                     HorizontalAlignment="Center" />
+        </Grid>
+      </Flyout>
+    </Button.Flyout>
+    <lumina:LuminaButton.Icon>
+      <icons:MaterialIcon Kind="{Binding #Root.VolumeIcon}"
+                          Width="22"
+                          Height="22"
+                          Foreground="{DynamicResource MusicSecondaryBrush}" />
+    </lumina:LuminaButton.Icon>
+  </Button>
+</UserControl>

@@ -7,6 +7,8 @@ namespace KuGouMusicAvalonia.Views;
 
 public partial class MainView : UserControl
 {
+    private MainViewModel? _viewModel;
+
     public MainView()
     {
         InitializeComponent();
@@ -20,8 +22,6 @@ public partial class MainView : UserControl
             UpdateLayoutMode();
         }
     }
-
-    private MainViewModel? _viewModel;
 
     protected override void OnDataContextChanged(EventArgs e)
     {
@@ -52,6 +52,7 @@ public partial class MainView : UserControl
                 }, Avalonia.Threading.DispatcherPriority.Loaded);
             }
         }
+
     }
 
     private void UpdateLayoutMode()
@@ -62,10 +63,10 @@ public partial class MainView : UserControl
             var height = Bounds.Height;
             var isShortLandscape = width > height && height > 0 && height <= 520;
 
-            viewModel.IsCompactLayout = width > 0 && (width < 760 || isShortLandscape);
+            viewModel.IsCompactLayout = width > 0 && (width < 680 || isShortLandscape);
             if (width > 0)
             {
-                viewModel.QueuePopupWidth = Math.Clamp(width - 32, 320, 420);
+                viewModel.QueuePopupWidth = Math.Clamp(width - 32, 300, 420);
             }
         }
     }

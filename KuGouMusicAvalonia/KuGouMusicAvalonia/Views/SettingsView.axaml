@@ -5,6 +5,7 @@
              xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
              xmlns:services="using:KuGouMusicAvalonia.Services"
              xmlns:converters="using:KuGouMusicAvalonia.Converters"
+             xmlns:controls="using:KuGouMusicAvalonia.Controls"
              xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
              xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
@@ -396,6 +397,7 @@
           </Grid>
         </StackPanel>
       </Border>
+      <controls:PageBottomInsetSpacer />
     </StackPanel>
   </ScrollViewer>
 

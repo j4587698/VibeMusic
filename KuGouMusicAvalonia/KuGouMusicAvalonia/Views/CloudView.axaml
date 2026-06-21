@@ -12,13 +12,13 @@
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
              x:Class="KuGouMusicAvalonia.Views.CloudView"
              x:DataType="vm:CloudViewModel">
-  <ListBox ItemsSource="{Binding PageItems}"
-           Background="Transparent"
-           BorderThickness="0"
-           Padding="0"
-           Focusable="False"
-           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-           ScrollViewer.VerticalScrollBarVisibility="Auto">
+  <controls:PageInsetListBox ItemsSource="{Binding PageItems}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             BasePadding="0"
+                             Focusable="False"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
     <ListBox.ItemsPanel>
       <ItemsPanelTemplate>
         <VirtualizingStackPanel />
@@ -124,5 +124,5 @@
         </StackPanel>
       </DataTemplate>
     </ListBox.DataTemplates>
-  </ListBox>
+  </controls:PageInsetListBox>
 </UserControl>

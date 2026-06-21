@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
+             xmlns:controls="using:KuGouMusicAvalonia.Controls"
              xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:kugou="clr-namespace:KuGou.Lite;assembly=KuGouLiteSdk"
@@ -113,6 +114,7 @@
         </Grid>
       </Border>
 
+      <controls:PageBottomInsetSpacer />
     </StackPanel>
   </ScrollViewer>
 </UserControl>

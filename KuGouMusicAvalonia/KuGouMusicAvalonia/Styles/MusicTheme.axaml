@@ -28,6 +28,7 @@
       <SolidColorBrush x:Key="MusicTextMutedBrush" Color="{StaticResource MusicTextMuted}" />
       <SolidColorBrush x:Key="MusicOutlineBrush" Color="{StaticResource MusicOutline}" />
       <SolidColorBrush x:Key="MusicGlassBrush" Color="#CC201F1F" />
+      <SolidColorBrush x:Key="MusicFloatingGlassBrush" Color="#70201F1F" />
       <SolidColorBrush x:Key="MusicGlassLightBrush" Color="#18FFFFFF" />
 
       <Color x:Key="LuminaBackground">#131313</Color>
@@ -136,6 +137,7 @@
       <SolidColorBrush x:Key="MusicTextMutedBrush" Color="{StaticResource MusicTextMuted}" />
       <SolidColorBrush x:Key="MusicOutlineBrush" Color="{StaticResource MusicOutline}" />
       <SolidColorBrush x:Key="MusicGlassBrush" Color="#CCFFFFFF" />
+      <SolidColorBrush x:Key="MusicFloatingGlassBrush" Color="#99FFFFFF" />
       <SolidColorBrush x:Key="MusicGlassLightBrush" Color="#22D32F2F" />
 
       <Color x:Key="LuminaBackground">#F9FAFB</Color>

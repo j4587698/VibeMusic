@@ -164,6 +164,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     public bool IsSingleLoopMode => PlayMode == PlaybackMode.SingleLoop;
     public bool HasQueue => !IsRadioMode && Queue.Count > 0;
     public bool IsQueueEmpty => IsRadioMode || Queue.Count == 0;
+    public string QueueCountText => IsRadioMode ? "FM" : Queue.Count.ToString();
     public string CurrentQueuePositionText => IsRadioMode ? "FM" : Queue.Count == 0 || CurrentQueueIndex < 0 ? "0 / 0" : $"{CurrentQueueIndex + 1} / {Queue.Count}";
     public string QueueStatusText => IsRadioMode ? $"{QueueTitle} · 电台播放" : Queue.Count == 0 ? "暂无播放队列" : $"{QueueTitle} · {CurrentQueuePositionText}";
 
@@ -936,6 +937,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         OnPropertyChanged(nameof(Queue));
         OnPropertyChanged(nameof(HasQueue));
         OnPropertyChanged(nameof(IsQueueEmpty));
+        OnPropertyChanged(nameof(QueueCountText));
         OnPropertyChanged(nameof(CurrentQueuePositionText));
         OnPropertyChanged(nameof(QueueStatusText));
     }
