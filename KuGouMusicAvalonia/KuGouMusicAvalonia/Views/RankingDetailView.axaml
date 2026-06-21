@@ -13,13 +13,13 @@
              x:Class="KuGouMusicAvalonia.Views.RankingDetailView"
              x:DataType="vm:RankingDetailViewModel"
              x:CompileBindings="True">
-  <ListBox ItemsSource="{Binding PageItems}"
-           Background="Transparent"
-           BorderThickness="0"
-           Padding="0"
-           Focusable="False"
-           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-           ScrollViewer.VerticalScrollBarVisibility="Auto">
+  <controls:PageInsetListBox ItemsSource="{Binding PageItems}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             BasePadding="0"
+                             Focusable="False"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
     <ListBox.ItemsPanel>
       <ItemsPanelTemplate>
         <VirtualizingStackPanel />
@@ -139,5 +139,5 @@
         </Border>
       </DataTemplate>
     </ListBox.DataTemplates>
-  </ListBox>
+  </controls:PageInsetListBox>
 </UserControl>

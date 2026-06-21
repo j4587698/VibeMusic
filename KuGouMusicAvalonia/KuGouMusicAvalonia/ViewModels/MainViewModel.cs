@@ -8,6 +8,8 @@ namespace KuGouMusicAvalonia.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
+    private const double CompactMiniPlayerPageBottomInset = 96;
+
     private readonly DiscoverViewModel _discoverViewModel = new();
     private readonly PlaylistsViewModel _playlistsViewModel = new();
     private readonly CloudViewModel _cloudViewModel = new();
@@ -31,9 +33,11 @@ public partial class MainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsSettingsActive))]
     [NotifyPropertyChangedFor(nameof(IsLyricsActive))]
     [NotifyPropertyChangedFor(nameof(ShowMiniPlayer))]
+    [NotifyPropertyChangedFor(nameof(ShowCompactMiniPlayer))]
     [NotifyPropertyChangedFor(nameof(ShowCompactChrome))]
     [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
     [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
+    [NotifyPropertyChangedFor(nameof(PageBottomInset))]
     private string _activeNavigationKey = "NavDiscover";
 
     [ObservableProperty]
@@ -41,8 +45,10 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDesktopLayout))]
+    [NotifyPropertyChangedFor(nameof(ShowCompactMiniPlayer))]
     [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
     [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
+    [NotifyPropertyChangedFor(nameof(PageBottomInset))]
     private bool _isCompactLayout;
 
     [ObservableProperty]
@@ -67,9 +73,11 @@ public partial class MainViewModel : ViewModelBase
     public bool IsSettingsActive => ActiveNavigationKey == "NavSettings";
     public bool IsLyricsActive => ActiveNavigationKey == "NavLyrics";
     public bool ShowMiniPlayer => Player.HasSong && ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
+    public bool ShowCompactMiniPlayer => IsCompactLayout && ShowMiniPlayer;
     public bool ShowCompactChrome => ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
     public bool ShowShellChrome => IsDesktopLayout || ShowCompactChrome;
     public bool ShowShellHeader => IsCompactLayout && ShowCompactChrome;
+    public double PageBottomInset => ShowCompactMiniPlayer ? CompactMiniPlayerPageBottomInset : 0;
 
     public MainViewModel()
     {
@@ -80,6 +88,8 @@ public partial class MainViewModel : ViewModelBase
             if (args.PropertyName is nameof(PlayerService.CurrentSong) or nameof(PlayerService.HasSong))
             {
                 OnPropertyChanged(nameof(ShowMiniPlayer));
+                OnPropertyChanged(nameof(ShowCompactMiniPlayer));
+                OnPropertyChanged(nameof(PageBottomInset));
             }
         };
         ShellNavigationService.Instance.NavigationRequested += key => Navigate(key);
