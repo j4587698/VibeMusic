@@ -341,7 +341,7 @@ public sealed partial class KugouLiteClient
 
         if (albumAudioId > 0)
         {
-            var newResponse = await GetSongUrlNewAsync(hash, albumAudioId, freePart, cancellationToken).ConfigureAwait(false);
+            var newResponse = await GetSongUrlNewAsync(hash, albumAudioId, new[] { quality }, freePart, cancellationToken).ConfigureAwait(false);
             var newAudioUrl = KugouJsonMapper.MapAudioUrl(newResponse);
             if (!string.IsNullOrWhiteSpace(newAudioUrl.Url))
             {
@@ -383,7 +383,40 @@ public sealed partial class KugouLiteClient
         async Task<KugouTypedResult<KugouAudioUrl>> TrySongUrlAsync(string hash, string quality, string? ppageId = null)
         {
             var response = await GetSongUrlAsync(hash, albumId, song.MixSongId, quality, ppageId: ppageId, cancellationToken: cancellationToken).ConfigureAwait(false);
-            return new KugouTypedResult<KugouAudioUrl>(KugouJsonMapper.MapAudioUrl(response), response);
+            var result = new KugouTypedResult<KugouAudioUrl>(KugouJsonMapper.MapAudioUrl(response), response);
+            return result;
+        }
+
+        KugouTypedResult<KugouAudioUrl>? lastResult = null;
+
+        if (song.MixSongId > 0)
+        {
+            var qualities = GetAudioQualityCandidates(preferredQuality, compatibilityMode).ToArray();
+            var newResponse = await GetSongUrlNewAsync(song.Hash, song.MixSongId, qualities, cancellationToken: cancellationToken).ConfigureAwait(false);
+            
+            var v6Goods = KugouJsonMapper.MapRelateGoodsFromPrivilege(newResponse);
+            if (v6Goods != null && v6Goods.Count > 0)
+            {
+                var combinedGoods = new List<KugouSongRelateGood>(relateGoods);
+                combinedGoods.AddRange(v6Goods);
+                relateGoods = combinedGoods;
+            }
+
+            lastResult = new KugouTypedResult<KugouAudioUrl>(KugouJsonMapper.MapAudioUrl(newResponse), newResponse);
+            if (!string.IsNullOrWhiteSpace(lastResult.Data?.Url))
+            {
+                var url = lastResult.Data!.Url.ToLowerInvariant();
+                if (!url.EndsWith(".mflac") && !url.EndsWith(".mgg") && !url.EndsWith(".kgm"))
+                {
+                    var bitrate = lastResult.Data!.Bitrate;
+                    var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
+                    return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw);
+                }
+                else
+                {
+                    // v6 URL is encrypted. Fall back to v5 using the extracted hashes.
+                }
+            }
         }
 
         foreach (var quality in GetAudioQualityCandidates(preferredQuality, compatibilityMode))
@@ -397,39 +430,43 @@ public sealed partial class KugouLiteClient
             var qualityResult = await TrySongUrlAsync(matched.Hash, quality).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(qualityResult.Data?.Url))
             {
-                return new KugouResolvedAudioSource(qualityResult.Data!.Url, quality, "none", qualityResult.Raw);
+                var resolvedQuality = quality;
+                var bitrate = qualityResult.Data!.Bitrate;
+                if (bitrate > 0)
+                {
+                    if (bitrate >= 800000) resolvedQuality = "flac";
+                    else if (bitrate >= 320000) resolvedQuality = "320";
+                    else resolvedQuality = "128";
+                }
+                
+                return new KugouResolvedAudioSource(qualityResult.Data!.Url, resolvedQuality, "none", qualityResult.Raw);
             }
         }
 
-        KugouTypedResult<KugouAudioUrl>? lastResult = null;
         if (compatibilityMode)
         {
             lastResult = await TrySongUrlAsync(song.Hash, string.Empty).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(lastResult.Data?.Url))
             {
-                return new KugouResolvedAudioSource(lastResult.Data!.Url, ResolveEffectiveAudioQuality(relateGoods, preferredQuality, compatibilityMode), "none", lastResult.Raw);
+                var bitrate = lastResult.Data!.Bitrate;
+                var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
+                return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw);
             }
         }
 
         lastResult = await TrySongUrlAsync(song.Hash, string.Empty, "356753938").ConfigureAwait(false);
         if (!string.IsNullOrWhiteSpace(lastResult.Data?.Url))
         {
-            return new KugouResolvedAudioSource(lastResult.Data!.Url, ResolveEffectiveAudioQuality(relateGoods, preferredQuality, compatibilityMode), "none", lastResult.Raw);
+            var bitrate = lastResult.Data!.Bitrate;
+            var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
+            return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw);
         }
-
-        if (song.MixSongId > 0)
-        {
-            var newResponse = await GetSongUrlNewAsync(song.Hash, song.MixSongId, cancellationToken: cancellationToken).ConfigureAwait(false);
-            lastResult = new KugouTypedResult<KugouAudioUrl>(KugouJsonMapper.MapAudioUrl(newResponse), newResponse);
-            if (!string.IsNullOrWhiteSpace(lastResult.Data?.Url))
-            {
-                return new KugouResolvedAudioSource(lastResult.Data!.Url, ResolveEffectiveAudioQuality(relateGoods, preferredQuality, compatibilityMode), "none", lastResult.Raw);
-            }
-        }
-
         var publicResponse = await GetPublicSongInfoAsync(song.Hash, cancellationToken: cancellationToken).ConfigureAwait(false);
         lastResult = new KugouTypedResult<KugouAudioUrl>(KugouJsonMapper.MapAudioUrl(publicResponse), publicResponse);
-        return new KugouResolvedAudioSource(lastResult.Data?.Url ?? string.Empty, ResolveEffectiveAudioQuality(relateGoods, preferredQuality, compatibilityMode), "none", lastResult.Raw);
+        var finalBitrate = lastResult.Data?.Bitrate;
+        var finalQuality = finalBitrate >= 800000 ? "flac" : (finalBitrate >= 320000 ? "320" : "128");
+
+        return new KugouResolvedAudioSource(lastResult.Data?.Url ?? string.Empty, finalQuality, "none", lastResult.Raw);
     }
 
     public async Task<KugouListResult<KugouSongRelateGood>> GetSongPrivilegeLiteTypedAsync(string hash, long? albumId = null, CancellationToken cancellationToken = default)
@@ -554,12 +591,12 @@ public sealed partial class KugouLiteClient
 
     private static bool DoesRelateGoodMatchQuality(KugouSongRelateGood item, string quality)
     {
+        var normalizedQuality = (item.Quality ?? string.Empty).Trim().ToLowerInvariant();
         if (quality == "128")
         {
-            return true;
+            return normalizedQuality is "128" or "" || item.Level == 2;
         }
 
-        var normalizedQuality = (item.Quality ?? string.Empty).Trim().ToLowerInvariant();
         return quality switch
         {
             "320" => normalizedQuality is "320" or "hq" || item.Level == 4,

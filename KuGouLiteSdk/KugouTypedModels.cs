@@ -259,5 +259,6 @@ public sealed class KugouTrackLoudness
 public sealed class KugouAudioUrl
 {
     public string Url { get; init; } = string.Empty;
+    public int? Bitrate { get; init; }
     public KugouTrackLoudness? Loudness { get; init; }
 }
