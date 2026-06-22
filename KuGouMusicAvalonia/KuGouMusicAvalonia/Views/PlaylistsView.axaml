@@ -64,7 +64,7 @@
                   </StackPanel>
                 </WrapPanel>
               </StackPanel>
-              <Border Grid.Column="1" Width="104" Height="104" CornerRadius="20" Background="#33000000" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
+              <Border Grid.Column="1" Width="104" Height="104" CornerRadius="20" Background="{DynamicResource LuminaHoverBackgroundBrush}" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <icons:MaterialIcon Kind="PlaylistMusic" Width="62" Height="62" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
               </Border>
             </Grid>

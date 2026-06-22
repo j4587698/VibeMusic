@@ -86,6 +86,7 @@
 
       <BoxShadows x:Key="MusicFloatingShadow">0 8 24 #80000000</BoxShadows>
       <BoxShadows x:Key="MusicSoftShadow">0 4 14 #66000000</BoxShadows>
+      <BoxShadows x:Key="MusicPillFocusShadow">0 0 0 3 #33FE5552</BoxShadows>
 
       <LinearGradientBrush x:Key="MusicHeroGradient" StartPoint="0%,0%" EndPoint="100%,100%">
         <GradientStop Color="#FE5552" Offset="0" />
@@ -195,21 +196,22 @@
 
       <BoxShadows x:Key="MusicFloatingShadow">0 8 24 #15000000</BoxShadows>
       <BoxShadows x:Key="MusicSoftShadow">0 4 14 #0A000000</BoxShadows>
+      <BoxShadows x:Key="MusicPillFocusShadow">0 0 0 3 #33BA5A58</BoxShadows>
 
       <LinearGradientBrush x:Key="MusicHeroGradient" StartPoint="0%,0%" EndPoint="100%,100%">
-        <GradientStop Color="#FFFFFF" Offset="0" />
-        <GradientStop Color="#F9FAFB" Offset="0.46" />
-        <GradientStop Color="#F3F4F6" Offset="1" />
+        <GradientStop Color="#FFA7A5" Offset="0" />
+        <GradientStop Color="#FFF0F5" Offset="0.46" />
+        <GradientStop Color="#9EE0FF" Offset="1" />
       </LinearGradientBrush>
 
       <LinearGradientBrush x:Key="MusicPrimaryGradient" StartPoint="0%,0%" EndPoint="100%,100%">
-        <GradientStop Color="#D16B68" Offset="0" />
-        <GradientStop Color="#BA5A58" Offset="1" />
+        <GradientStop Color="#FF7E7A" Offset="0" />
+        <GradientStop Color="#E8413D" Offset="1" />
       </LinearGradientBrush>
 
       <LinearGradientBrush x:Key="MusicBlueGradient" StartPoint="0%,0%" EndPoint="100%,100%">
-        <GradientStop Color="#A3BAC3" Offset="0" />
-        <GradientStop Color="#78939E" Offset="1" />
+        <GradientStop Color="#5AC8FA" Offset="0" />
+        <GradientStop Color="#007AFF" Offset="1" />
       </LinearGradientBrush>
 
       <LinearGradientBrush x:Key="MusicCoverFallbackBrush" StartPoint="0%,0%" EndPoint="100%,100%">

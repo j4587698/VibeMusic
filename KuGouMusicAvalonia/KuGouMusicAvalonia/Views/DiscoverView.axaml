@@ -15,7 +15,7 @@
     <StackPanel Margin="12,0,12,28" Spacing="18">
       <Border CornerRadius="20" MinHeight="180" ClipToBounds="True" Background="{DynamicResource MusicHeroGradient}" BoxShadow="{DynamicResource MusicFloatingShadow}">
         <Grid>
-          <Border Background="#70000000" />
+
           <Grid ColumnDefinitions="*,104" ColumnSpacing="16" Margin="18" VerticalAlignment="Bottom">
             <StackPanel Spacing="8" VerticalAlignment="Bottom" MinWidth="0">
               <TextBlock Text="DISCOVER" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />

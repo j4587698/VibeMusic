@@ -113,7 +113,7 @@
         </Style>
         <Style Selector="TextBox.MusicPillInput:focus /template/ Border#PART_BorderElement">
             <Setter Property="BorderBrush" Value="{DynamicResource MusicPrimaryBrush}" />
-            <Setter Property="BoxShadow" Value="0 0 0 3 #33FE5552" />
+            <Setter Property="BoxShadow" Value="{DynamicResource MusicPillFocusShadow}" />
         </Style>
         <Style Selector="TextBox.MusicSearchBox">
             <Setter Property="MinHeight" Value="48" />

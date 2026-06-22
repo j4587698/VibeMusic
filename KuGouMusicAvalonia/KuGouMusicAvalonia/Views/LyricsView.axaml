@@ -37,10 +37,10 @@
       <Grid Grid.Row="1" ColumnDefinitions="0.92*,1.08*" ColumnSpacing="28" Margin="0,26,0,0">
         <Grid RowDefinitions="*,Auto" VerticalAlignment="Stretch">
           <Grid MaxWidth="420" MaxHeight="420" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Ellipse Fill="#D0000000" />
-            <Ellipse Margin="28" Stroke="#332A2A2A" StrokeThickness="14" />
+            <Ellipse Fill="{DynamicResource MusicTextBrush}" Opacity="0.8" />
+            <Ellipse Margin="28" Stroke="{DynamicResource MusicTextBrush}" StrokeThickness="14" Opacity="0.1" />
             <Ellipse Margin="112" Fill="{DynamicResource MusicCoverFallbackBrush}" />
-            <Ellipse Margin="148" Stroke="#70FFFFFF" StrokeThickness="1" />
+            <Ellipse Margin="148" Stroke="{DynamicResource MusicBackgroundBrush}" StrokeThickness="1" Opacity="0.4" />
             <Ellipse Width="56" Height="56" Fill="{DynamicResource MusicBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <Border Classes="spinning-cover" Classes.playing="{Binding Player.IsPlaying}" Width="210" Height="210" CornerRadius="105" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True" Background="{DynamicResource MusicCoverFallbackBrush}" RenderTransformOrigin="50%,50%">
               <Border.RenderTransform>
@@ -56,7 +56,7 @@
               <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
             </StackPanel>
 
-            <lumina:LuminaPlaybackSlider Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="5" ThumbSize="12" TrackBrush="#332A2A2A" BufferedBrush="#555A403E" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" />
+            <lumina:LuminaPlaybackSlider Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="5" ThumbSize="12" TrackBrush="{DynamicResource LuminaDividerBrush}" BufferedBrush="{DynamicResource LuminaBorderBrush}" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16">
               <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding PreviousCommand}" ToolTip.Tip="上一首" lumina:LuminaButton.IconSize="28">
@@ -81,7 +81,7 @@
           </StackPanel>
         </Grid>
 
-        <Border Grid.Column="1" CornerRadius="26" Background="#AA201F1F" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="34,20" BoxShadow="{DynamicResource MusicFloatingShadow}">
+        <Border Grid.Column="1" CornerRadius="26" Background="{DynamicResource LuminaPopoverBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="34,20" BoxShadow="{DynamicResource MusicFloatingShadow}">
           <Grid>
             <ItemsControl ItemsSource="{Binding Lyrics.FocusedLines}" VerticalAlignment="Center">
               <ItemsControl.ItemTemplate>
@@ -142,8 +142,8 @@
           <ScrollViewer HorizontalScrollBarVisibility="Disabled">
             <StackPanel Spacing="18" Margin="2,18,2,6">
               <Grid Width="300" Height="300" HorizontalAlignment="Center">
-                <Ellipse Fill="#D0000000" />
-                <Ellipse Margin="24" Stroke="#332A2A2A" StrokeThickness="12" />
+                <Ellipse Fill="{DynamicResource MusicTextBrush}" Opacity="0.8" />
+                <Ellipse Margin="24" Stroke="{DynamicResource MusicTextBrush}" StrokeThickness="12" Opacity="0.1" />
                 <Ellipse Margin="92" Fill="{DynamicResource MusicCoverFallbackBrush}" />
                 <Ellipse Width="46" Height="46" Fill="{DynamicResource MusicBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 <Border Classes="spinning-cover" Classes.playing="{Binding Player.IsPlaying}" Width="160" Height="160" CornerRadius="80" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True" Background="{DynamicResource MusicCoverFallbackBrush}" RenderTransformOrigin="50%,50%">
@@ -159,7 +159,7 @@
                 <lumina:LuminaAutoScrollText Text="{Binding Player.CurrentArtist}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" HorizontalAlignment="Stretch" />
               </StackPanel>
 
-              <lumina:LuminaPlaybackSlider Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="5" ThumbSize="12" TrackBrush="#332A2A2A" BufferedBrush="#555A403E" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" />
+              <lumina:LuminaPlaybackSlider Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="5" ThumbSize="12" TrackBrush="{DynamicResource LuminaDividerBrush}" BufferedBrush="{DynamicResource LuminaBorderBrush}" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" />
 
               <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16">
                 <Button Classes="Ghost Icon" Width="44" Height="44" Command="{Binding PreviousCommand}" ToolTip.Tip="上一首" lumina:LuminaButton.IconSize="28">
@@ -186,7 +186,7 @@
         </TabItem>
 
         <TabItem Header="歌词">
-          <Border CornerRadius="24" Background="#AA201F1F" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18,18" Margin="2,18,2,6">
+          <Border CornerRadius="24" Background="{DynamicResource LuminaPopoverBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18,18" Margin="2,18,2,6">
             <Grid>
               <ItemsControl ItemsSource="{Binding Lyrics.FocusedLines}" VerticalAlignment="Center">
                 <ItemsControl.ItemTemplate>

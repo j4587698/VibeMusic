@@ -174,7 +174,7 @@
 
                 <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                   <TextBlock Text="{Binding Player.ProgressText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" VerticalAlignment="Center" />
-                  <lumina:LuminaPlaybackSlider Grid.Column="1" Height="22" MinHeight="0" MaxHeight="22" VerticalAlignment="Center" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="3" ThumbSize="10" TrackBrush="#333333" BufferedBrush="#555555" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" />
+                  <lumina:LuminaPlaybackSlider Grid.Column="1" Height="22" MinHeight="0" MaxHeight="22" VerticalAlignment="Center" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="3" ThumbSize="10" TrackBrush="{DynamicResource LuminaDividerBrush}" BufferedBrush="{DynamicResource LuminaBorderBrush}" ProgressBrush="{DynamicResource MusicPrimaryBrush}" ThumbBrush="{DynamicResource MusicPrimaryBrush}" />
                   <TextBlock Grid.Column="2" Text="{Binding Player.DurationText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" VerticalAlignment="Center" />
                 </Grid>
               </Grid>
@@ -240,13 +240,13 @@
   </lumina:LuminaButton.Icon>
 </Button>
               </Grid>
-              <lumina:LuminaPlaybackSlider Grid.Row="1" Margin="1,0" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="3" ThumbSize="0" TrackBrush="#332A2A2A" BufferedBrush="#555A403E" ProgressBrush="{DynamicResource MusicPrimaryBrush}" />
+              <lumina:LuminaPlaybackSlider Grid.Row="1" Margin="1,0" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="3" ThumbSize="0" TrackBrush="{DynamicResource LuminaDividerBrush}" BufferedBrush="{DynamicResource LuminaBorderBrush}" ProgressBrush="{DynamicResource MusicPrimaryBrush}" />
             </Grid>
             </lumina:LuminaBlurBackground>
     </Grid>
 
     <Grid Grid.RowSpan="2" IsVisible="{Binding IsQueueOpen}" ZIndex="20">
-      <Border Background="#7A000000" lumina:LuminaCommand.TappedCommand="{Binding CloseQueueCommand}" />
+      <Border Background="{DynamicResource MusicGlassBrush}" lumina:LuminaCommand.TappedCommand="{Binding CloseQueueCommand}" />
       <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="{Binding QueuePopupWidth}" Margin="16,16,16,90" CornerRadius="22" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="16" BoxShadow="{DynamicResource MusicFloatingShadow}">
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
           <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">

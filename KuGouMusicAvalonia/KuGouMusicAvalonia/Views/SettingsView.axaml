@@ -62,7 +62,7 @@
     <icons:MaterialIcon Kind="Sync" Width="25" Height="25" Foreground="{DynamicResource MusicPrimaryBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
-              <Button Classes="Outline" Command="{Binding ClearLoginCommand}" Height="38" CornerRadius="19" BorderBrush="#44FFFFFF" Background="#22000000" Padding="14,0">
+              <Button Classes="Outline" Command="{Binding ClearLoginCommand}" Height="38" CornerRadius="19" BorderBrush="{DynamicResource LuminaDividerBrush}" Background="{DynamicResource LuminaHoverBackgroundBrush}" Padding="14,0">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <icons:MaterialIcon Kind="Logout" Width="24" Height="24" Foreground="{DynamicResource MusicTextBrush}" />
                   <TextBlock Text="登出" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" />
@@ -96,7 +96,7 @@
     <icons:MaterialIcon Kind="Sync" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
-              <Button Classes="Outline" Command="{Binding ClearLoginCommand}" Height="38" CornerRadius="19" BorderBrush="#44FFFFFF" Background="#22000000" Padding="14,0">
+              <Button Classes="Outline" Command="{Binding ClearLoginCommand}" Height="38" CornerRadius="19" BorderBrush="{DynamicResource LuminaDividerBrush}" Background="{DynamicResource LuminaHoverBackgroundBrush}" Padding="14,0">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                   <icons:MaterialIcon Kind="Logout" Width="23" Height="23" Foreground="{DynamicResource MusicTextBrush}" />
                   <TextBlock Text="登出" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
@@ -158,7 +158,7 @@
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:UserLibraryItem">
                   <Grid ColumnDefinitions="42,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
-                    <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                    <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True">
                       <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
@@ -185,7 +185,7 @@
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:UserLibraryItem">
                     <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
-                      <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                      <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True">
                         <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                       </Border>
                       <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
@@ -208,7 +208,7 @@
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:UserLibraryItem">
                     <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
-                      <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                      <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True">
                         <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                       </Border>
                       <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
@@ -231,7 +231,7 @@
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="kugou:KugouSong">
                     <Grid ColumnDefinitions="42,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
-                      <Border Width="42" Height="42" CornerRadius="8" Background="#24FFFFFF" ClipToBounds="True">
+                      <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True">
                         <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                       </Border>
                       <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
@@ -402,7 +402,7 @@
   </ScrollViewer>
 
   <Grid IsVisible="{Binding IsLoginDialogOpen}" ZIndex="40">
-    <Border Background="#A6000000" lumina:LuminaCommand.TappedCommand="{Binding CloseLoginDialogCommand}" />
+    <Border Background="{DynamicResource MusicFloatingGlassBrush}" lumina:LuminaCommand.TappedCommand="{Binding CloseLoginDialogCommand}" />
     <Border Width="{Binding LoginDialogWidth}"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
@@ -430,7 +430,7 @@
             <StackPanel Margin="18,14,18,6" Spacing="14">
               <Border Width="220" Height="220" CornerRadius="18" Background="White" HorizontalAlignment="Center" Padding="10" ClipToBounds="True">
                 <Grid>
-                  <TextBlock Text="QR" FontSize="42" FontWeight="Black" Foreground="#3368000A" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !HasQrCode}" />
+                  <TextBlock Text="QR" FontSize="42" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryDeepBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !HasQrCode}" />
                   <Image Source="{Binding QrCodeImage}" Stretch="Uniform" IsVisible="{Binding HasQrCode}" />
                 </Grid>
               </Border>

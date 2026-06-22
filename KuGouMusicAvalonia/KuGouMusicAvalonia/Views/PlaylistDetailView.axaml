@@ -67,7 +67,7 @@
                   <Button Classes="Primary Icon" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).PlayAllCommand}" Width="38" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Padding="0" Margin="0,0,10,10" ToolTip.Tip="播放全部" lumina:LuminaButton.IconSize="22">
                     <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                   </Button>
-                  <Button Classes="Ghost Icon" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).QueueAllCommand}" Width="38" Height="38" CornerRadius="19" Background="#33000000" Padding="0" Margin="0,0,10,10" ToolTip.Tip="加入队列" lumina:LuminaButton.IconSize="22">
+                  <Button Classes="Ghost Icon" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).QueueAllCommand}" Width="38" Height="38" CornerRadius="19" Background="{DynamicResource LuminaHoverBackgroundBrush}" Padding="0" Margin="0,0,10,10" ToolTip.Tip="加入队列" lumina:LuminaButton.IconSize="22">
                     <icons:MaterialIcon Kind="PlaylistMusic" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
                   </Button>
                 </WrapPanel>

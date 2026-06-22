@@ -42,7 +42,7 @@
 
   <Grid>
     <!-- Background overlay when hovered -->
-    <Border Classes="hover-bg" Classes.show="{Binding IsHovered}" CornerRadius="16" Background="#88000000" BorderBrush="#33FFFFFF" BorderThickness="1" PointerPressed="OnDragWindow" />
+    <Border Classes="hover-bg" Classes.show="{Binding IsHovered}" CornerRadius="16" Background="{DynamicResource MusicFloatingGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" PointerPressed="OnDragWindow" />
 
     <!-- Content -->
     <Grid Margin="{Binding ContentMargin}" RowDefinitions="Auto,*,Auto">
@@ -52,8 +52,8 @@
         <!-- Title and Artist -->
         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center" ClipToBounds="True">
           <Border Width="8" Height="8" CornerRadius="4" Background="{DynamicResource MusicPrimaryBrush}" />
-          <lumina:LuminaAutoScrollText Grid.Column="1" Text="{Binding Player.CurrentTitle}" FontSize="12" FontWeight="Bold" Foreground="#E8FFFFFF" HorizontalAlignment="Stretch" MaxWidth="150" />
-          <TextBlock Grid.Column="2" Text="{Binding Player.CurrentArtist}" FontSize="11" Foreground="#99FFFFFF" VerticalAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis" />
+          <lumina:LuminaAutoScrollText Grid.Column="1" Text="{Binding Player.CurrentTitle}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" MaxWidth="150" />
+          <TextBlock Grid.Column="2" Text="{Binding Player.CurrentArtist}" FontSize="11" Foreground="{DynamicResource MusicTextMutedBrush}" VerticalAlignment="Center" MaxWidth="100" TextTrimming="CharacterEllipsis" />
         </Grid>
         
         <!-- Controls -->
@@ -61,14 +61,14 @@
           <Button Classes="Ghost Icon" Width="28" Height="28" Padding="0" Command="{Binding ToggleLockCommand}" ToolTip.Tip="锁定悬浮歌词 (鼠标穿透，可在设置页解锁)" lumina:LuminaButton.IconSize="16">
   <lumina:LuminaButton.Icon>
     <Grid>
-                  <icons:MaterialIcon IsVisible="{Binding !IsLocked}" Kind="LockOpenOutline" Width="16" Height="16" Foreground="#CCFFFFFF" />
+                  <icons:MaterialIcon IsVisible="{Binding !IsLocked}" Kind="LockOpenOutline" Width="16" Height="16" Foreground="{DynamicResource MusicTextSoftBrush}" />
                   <icons:MaterialIcon IsVisible="{Binding IsLocked}" Kind="Lock" Width="16" Height="16" Foreground="{DynamicResource MusicPrimaryBrush}" />
                 </Grid>
   </lumina:LuminaButton.Icon>
 </Button>
           <Button Classes="Ghost Icon" Width="28" Height="28" Padding="0" Click="OnCloseWindow" ToolTip.Tip="关闭悬浮歌词" lumina:LuminaButton.IconSize="18">
   <lumina:LuminaButton.Icon>
-    <icons:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="#CCFFFFFF" />
+    <icons:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
         </StackPanel>
@@ -87,14 +87,14 @@
               HorizontalAlignment="Stretch"
               VerticalAlignment="Center"
               SungBrush="{DynamicResource MusicPrimaryBrush}"
-              UnsungBrush="#99FFFFFF"
+              UnsungBrush="{DynamicResource MusicTextMutedBrush}"
               IsVisible="{Binding Lyrics.ActiveLine.ShowWords, FallbackValue=False}" />
         </Grid>
-        <TextBlock Text="{Binding Lyrics.NextLineText}" FontSize="{Binding NextLineFontSize}" FontWeight="Bold" Foreground="#CCFFFFFF" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" HorizontalAlignment="Stretch" IsVisible="{Binding ShowExpandedContent}" />
+        <TextBlock Text="{Binding Lyrics.NextLineText}" FontSize="{Binding NextLineFontSize}" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" HorizontalAlignment="Stretch" IsVisible="{Binding ShowExpandedContent}" />
       </StackPanel>
 
       <!-- Progress Bar (Visible when hovered) -->
-      <Border Grid.Row="2" Classes="hover-bg" Classes.show="{Binding IsHovered}" Height="2" CornerRadius="1" Background="#24FFFFFF" IsHitTestVisible="False" IsVisible="{Binding ShowExpandedContent}">
+      <Border Grid.Row="2" Classes="hover-bg" Classes.show="{Binding IsHovered}" Height="2" CornerRadius="1" Background="{DynamicResource LuminaDividerBrush}" IsHitTestVisible="False" IsVisible="{Binding ShowExpandedContent}">
         <ProgressBar Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress}" Height="2" Background="Transparent" Foreground="{DynamicResource MusicPrimaryBrush}" />
       </Border>
       
