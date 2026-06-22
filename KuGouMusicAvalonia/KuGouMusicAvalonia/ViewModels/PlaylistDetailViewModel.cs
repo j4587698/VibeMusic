@@ -150,7 +150,7 @@ public partial class PlaylistDetailViewModel : ViewModelBase
     [RelayCommand]
     private void Back()
     {
-        ShellNavigationService.Instance.Navigate("NavPlaylists");
+        ShellNavigationService.Instance.GoBack();
     }
 
     [RelayCommand]

@@ -135,7 +135,7 @@ public partial class ArtistDetailViewModel : ViewModelBase
     [RelayCommand]
     private void Back()
     {
-           ShellNavigationService.Instance.Navigate("NavArtists");
+        ShellNavigationService.Instance.GoBack();
     }
 
     [RelayCommand]

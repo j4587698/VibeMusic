@@ -20,8 +20,6 @@ public partial class MainViewModel : ViewModelBase
     private readonly SettingsViewModel _settingsViewModel = new();
     private readonly NowPlayingViewModel _nowPlayingViewModel = new();
     private readonly LyricsViewModel _lyricsViewModel = new();
-    private string _returnNavigationKey = "NavDiscover";
-    private object? _returnPage;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDiscoverActive))]
@@ -41,9 +39,6 @@ public partial class MainViewModel : ViewModelBase
     private string _activeNavigationKey = "NavDiscover";
 
     [ObservableProperty]
-    private object _currentPage;
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDesktopLayout))]
     [NotifyPropertyChangedFor(nameof(ShowCompactMiniPlayer))]
     [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
@@ -59,6 +54,10 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty]
     private double _queuePopupWidth = 420;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
+    private bool _isInnerPageActive;
 
     public PlayerService Player => PlayerService.Instance;
 
@@ -76,13 +75,14 @@ public partial class MainViewModel : ViewModelBase
     public bool ShowCompactMiniPlayer => IsCompactLayout && ShowMiniPlayer;
     public bool ShowCompactChrome => ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
     public bool ShowShellChrome => IsDesktopLayout || ShowCompactChrome;
-    public bool ShowShellHeader => IsCompactLayout && ShowCompactChrome;
+    public bool ShowShellHeader => ShowCompactChrome && IsInnerPageActive;
     public double PageBottomInset => ShowCompactMiniPlayer ? CompactMiniPlayerPageBottomInset : 0;
+    public NowPlayingViewModel NowPlayingPage => _nowPlayingViewModel;
+    public LyricsViewModel LyricsPage => _lyricsViewModel;
 
     public MainViewModel()
     {
         _ = LyricsService.Instance;
-        CurrentPage = _discoverViewModel;
         Player.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName is nameof(PlayerService.CurrentSong) or nameof(PlayerService.HasSong))
@@ -92,12 +92,7 @@ public partial class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(PageBottomInset));
             }
         };
-        ShellNavigationService.Instance.NavigationRequested += key => Navigate(key);
-        ShellNavigationService.Instance.NowPlayingCloseRequested += CloseNowPlaying;
         ShellNavigationService.Instance.QueueToggleRequested += ToggleQueue;
-        ShellNavigationService.Instance.PlaylistDetailRequested += OpenPlaylistDetail;
-        ShellNavigationService.Instance.RankingDetailRequested += OpenRankingDetail;
-        ShellNavigationService.Instance.ArtistDetailRequested += OpenArtistDetail;
     }
 
     partial void OnActiveNavigationKeyChanged(string value)
@@ -107,7 +102,6 @@ public partial class MainViewModel : ViewModelBase
         {
             IsShellMenuOpen = false;
         }
-        CurrentPage = ResolveNavigationPage(value);
     }
 
     partial void OnIsCompactLayoutChanged(bool value)
@@ -115,21 +109,27 @@ public partial class MainViewModel : ViewModelBase
         IsShellMenuOpen = !value;
     }
 
-    private object ResolveNavigationPage(string value)
+    public object ResolveRootNavigationPage(string value)
     {
         return value switch
         {
             "NavDiscover" => _discoverViewModel,
             "NavPlaylists" => _playlistsViewModel,
-            "NavCloud" => RefreshCloudPage(),
             "NavArtists" => _artistsViewModel,
             "NavRankings" => _rankingsViewModel,
-            "NavHistory" => _historyViewModel,
             "NavSearch" => _searchViewModel,
-            "NavSettings" => RefreshSettingsPage(),
-            "NavNowPlaying" => _nowPlayingViewModel,
-            "NavLyrics" => _lyricsViewModel,
             _ => _discoverViewModel
+        };
+    }
+
+    public object? ResolveInnerNavigationPage(string value)
+    {
+        return value switch
+        {
+            "NavSettings" => RefreshSettingsPage(),
+            "NavHistory" => _historyViewModel,
+            "NavCloud" => RefreshCloudPage(),
+            _ => null
         };
     }
 
@@ -150,68 +150,26 @@ public partial class MainViewModel : ViewModelBase
     {
         if (!string.IsNullOrWhiteSpace(key))
         {
-            if (ActiveNavigationKey == key)
-            {
-                CurrentPage = ResolveNavigationPage(key);
-                return;
-            }
-
             ActiveNavigationKey = key;
         }
-    }
-
-    private void OpenPlaylistDetail(KugouPlaylist playlist)
-    {
-        if (playlist is null) return;
-        ActiveNavigationKey = "NavPlaylists";
-        CurrentPage = new PlaylistDetailViewModel(playlist);
-    }
-
-    private void OpenRankingDetail(KugouRank rank)
-    {
-        if (rank is null) return;
-        ActiveNavigationKey = "NavRankings";
-        CurrentPage = new RankingDetailViewModel(rank);
-    }
-
-    private void OpenArtistDetail(KugouArtist artist)
-    {
-        if (artist is null) return;
-        ActiveNavigationKey = "NavArtists";
-        CurrentPage = new ArtistDetailViewModel(artist);
     }
 
     [RelayCommand]
     private void OpenNowPlaying()
     {
-        if (ActiveNavigationKey != "NavNowPlaying")
-        {
-            _returnNavigationKey = ActiveNavigationKey;
-            _returnPage = CurrentPage;
-        }
-
-        ActiveNavigationKey = "NavNowPlaying";
-    }
-
-    private void CloseNowPlaying()
-    {
-        var targetKey = string.IsNullOrWhiteSpace(_returnNavigationKey) || _returnNavigationKey == "NavNowPlaying"
-            ? "NavDiscover"
-            : _returnNavigationKey;
-        var targetPage = _returnPage ?? ResolveNavigationPage(targetKey);
-
-        if (ActiveNavigationKey != targetKey)
-        {
-            ActiveNavigationKey = targetKey;
-        }
-
-        CurrentPage = targetPage;
+        ShellNavigationService.Instance.OpenNowPlaying();
     }
 
     [RelayCommand]
     private void OpenLyrics()
     {
-        ActiveNavigationKey = "NavLyrics";
+        ShellNavigationService.Instance.OpenLyrics();
+    }
+
+    [RelayCommand]
+    private void OpenMy()
+    {
+        ShellNavigationService.Instance.Navigate("NavSettings");
     }
 
     [RelayCommand]
