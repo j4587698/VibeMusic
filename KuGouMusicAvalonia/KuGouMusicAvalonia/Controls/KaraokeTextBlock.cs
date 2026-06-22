@@ -28,6 +28,12 @@ public sealed class KaraokeTextBlock : Control
     public static readonly StyledProperty<IBrush?> UnsungBrushProperty =
         AvaloniaProperty.Register<KaraokeTextBlock, IBrush?>(nameof(UnsungBrush));
 
+    public static readonly StyledProperty<IBrush?> StrokeBrushProperty =
+        AvaloniaProperty.Register<KaraokeTextBlock, IBrush?>(nameof(StrokeBrush));
+
+    public static readonly StyledProperty<double> StrokeThicknessProperty =
+        AvaloniaProperty.Register<KaraokeTextBlock, double>(nameof(StrokeThickness), 0);
+
     public static readonly StyledProperty<double> FontSizeProperty =
         AvaloniaProperty.Register<KaraokeTextBlock, double>(nameof(FontSize), 36);
 
@@ -42,6 +48,7 @@ public sealed class KaraokeTextBlock : Control
 
     private TextLayout? _unsung;
     private TextLayout? _sung;
+    private Geometry? _textGeometry;
     private double _builtWidth = double.NaN;
     private bool _usesLayoutAlignment;
     private string _text = string.Empty;
@@ -68,6 +75,18 @@ public sealed class KaraokeTextBlock : Control
     {
         get => GetValue(UnsungBrushProperty);
         set => SetValue(UnsungBrushProperty, value);
+    }
+
+    public IBrush? StrokeBrush
+    {
+        get => GetValue(StrokeBrushProperty);
+        set => SetValue(StrokeBrushProperty, value);
+    }
+
+    public double StrokeThickness
+    {
+        get => GetValue(StrokeThicknessProperty);
+        set => SetValue(StrokeThicknessProperty, value);
     }
 
     public double FontSize
@@ -116,10 +135,13 @@ public sealed class KaraokeTextBlock : Control
             change.Property == FontFamilyProperty ||
             change.Property == TextAlignmentProperty ||
             change.Property == SungBrushProperty ||
-            change.Property == UnsungBrushProperty)
+            change.Property == UnsungBrushProperty ||
+            change.Property == StrokeBrushProperty ||
+            change.Property == StrokeThicknessProperty)
         {
             _unsung = null;
             _sung = null;
+            _textGeometry = null;
             _builtWidth = double.NaN;
             InvalidateMeasure();
         }
@@ -166,6 +188,12 @@ public sealed class KaraokeTextBlock : Control
 
         using (context.PushTransform(Matrix.CreateTranslation(offsetX, 0)))
         {
+            if (_textGeometry != null && StrokeThickness > 0 && StrokeBrush != null)
+            {
+                var pen = new Pen(StrokeBrush, StrokeThickness) { LineJoin = PenLineJoin.Round };
+                context.DrawGeometry(null, pen, _textGeometry);
+            }
+
             _unsung.Draw(context, default);
             DrawSung(context);
         }
@@ -179,6 +207,7 @@ public sealed class KaraokeTextBlock : Control
             _text = string.Empty;
             _unsung = null;
             _sung = null;
+            _textGeometry = null;
             return;
         }
 
@@ -197,6 +226,31 @@ public sealed class KaraokeTextBlock : Control
 
         _unsung = new TextLayout(_text, typeface, FontSize, UnsungBrush, alignment, TextWrapping.Wrap, maxWidth: constraint);
         _sung = new TextLayout(_text, typeface, FontSize, SungBrush, alignment, TextWrapping.Wrap, maxWidth: constraint);
+
+        if (StrokeThickness > 0 && StrokeBrush != null)
+        {
+            var ft = new FormattedText(
+                _text,
+                System.Globalization.CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                typeface,
+                FontSize,
+                null)
+            {
+                TextAlignment = alignment
+            };
+            
+            if (double.IsFinite(constraint) && constraint > 0)
+            {
+                ft.MaxTextWidth = constraint;
+            }
+
+            _textGeometry = ft.BuildGeometry(default);
+        }
+        else
+        {
+            _textGeometry = null;
+        }
     }
 
     private void DrawSung(DrawingContext context)
