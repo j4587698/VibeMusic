@@ -77,7 +77,7 @@
       <!-- Lyrics (Always visible) -->
       <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="6" Margin="0,4" IsHitTestVisible="False">
         <Grid HorizontalAlignment="Stretch">
-          <TextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="{Binding CurrentLineFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="{Binding CurrentLineMaxLines}" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding Lyrics.ActiveLine.ShowPlain, FallbackValue=True}" />
+          <controls:OutlinedTextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="{Binding CurrentLineFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" Stroke="#66000000" StrokeThickness="1.5" TextAlignment="Center" TextWrapping="Wrap" MaxLines="{Binding CurrentLineMaxLines}" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding Lyrics.ActiveLine.ShowPlain, FallbackValue=True}" />
           <controls:KaraokeTextBlock
               Words="{Binding Lyrics.ActiveLine.Words}"
               PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
@@ -88,9 +88,11 @@
               VerticalAlignment="Center"
               SungBrush="{DynamicResource MusicPrimaryBrush}"
               UnsungBrush="{DynamicResource MusicTextMutedBrush}"
+              StrokeBrush="#66000000"
+              StrokeThickness="1.5"
               IsVisible="{Binding Lyrics.ActiveLine.ShowWords, FallbackValue=False}" />
         </Grid>
-        <TextBlock Text="{Binding Lyrics.NextLineText}" FontSize="{Binding NextLineFontSize}" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" HorizontalAlignment="Stretch" IsVisible="{Binding ShowExpandedContent}" />
+        <controls:OutlinedTextBlock Text="{Binding Lyrics.NextLineText}" FontSize="{Binding NextLineFontSize}" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" Stroke="#66000000" StrokeThickness="1" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" HorizontalAlignment="Stretch" IsVisible="{Binding ShowExpandedContent}" />
       </StackPanel>
 
       <!-- Progress Bar (Visible when hovered) -->
