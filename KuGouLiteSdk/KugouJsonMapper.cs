@@ -71,9 +71,13 @@ internal static partial class KugouJsonMapper
     public static KugouAudioUrl MapAudioUrl(KugouResponse response)
     {
         var root = Parse(response);
+        var record = Object(root);
+        var data = Object(Get(record, "data"));
+        var info = Object(Get(record, "info"));
         return new KugouAudioUrl
         {
             Url = ResolveUrl(root),
+            Bitrate = ParseOptionalInt(Pick(Get(record, "bitRate"), Get(record, "bitrate"), Get(data, "bitRate"), Get(data, "bitrate"), Get(info, "bitRate"), Get(info, "bitrate"))),
             Loudness = ResolveTrackLoudness(root)
         };
     }
@@ -82,13 +86,27 @@ internal static partial class KugouJsonMapper
     {
         var root = Parse(response);
         var source = Get(Object(root), "data");
-        var first = Object(ArrayFrom(source).FirstOrDefault()) ?? Object(source);
-        if (first is null)
+        var array = ArrayFrom(source);
+
+        var goods = new System.Collections.Generic.List<KugouSongRelateGood>();
+        foreach (var item in array)
         {
-            return System.Array.Empty<KugouSongRelateGood>();
+            var record = Object(item);
+            var hash = ReadString(Get(record, "hash"));
+            var quality = ReadString(Get(record, "quality"));
+            if (!string.IsNullOrWhiteSpace(hash) || !string.IsNullOrWhiteSpace(quality))
+            {
+                goods.Add(new KugouSongRelateGood { Hash = EmptyToNull(hash), Quality = EmptyToNull(quality) });
+            }
         }
 
-        return BuildRelateGoods(first, null).ToArray();
+        var first = Object(array.FirstOrDefault()) ?? Object(source);
+        if (first is not null)
+        {
+            goods.AddRange(BuildRelateGoods(first, null));
+        }
+
+        return goods.ToArray();
     }
 
     public static KugouSong MapSong(JsonNode? json, KugouSongMapKind kind = KugouSongMapKind.Generic, string? artistId = null)
@@ -691,6 +709,11 @@ internal static partial class KugouJsonMapper
                 continue;
             }
 
+            if (value is JsonArray jsonArray && jsonArray.Count == 0)
+            {
+                continue;
+            }
+
             return value;
         }
 
@@ -985,7 +1008,9 @@ internal static partial class KugouJsonMapper
             Get(record, "play_url"),
             Get(record, "playUrl"),
             Get(record, "downurl"),
-            Get(record, "down_url"));
+            Get(record, "down_url"),
+            Get(record, "tracker_url"),
+            Get(record, "en_tracker_url"));
         var url = ResolveUrl(urlField);
         if (!string.IsNullOrWhiteSpace(url))
         {

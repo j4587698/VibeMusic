@@ -513,7 +513,7 @@ public partial class KugouLiteClient
         return await SendAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<KugouResponse> GetSongUrlNewAsync(string hash, long albumAudioId, bool freePart = false, CancellationToken cancellationToken = default)
+    public async Task<KugouResponse> GetSongUrlNewAsync(string hash, long albumAudioId, string[] qualities, bool freePart = false, CancellationToken cancellationToken = default)
     {
         var userId = CookieStore.Get("userid") ?? "0";
         var mid = CookieStore.Get("KUGOU_API_MID") ?? string.Empty;
@@ -523,9 +523,9 @@ public partial class KugouLiteClient
         var body = D(
             ("area_code", "1"),
             ("behavior", "play"),
-            ("qualities", new[] { "128", "320", "flac", "high", "multitrack", "viper_atmos", "viper_tape", "viper_clear" }),
+            ("qualities", qualities),
             ("resource", D(
-                ("album_audio_id", albumAudioId),
+                ("album_audio_id", albumAudioId.ToString()),
                 ("collect_list_id", "3"),
                 ("collect_time", clientTimeMs),
                 ("hash", hash),
@@ -537,7 +537,7 @@ public partial class KugouLiteClient
                 ("all_m", 1),
                 ("auth", string.Empty),
                 ("is_free_part", freePart ? 1 : 0),
-                ("key", KugouCrypto.Md5Hex($"{hash}{KugouConstants.LiteSignKeySalt}{KugouConstants.LegacyAppId}{mid}{userId}")),
+                ("key", KugouCrypto.Md5Hex($"{hash}{KugouConstants.LiteSignKeySalt}{KugouConstants.LiteAppId}{mid}{userId}")),
                 ("module_id", 0),
                 ("need_climax", 1),
                 ("need_xcdn", 1),
@@ -547,7 +547,7 @@ public partial class KugouLiteClient
                 ("priv_vip_type", "6"),
                 ("viptoken", CookieStore.Get("vip_token") ?? string.Empty))),
             ("userid", userId),
-            ("vip", CookieStore.Get("vip_type") ?? "0"));
+            ("vip", int.TryParse(CookieStore.Get("vip_type"), out var vipType) ? vipType : 0));
 
         var request = new KugouRequest
         {
