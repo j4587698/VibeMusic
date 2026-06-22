@@ -29,7 +29,7 @@ public sealed partial class LyricsViewModel : ViewModelBase
     [RelayCommand]
     private void OpenNowPlaying()
     {
-        ShellNavigationService.Instance.Navigate("NavNowPlaying");
+        ShellNavigationService.Instance.GoBack();
     }
 
     [RelayCommand]

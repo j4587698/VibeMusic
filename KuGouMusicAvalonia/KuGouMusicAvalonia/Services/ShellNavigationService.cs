@@ -12,7 +12,10 @@ public sealed class ShellNavigationService
     }
 
     public event Action<string>? NavigationRequested;
+    public event Action? BackRequested;
+    public event Action? NowPlayingRequested;
     public event Action? NowPlayingCloseRequested;
+    public event Action? LyricsRequested;
     public event Action? QueueToggleRequested;
     public event Action<KugouPlaylist>? PlaylistDetailRequested;
     public event Action<KugouRank>? RankingDetailRequested;
@@ -26,9 +29,24 @@ public sealed class ShellNavigationService
         }
     }
 
+    public void GoBack()
+    {
+        BackRequested?.Invoke();
+    }
+
+    public void OpenNowPlaying()
+    {
+        NowPlayingRequested?.Invoke();
+    }
+
     public void CloseNowPlaying()
     {
         NowPlayingCloseRequested?.Invoke();
+    }
+
+    public void OpenLyrics()
+    {
+        LyricsRequested?.Invoke();
     }
 
     public void ToggleQueue()

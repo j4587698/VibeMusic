@@ -47,7 +47,7 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
     [RelayCommand]
     private void Close()
     {
-        ShellNavigationService.Instance.CloseNowPlaying();
+        ShellNavigationService.Instance.GoBack();
     }
 
     [RelayCommand]
@@ -134,7 +134,13 @@ public sealed partial class NowPlayingViewModel : ViewModelBase
     [RelayCommand]
     private void OpenLyrics()
     {
-        IsCompactLyricsVisible = true;
+        if (IsWideLayout)
+        {
+            IsCompactLyricsVisible = true;
+            return;
+        }
+
+        ShellNavigationService.Instance.OpenLyrics();
     }
 
     public void ShowLyricSeekPreview(LyricLine? line)

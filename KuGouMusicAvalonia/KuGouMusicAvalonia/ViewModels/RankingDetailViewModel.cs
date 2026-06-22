@@ -77,7 +77,7 @@ public partial class RankingDetailViewModel : ViewModelBase
     [RelayCommand]
     private void Back()
     {
-        ShellNavigationService.Instance.Navigate("NavRankings");
+        ShellNavigationService.Instance.GoBack();
     }
 
     [RelayCommand]
