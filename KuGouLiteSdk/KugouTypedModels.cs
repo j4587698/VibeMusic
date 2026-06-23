@@ -14,7 +14,9 @@ public sealed record KugouResolvedAudioSource(
     string Url,
     string? Quality,
     string Effect,
-    KugouResponse Raw);
+    KugouResponse Raw,
+    string? EnEkey = null,
+    long FileSize = 0);
 
 public sealed record KugouConceptVipEnsureResult(
     bool IsLoggedIn,
@@ -261,4 +263,6 @@ public sealed class KugouAudioUrl
     public string Url { get; init; } = string.Empty;
     public int? Bitrate { get; init; }
     public KugouTrackLoudness? Loudness { get; init; }
+    public string? EnEkey { get; init; }
+    public long FileSize { get; init; }
 }

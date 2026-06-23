@@ -78,7 +78,9 @@ internal static partial class KugouJsonMapper
         {
             Url = ResolveUrl(root),
             Bitrate = ParseOptionalInt(Pick(Get(record, "bitRate"), Get(record, "bitrate"), Get(data, "bitRate"), Get(data, "bitrate"), Get(info, "bitRate"), Get(info, "bitrate"))),
-            Loudness = ResolveTrackLoudness(root)
+            Loudness = ResolveTrackLoudness(root),
+            EnEkey = ReadString(Pick(Get(record, "en_ekey"), Get(data, "en_ekey"), Get(info, "en_ekey"))),
+            FileSize = ParseOptionalLong(Pick(Get(record, "filesize"), Get(record, "fileSize"), Get(data, "filesize"), Get(data, "fileSize"), Get(info, "filesize"), Get(info, "fileSize"))) ?? 0
         };
     }
 
