@@ -410,11 +410,14 @@ public sealed partial class KugouLiteClient
                 {
                     var bitrate = lastResult.Data!.Bitrate;
                     var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
-                    return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw);
+                    return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw, lastResult.Data.EnEkey, lastResult.Data.FileSize);
                 }
                 else
                 {
-                    // v6 URL is encrypted. Fall back to v5 using the extracted hashes.
+                    // v6 URL is encrypted. We can play it directly with KugouCryptoHttpStream!
+                    var bitrate = lastResult.Data!.Bitrate;
+                    var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
+                    return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw, lastResult.Data.EnEkey, lastResult.Data.FileSize);
                 }
             }
         }
@@ -439,7 +442,7 @@ public sealed partial class KugouLiteClient
                     else resolvedQuality = "128";
                 }
                 
-                return new KugouResolvedAudioSource(qualityResult.Data!.Url, resolvedQuality, "none", qualityResult.Raw);
+                return new KugouResolvedAudioSource(qualityResult.Data!.Url, resolvedQuality, "none", qualityResult.Raw, qualityResult.Data.EnEkey, qualityResult.Data.FileSize);
             }
         }
 
@@ -450,7 +453,7 @@ public sealed partial class KugouLiteClient
             {
                 var bitrate = lastResult.Data!.Bitrate;
                 var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
-                return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw);
+                return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw, lastResult.Data.EnEkey, lastResult.Data.FileSize);
             }
         }
 
@@ -459,14 +462,14 @@ public sealed partial class KugouLiteClient
         {
             var bitrate = lastResult.Data!.Bitrate;
             var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
-            return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw);
+            return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw, lastResult.Data.EnEkey, lastResult.Data.FileSize);
         }
         var publicResponse = await GetPublicSongInfoAsync(song.Hash, cancellationToken: cancellationToken).ConfigureAwait(false);
         lastResult = new KugouTypedResult<KugouAudioUrl>(KugouJsonMapper.MapAudioUrl(publicResponse), publicResponse);
         var finalBitrate = lastResult.Data?.Bitrate;
         var finalQuality = finalBitrate >= 800000 ? "flac" : (finalBitrate >= 320000 ? "320" : "128");
 
-        return new KugouResolvedAudioSource(lastResult.Data?.Url ?? string.Empty, finalQuality, "none", lastResult.Raw);
+        return new KugouResolvedAudioSource(lastResult.Data?.Url ?? string.Empty, finalQuality, "none", lastResult.Raw, lastResult.Data?.EnEkey, lastResult.Data?.FileSize ?? 0);
     }
 
     public async Task<KugouListResult<KugouSongRelateGood>> GetSongPrivilegeLiteTypedAsync(string hash, long? albumId = null, CancellationToken cancellationToken = default)

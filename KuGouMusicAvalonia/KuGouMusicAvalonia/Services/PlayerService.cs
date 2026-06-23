@@ -1020,7 +1020,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             throw new InvalidOperationException("酷狗接口没有返回可播放地址。" + Environment.NewLine + DescribeResponse(source.Raw));
         }
 
-        return new PlaybackSource(source.Url, IsLocalFile: false, Quality: source.Quality);
+        return new PlaybackSource(source.Url, IsLocalFile: false, Quality: source.Quality, EnEkey: source.EnEkey, FileSize: source.FileSize);
     }
 
     private async Task LoadRemotePlaybackAsync(
@@ -1030,6 +1030,14 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         int requestId,
         CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrWhiteSpace(playbackSource.EnEkey) && playbackSource.FileSize > 0)
+        {
+            var cryptoStream = new KuGouLiteSdk.Crypto.KugouCryptoHttpStream(playbackSource.Location, playbackSource.EnEkey, playbackSource.FileSize);
+            var streamHandle = new StreamHandle(cryptoStream);
+            await LoadPlayerHandleAsync(player, streamHandle, requestId, cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
         var cachePath = AudioCacheService.Instance.GetProgressiveCacheTargetPath(song, playbackSource.Location, playbackSource.Quality);
         if (!string.IsNullOrWhiteSpace(cachePath))
         {
@@ -1466,7 +1474,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             : $"{value.Minutes}:{value.Seconds:00}";
     }
 
-    private sealed record PlaybackSource(string Location, bool IsLocalFile, string? Quality);
+    private sealed record PlaybackSource(string Location, bool IsLocalFile, string? Quality, string? EnEkey = null, long FileSize = 0);
 
     public void Dispose()
     {
