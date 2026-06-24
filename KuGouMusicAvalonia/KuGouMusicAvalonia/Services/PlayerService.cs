@@ -1032,7 +1032,11 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     {
         var cachePath = AudioCacheService.Instance.GetProgressiveCacheTargetPath(song, playbackSource.Location, playbackSource.Quality);
 
-        if (!string.IsNullOrWhiteSpace(playbackSource.EnEkey) && playbackSource.FileSize > 0)
+        bool isEncryptedFormat = playbackSource.Location.Contains(".mflac") || 
+                               playbackSource.Location.Contains(".mgg") || 
+                               playbackSource.Location.Contains(".kgm");
+
+        if (isEncryptedFormat && !string.IsNullOrWhiteSpace(playbackSource.EnEkey) && playbackSource.FileSize > 0)
         {
             var cryptoStream = new KuGouLiteSdk.Crypto.KugouCryptoHttpStream(playbackSource.Location, playbackSource.EnEkey, playbackSource.FileSize);
             
