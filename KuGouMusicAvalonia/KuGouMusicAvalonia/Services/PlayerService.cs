@@ -1030,15 +1030,40 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         int requestId,
         CancellationToken cancellationToken)
     {
+        var cachePath = AudioCacheService.Instance.GetProgressiveCacheTargetPath(song, playbackSource.Location, playbackSource.Quality);
+
         if (!string.IsNullOrWhiteSpace(playbackSource.EnEkey) && playbackSource.FileSize > 0)
         {
             var cryptoStream = new KuGouLiteSdk.Crypto.KugouCryptoHttpStream(playbackSource.Location, playbackSource.EnEkey, playbackSource.FileSize);
-            var streamHandle = new StreamHandle(cryptoStream);
-            await LoadPlayerHandleAsync(player, streamHandle, requestId, cancellationToken).ConfigureAwait(false);
+            
+            AudioCallbackHandlerBase cryptoHandle;
+            if (!string.IsNullOrWhiteSpace(cachePath))
+            {
+                var diskHandle = new DiskCachedStreamHandle(cryptoStream, totalSize: playbackSource.FileSize, cacheFilePath: cachePath, deleteCacheOnDispose: true, enableSeek: true, leaveOpen: false);
+                diskHandle.DownloadCompleted += (success, error) =>
+                {
+                    if (success)
+                    {
+                        AudioCacheService.Instance.MarkProgressiveCacheCompleted(song, cachePath, playbackSource.Quality, playbackSource.Location);
+                    }
+                    else
+                    {
+                        AudioCacheService.Instance.MarkProgressiveCacheFailed(song, cachePath, playbackSource.Quality, playbackSource.Location, error ?? new Exception("Download failed"));
+                    }
+                };
+                
+                // Note: DiskCachedStreamHandle natively supports ProgressChanged but we skip registering it as ProgressiveHttpStreamHandle does not expose it via PlayerService.
+                cryptoHandle = diskHandle;
+            }
+            else
+            {
+                cryptoHandle = new StreamHandle(cryptoStream);
+            }
+
+            await LoadPlayerHandleAsync(player, cryptoHandle, requestId, cancellationToken).ConfigureAwait(false);
             return;
         }
 
-        var cachePath = AudioCacheService.Instance.GetProgressiveCacheTargetPath(song, playbackSource.Location, playbackSource.Quality);
         if (!string.IsNullOrWhiteSpace(cachePath))
         {
             ProgressiveHttpStreamHandle? progressiveHandle = null;
