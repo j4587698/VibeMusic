@@ -1032,12 +1032,15 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     {
         var cachePath = AudioCacheService.Instance.GetProgressiveCacheTargetPath(song, playbackSource.Location, playbackSource.Quality);
 
-        bool isEncryptedFormat = playbackSource.Location.Contains(".mflac") || 
-                               playbackSource.Location.Contains(".mgg") || 
-                               playbackSource.Location.Contains(".kgm");
+        var isEncryptedFormat = IsKugouEncryptedFormat(playbackSource.Location);
 
-        if (isEncryptedFormat && !string.IsNullOrWhiteSpace(playbackSource.EnEkey) && playbackSource.FileSize > 0)
+        if (isEncryptedFormat)
         {
+            if (string.IsNullOrWhiteSpace(playbackSource.EnEkey) || playbackSource.FileSize <= 0)
+            {
+                throw new InvalidOperationException("KuGou encrypted audio is missing en_ekey or file size.");
+            }
+
             var cryptoStream = new KuGouLiteSdk.Crypto.KugouCryptoHttpStream(playbackSource.Location, playbackSource.EnEkey, playbackSource.FileSize);
             
             AudioCallbackHandlerBase cryptoHandle;
@@ -1504,6 +1507,11 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     }
 
     private sealed record PlaybackSource(string Location, bool IsLocalFile, string? Quality, string? EnEkey = null, long FileSize = 0);
+
+    private static bool IsKugouEncryptedFormat(string location) =>
+        location.Contains(".mflac", StringComparison.OrdinalIgnoreCase) ||
+        location.Contains(".mgg", StringComparison.OrdinalIgnoreCase) ||
+        location.Contains(".kgm", StringComparison.OrdinalIgnoreCase);
 
     public void Dispose()
     {

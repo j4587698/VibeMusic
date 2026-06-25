@@ -22,6 +22,8 @@ internal static partial class KugouJsonMapper
 {
     private const string DefaultCoverUrl = "https://imge.kugou.com/soft/collection/default.jpg";
 
+    private readonly record struct AudioUrlCandidate(string Url, JsonObject? Record, JsonObject? Info, bool IsEncrypted);
+
     public static KugouListResult<T> ToListResult<T>(KugouResponse response, Func<JsonNode?, T> mapper)
     {
         var root = Parse(response);
@@ -74,13 +76,41 @@ internal static partial class KugouJsonMapper
         var record = Object(root);
         var data = Object(Get(record, "data"));
         var info = Object(Get(record, "info"));
+        var candidate = ResolveAudioUrlCandidate(root);
+        var candidateRecord = candidate.Record;
+        var candidateInfo = candidate.Info ?? Object(Get(candidateRecord, "info"));
+        var fileSize = candidate.IsEncrypted
+            ? Pick(
+                Get(candidateRecord, "en_filesize"),
+                Get(candidateRecord, "en_fileSize"),
+                Get(candidateInfo, "en_filesize"),
+                Get(candidateInfo, "en_fileSize"),
+                Get(candidateRecord, "filesize"),
+                Get(candidateRecord, "fileSize"),
+                Get(candidateInfo, "filesize"),
+                Get(candidateInfo, "fileSize"),
+                Get(record, "en_filesize"),
+                Get(data, "en_filesize"),
+                Get(info, "en_filesize"))
+            : Pick(
+                Get(candidateRecord, "filesize"),
+                Get(candidateRecord, "fileSize"),
+                Get(candidateInfo, "filesize"),
+                Get(candidateInfo, "fileSize"),
+                Get(record, "filesize"),
+                Get(record, "fileSize"),
+                Get(data, "filesize"),
+                Get(data, "fileSize"),
+                Get(info, "filesize"),
+                Get(info, "fileSize"));
+
         return new KugouAudioUrl
         {
-            Url = ResolveUrl(root),
-            Bitrate = ParseOptionalInt(Pick(Get(record, "bitRate"), Get(record, "bitrate"), Get(data, "bitRate"), Get(data, "bitrate"), Get(info, "bitRate"), Get(info, "bitrate"))),
-            Loudness = ResolveTrackLoudness(root),
-            EnEkey = ReadString(Pick(Get(record, "en_ekey"), Get(data, "en_ekey"), Get(info, "en_ekey"))),
-            FileSize = ParseOptionalLong(Pick(Get(record, "filesize"), Get(record, "fileSize"), Get(data, "filesize"), Get(data, "fileSize"), Get(info, "filesize"), Get(info, "fileSize"))) ?? 0
+            Url = candidate.Url ?? string.Empty,
+            Bitrate = ParseOptionalInt(Pick(Get(candidateRecord, "bitRate"), Get(candidateRecord, "bitrate"), Get(candidateInfo, "bitRate"), Get(candidateInfo, "bitrate"), Get(record, "bitRate"), Get(record, "bitrate"), Get(data, "bitRate"), Get(data, "bitrate"), Get(info, "bitRate"), Get(info, "bitrate"))),
+            Loudness = ResolveTrackLoudness(root) ?? ResolveTrackLoudness(candidateRecord) ?? ResolveTrackLoudness(candidateInfo),
+            EnEkey = ReadString(Pick(Get(candidateRecord, "en_ekey"), Get(candidateInfo, "en_ekey"), Get(record, "en_ekey"), Get(data, "en_ekey"), Get(info, "en_ekey"))),
+            FileSize = ParseOptionalLong(fileSize) ?? 0
         };
     }
 
@@ -1029,6 +1059,72 @@ internal static partial class KugouJsonMapper
         }
 
         return ResolveUrl(Pick(Get(record, "data"), Get(record, "info")));
+    }
+
+    private static AudioUrlCandidate ResolveAudioUrlCandidate(JsonNode? payload)
+    {
+        if (payload is null)
+        {
+            return default;
+        }
+
+        if (payload is JsonValue)
+        {
+            var url = ReadString(payload).Trim();
+            return string.IsNullOrWhiteSpace(url) ? default : new AudioUrlCandidate(url, null, null, false);
+        }
+
+        var array = ArrayFrom(payload);
+        if (array.Length > 0)
+        {
+            foreach (var item in array)
+            {
+                var candidate = ResolveAudioUrlCandidate(item);
+                if (!string.IsNullOrWhiteSpace(candidate.Url))
+                {
+                    return candidate;
+                }
+            }
+
+            return default;
+        }
+
+        var record = Object(payload);
+        var info = Object(Get(record, "info"));
+        var normalUrl = ResolveUrl(Pick(
+            Get(record, "url"),
+            Get(record, "play_url"),
+            Get(record, "playUrl"),
+            Get(record, "downurl"),
+            Get(record, "down_url"),
+            Get(record, "tracker_url")));
+        if (!string.IsNullOrWhiteSpace(normalUrl))
+        {
+            return new AudioUrlCandidate(normalUrl, record, info, false);
+        }
+
+        var encryptedUrl = ResolveUrl(Get(record, "en_tracker_url"));
+        if (!string.IsNullOrWhiteSpace(encryptedUrl))
+        {
+            return new AudioUrlCandidate(encryptedUrl, record, info, true);
+        }
+
+        var backupUrl = ResolveBackupUrl(Pick(
+            Get(record, "backup_url"),
+            Get(record, "backupUrl"),
+            Get(record, "backupdownurl")));
+        if (!string.IsNullOrWhiteSpace(backupUrl))
+        {
+            return new AudioUrlCandidate(backupUrl, record, info, false);
+        }
+
+        var dataCandidate = ResolveAudioUrlCandidate(Get(record, "data"));
+        if (!string.IsNullOrWhiteSpace(dataCandidate.Url))
+        {
+            return dataCandidate;
+        }
+
+        return ResolveAudioUrlCandidate(Get(record, "info"));
     }
 
     private static string ResolveBackupUrl(JsonNode? payload)
