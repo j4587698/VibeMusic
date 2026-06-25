@@ -22,7 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ui\LuminaUI\src\LuminaUI\LuminaUI.csproj" />
     <ProjectReference Include="..\..\KuGouLiteSdk\KuGouLiteSdk.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LuminaUI" />
   </ItemGroup>
 </Project>
