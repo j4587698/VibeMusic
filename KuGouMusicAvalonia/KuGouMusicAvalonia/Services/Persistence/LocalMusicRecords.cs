@@ -155,3 +155,15 @@ public sealed partial class PlaybackHistoryRecord
     public bool Completed { get; set; }
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
+
+[Entity("lyrics")]
+public sealed partial class LyricRecord
+{
+    [Id]
+    public string Id { get; set; } = string.Empty;
+    [Index]
+    public string Hash { get; set; } = string.Empty;
+    public string Format { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public DateTime CachedAtUtc { get; set; } = DateTime.UtcNow;
+}

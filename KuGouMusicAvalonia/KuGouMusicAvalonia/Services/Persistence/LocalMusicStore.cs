@@ -36,6 +36,7 @@ internal sealed class LocalMusicStore : IDisposable
     private ITinyCollection<PlaybackStateRecord> _playbackStates = null!;
     private ITinyCollection<PlaybackQueueItemRecord> _queueItems = null!;
     private ITinyCollection<PlaybackHistoryRecord> _history = null!;
+    private ITinyCollection<LyricRecord> _lyrics = null!;
     private bool _disposed;
 
     private LocalMusicStore()
@@ -45,6 +46,7 @@ internal sealed class LocalMusicStore : IDisposable
         {
             OpenDatabase();
             MigrateLegacyAppStateIfNeeded();
+            CleanupExpiredData();
         }
         catch (Exception ex) when (IsRecoverableDatabaseException(ex))
         {
@@ -60,6 +62,7 @@ internal sealed class LocalMusicStore : IDisposable
             BackupCorruptDatabase(ex);
             OpenDatabase();
             MigrateLegacyAppStateIfNeeded();
+            CleanupExpiredData();
         }
     }
 
@@ -108,6 +111,7 @@ internal sealed class LocalMusicStore : IDisposable
         _playbackStates = database.GetCollection<PlaybackStateRecord>();
         _queueItems = database.GetCollection<PlaybackQueueItemRecord>();
         _history = database.GetCollection<PlaybackHistoryRecord>();
+        _lyrics = database.GetCollection<LyricRecord>();
     }
 
     private void DisposeDatabase()
@@ -667,6 +671,90 @@ internal sealed class LocalMusicStore : IDisposable
         {
             _history.DeleteAll();
         }
+    }
+
+    public string? FindCachedLyric(string hash, string format)
+    {
+        if (string.IsNullOrWhiteSpace(hash) || string.IsNullOrWhiteSpace(format))
+        {
+            return null;
+        }
+
+        var id = BuildLyricId(hash, format);
+        lock (_gate)
+        {
+            return _lyrics.FindById(id)?.Content;
+        }
+    }
+
+    public void SaveLyricCache(string hash, string format, string content)
+    {
+        if (string.IsNullOrWhiteSpace(hash) || string.IsNullOrWhiteSpace(format) || string.IsNullOrWhiteSpace(content))
+        {
+            return;
+        }
+
+        var id = BuildLyricId(hash, format);
+        lock (_gate)
+        {
+            _lyrics.Upsert(new LyricRecord
+            {
+                Id = id,
+                Hash = hash.Trim().ToUpperInvariant(),
+                Format = format.Trim().ToLowerInvariant(),
+                Content = content,
+                CachedAtUtc = DateTime.UtcNow
+            });
+        }
+    }
+
+    public int CleanupLyrics(int maxCount = 500)
+    {
+        lock (_gate)
+        {
+            var all = _lyrics.FindAll().OrderByDescending(r => r.CachedAtUtc).ToList();
+            if (all.Count <= maxCount)
+            {
+                return 0;
+            }
+
+            var toDelete = all.Skip(maxCount).Select(r => r.Id).ToList();
+            foreach (var id in toDelete)
+            {
+                _lyrics.Delete(id);
+            }
+
+            return toDelete.Count;
+        }
+    }
+
+    public int CleanupStaleDownloads(int maxAgeDays = 30)
+    {
+        var cutoff = DateTime.UtcNow.AddDays(-maxAgeDays);
+        lock (_gate)
+        {
+            var stale = _downloads.Find(r =>
+                (r.Status == MissingDownloadStatus || r.Status == FailedDownloadStatus) &&
+                r.UpdatedAtUtc < cutoff).ToList();
+
+            foreach (var record in stale)
+            {
+                _downloads.Delete(record.Id);
+            }
+
+            return stale.Count;
+        }
+    }
+
+    public void CleanupExpiredData()
+    {
+        CleanupStaleDownloads(30);
+        CleanupLyrics(500);
+    }
+
+    private static string BuildLyricId(string hash, string format)
+    {
+        return $"{hash.Trim().ToUpperInvariant()}|{format.Trim().ToLowerInvariant()}";
     }
 
     public static string GetSongKey(KugouSong? song)
