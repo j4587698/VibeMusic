@@ -66,12 +66,19 @@ public sealed partial class LyricsService : ObservableObject
             Interval = TimeSpan.FromMilliseconds(33) // ~30 fps
         };
         _interpolationTimer.Tick += OnInterpolationTick;
+
+        // 如果 CurrentSong 已经恢复（应用重启），立即加载歌词
+        if (_player.CurrentSong is not null)
+        {
+            _ = LoadForCurrentSongAsync();
+        }
     }
 
     public async Task LoadForCurrentSongAsync()
     {
         if (_player.CurrentSong is not KugouSong song)
         {
+            _lastLoadedSongHash = null;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Lines.Clear();
@@ -83,6 +90,8 @@ public sealed partial class LyricsService : ObservableObject
             });
             return;
         }
+
+        _lastLoadedSongHash = song.Hash;
 
         _loadCts?.Cancel();
         _loadCts?.Dispose();
@@ -103,17 +112,36 @@ public sealed partial class LyricsService : ObservableObject
 
         try
         {
-            var search = await MusicService.Client.SearchLyricAsync(song.Title, song.Hash, song.MixSongId, cancellationToken: cancellationToken).ConfigureAwait(false);
-            var (id, accessKey) = ReadFirstLyricCandidate(search.BodyText);
-            if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(accessKey))
+            var format = MusicService.PreferKrc ? "krc" : "lrc";
+            string? text = null;
+
+            // 优先从本地缓存读取
+            if (!string.IsNullOrWhiteSpace(song.Hash))
             {
-                await ApplyNoLyricAsync("没有匹配歌词", cancellationToken).ConfigureAwait(false);
-                return;
+                text = LocalMusicStore.Instance.FindCachedLyric(song.Hash, format);
             }
 
-            var format = MusicService.PreferKrc ? "krc" : "lrc";
-            var lyric = await MusicService.Client.GetLyricAsync(id, accessKey, format, decode: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-            var text = ReadDecodedLyric(lyric.BodyText);
+            // 缓存未命中，从网络获取
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                var search = await MusicService.Client.SearchLyricAsync(song.Title, song.Hash, song.MixSongId, cancellationToken: cancellationToken).ConfigureAwait(false);
+                var (id, accessKey) = ReadFirstLyricCandidate(search.BodyText);
+                if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(accessKey))
+                {
+                    await ApplyNoLyricAsync("没有匹配歌词", cancellationToken).ConfigureAwait(false);
+                    return;
+                }
+
+                var lyric = await MusicService.Client.GetLyricAsync(id, accessKey, format, decode: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+                text = ReadDecodedLyric(lyric.BodyText);
+
+                // 保存到本地缓存
+                if (!string.IsNullOrWhiteSpace(text) && !string.IsNullOrWhiteSpace(song.Hash))
+                {
+                    LocalMusicStore.Instance.SaveLyricCache(song.Hash, format, text);
+                }
+            }
+
             var lines = new List<LyricLine>(ParseLines(text));
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -167,10 +195,19 @@ public sealed partial class LyricsService : ObservableObject
         }
     }
 
+    private string? _lastLoadedSongHash;
+
     private void OnPlayerPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(PlayerService.CurrentSong))
         {
+            var song = _player.CurrentSong;
+            var hash = song?.Hash;
+            if (string.Equals(hash, _lastLoadedSongHash, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             _ = LoadForCurrentSongAsync();
             return;
         }
@@ -180,7 +217,10 @@ public sealed partial class LyricsService : ObservableObject
             // PlayerService.Progress only ticks every 500ms; re-anchor the
             // high-resolution clock so per-word interpolation stays in sync.
             AnchorPlaybackClock();
-            UpdateActiveLine();
+            if (!_player.IsLoading)
+            {
+                UpdateActiveLine();
+            }
             UpdateWordProgress();
         }
         
