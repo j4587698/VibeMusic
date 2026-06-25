@@ -406,15 +406,8 @@ public sealed partial class KugouLiteClient
             if (!string.IsNullOrWhiteSpace(lastResult.Data?.Url))
             {
                 var url = lastResult.Data!.Url.ToLowerInvariant();
-                if (!url.EndsWith(".mflac") && !url.EndsWith(".mgg") && !url.EndsWith(".kgm"))
+                if (!IsEncryptedAudioUrl(url))
                 {
-                    var bitrate = lastResult.Data!.Bitrate;
-                    var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
-                    return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw, lastResult.Data.EnEkey, lastResult.Data.FileSize);
-                }
-                else
-                {
-                    // v6 URL is encrypted. We can play it directly with KugouCryptoHttpStream!
                     var bitrate = lastResult.Data!.Bitrate;
                     var fallbackQuality = bitrate >= 800000 ? "flac" : (bitrate >= 320000 ? "320" : "128");
                     return new KugouResolvedAudioSource(lastResult.Data!.Url, fallbackQuality, "none", lastResult.Raw, lastResult.Data.EnEkey, lastResult.Data.FileSize);
@@ -608,4 +601,9 @@ public sealed partial class KugouLiteClient
             _ => string.Equals(normalizedQuality, quality, StringComparison.OrdinalIgnoreCase)
         };
     }
+
+    private static bool IsEncryptedAudioUrl(string url) =>
+        url.EndsWith(".mflac", StringComparison.OrdinalIgnoreCase) ||
+        url.EndsWith(".mgg", StringComparison.OrdinalIgnoreCase) ||
+        url.EndsWith(".kgm", StringComparison.OrdinalIgnoreCase);
 }

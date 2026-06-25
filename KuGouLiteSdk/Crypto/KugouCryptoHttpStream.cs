@@ -15,7 +15,9 @@ namespace KuGouLiteSdk.Crypto
         private readonly long _totalLength;
         private readonly byte[] _key;
         private readonly int _size;
+        private readonly bool _useRc4Cipher;
         private readonly int _blockSize = 5120;
+        private readonly int _headerSize = 128;
         private readonly int[] _offsetCache;
         private readonly byte[] _boxTemplate;
         private readonly uint _hash;
@@ -34,6 +36,7 @@ namespace KuGouLiteSdk.Crypto
 
             _key = KugouTeaCrypto.DecryptEKey(enEkey);
             _size = _key.Length;
+            _useRc4Cipher = _size > 300;
             
             _boxTemplate = Enumerable.Range(0, _size).Select(x => (byte)x).ToArray();
 
@@ -73,18 +76,93 @@ namespace KuGouLiteSdk.Crypto
 
         private void ProcessBlock(Span<byte> buffer, long offset)
         {
-            int j = 0, k = 0;
-            var box = (stackalloc byte[_size]);
-            _boxTemplate.CopyTo(box);
-            int skipLength = (int)(offset % _blockSize) + GetCachedOffset(offset / _blockSize);
-
-            for (int i = -skipLength; i < buffer.Length; i++)
+            if (_useRc4Cipher)
             {
-                j = (j + 1) % _size;
-                k = (box[j] + k) % _size;
-                (box[j], box[k]) = (box[k], box[j]);
-                if (i >= 0) buffer[i] ^= box[(box[j] + box[k]) % _size];
+                ProcessRc4(buffer, offset);
             }
+            else
+            {
+                ProcessMap(buffer, offset);
+            }
+        }
+
+        private void ProcessRc4(Span<byte> buffer, long offset)
+        {
+            int bufferIndex = 0;
+            if (offset < _headerSize)
+            {
+                int headerBytes = (int)Math.Min(buffer.Length, _headerSize - offset);
+                for (int i = 0; i < headerBytes; i++)
+                {
+                    buffer[i] ^= _key[GetCachedOffset(offset + i)];
+                }
+
+                bufferIndex = headerBytes;
+                offset += headerBytes;
+            }
+
+            if (bufferIndex < buffer.Length)
+            {
+                ProcessRc4Blocks(buffer[bufferIndex..], offset);
+            }
+        }
+
+        private void ProcessRc4Blocks(Span<byte> buffer, long offset)
+        {
+            long currentOffset = offset;
+            int bufferIndex = 0;
+            var box = (stackalloc byte[_size]);
+
+            while (bufferIndex < buffer.Length)
+            {
+                int blockIndex = (int)(currentOffset / _blockSize);
+                int offsetInBlock = (int)(currentOffset % _blockSize);
+                int bytesLeftInBlock = _blockSize - offsetInBlock;
+                int bytesToProcess = Math.Min(bytesLeftInBlock, buffer.Length - bufferIndex);
+
+                int j = 0, k = 0;
+                _boxTemplate.CopyTo(box);
+
+                int skipLength = offsetInBlock + GetCachedOffset(blockIndex);
+
+                for (int i = 0; i < skipLength; i++)
+                {
+                    j = (j + 1) % _size;
+                    k = (box[j] + k) % _size;
+                    (box[j], box[k]) = (box[k], box[j]);
+                }
+
+                for (int i = 0; i < bytesToProcess; i++)
+                {
+                    j = (j + 1) % _size;
+                    k = (box[j] + k) % _size;
+                    (box[j], box[k]) = (box[k], box[j]);
+                    buffer[bufferIndex + i] ^= box[(box[j] + box[k]) % _size];
+                }
+
+                bufferIndex += bytesToProcess;
+                currentOffset += bytesToProcess;
+            }
+        }
+
+        private void ProcessMap(Span<byte> buffer, long offset)
+        {
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                long index = offset + i;
+                if (index > 0x7fff) index %= 0x7fff;
+
+                var keyIndex = (int)((index * index + 71214) % _size);
+                buffer[i] ^= Rotate(_key[keyIndex], (byte)(keyIndex & 0x07));
+            }
+        }
+
+        private static byte Rotate(byte value, byte bits)
+        {
+            var rotate = (byte)((bits + 4) % 8);
+            var left = value << rotate;
+            var right = value >> rotate;
+            return (byte)(left | right);
         }
 
         private async Task EnsureStreamActiveAsync(CancellationToken cancellationToken)

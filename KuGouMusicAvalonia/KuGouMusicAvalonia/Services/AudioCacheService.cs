@@ -345,10 +345,20 @@ public sealed class AudioCacheService
     {
         if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
-            var extension = Path.GetExtension(uri.AbsolutePath);
+            var extension = Path.GetExtension(uri.AbsolutePath).ToLowerInvariant();
+            if (extension is ".mgg" or ".mgg1" or ".mggl")
+            {
+                return ".ogg";
+            }
+
+            if (extension == ".mflac")
+            {
+                return ".flac";
+            }
+
             if (SupportedExtensions.Contains(extension))
             {
-                return extension.ToLowerInvariant();
+                return extension;
             }
         }
 

@@ -7,23 +7,27 @@ namespace KuGouLiteSdk.Crypto
     public static class KugouTeaCrypto
     {
         private static readonly byte[] _v2Magic = [0x51, 0x51, 0x4d, 0x75, 0x73, 0x69, 0x63, 0x20, 0x45, 0x6e, 0x63, 0x56, 0x32, 0x2c, 0x4b, 0x65, 0x79, 0x3a]; // "QQMusic EncV2,Key:"
-        private static readonly byte[] _v2TeaKey1 = [0x38, 0x64, 0x36, 0x34, 0x61, 0x38, 0x36, 0x33, 0x34, 0x31, 0x31, 0x63, 0x62, 0x61, 0x61, 0x37]; // "8d64a863411cbaa7"
-        private static readonly byte[] _v2TeaKey2 = [0x65, 0x38, 0x32, 0x36, 0x64, 0x35, 0x34, 0x39, 0x63, 0x35, 0x32, 0x33, 0x39, 0x63, 0x33, 0x61]; // "e826d549c5239c3a"
+        private static readonly byte[] _v2TeaKey1 = [0x33, 0x38, 0x36, 0x5a, 0x4a, 0x59, 0x21, 0x40, 0x23, 0x2a, 0x24, 0x25, 0x5e, 0x26, 0x29, 0x28]; // "386ZJY!@#*$%^&)("
+        private static readonly byte[] _v2TeaKey2 = [0x2a, 0x2a, 0x23, 0x21, 0x28, 0x23, 0x24, 0x25, 0x26, 0x5e, 0x61, 0x31, 0x63, 0x5a, 0x2c, 0x54]; // "**#!(#$%&^a1cZ,T"
+        private static readonly byte[] _legacyV2TeaKey1 = [0x38, 0x64, 0x36, 0x34, 0x61, 0x38, 0x36, 0x33, 0x34, 0x31, 0x31, 0x63, 0x62, 0x61, 0x61, 0x37]; // "8d64a863411cbaa7"
+        private static readonly byte[] _legacyV2TeaKey2 = [0x65, 0x38, 0x32, 0x36, 0x64, 0x35, 0x34, 0x39, 0x63, 0x35, 0x32, 0x33, 0x39, 0x63, 0x33, 0x61]; // "e826d549c5239c3a"
 
         public static byte[] DecryptEKey(string base64EKey)
         {
-            var keySpan = Convert.FromBase64String(base64EKey.TrimEnd('\0')).AsSpan();
-            var length = keySpan.Length;
-            var key = keySpan;
+            var keyBytes = Convert.FromBase64String(base64EKey.TrimEnd('\0'));
+            var key = keyBytes.AsSpan();
+            var length = key.Length;
 
             if (key.Length >= 18 && key[..18].SequenceEqual(_v2Magic))
             {
-                key = key[18..];
+                var payload = key[18..];
+                if (!TryDecryptV2Key(payload, _v2TeaKey1, _v2TeaKey2, out keyBytes) &&
+                    !TryDecryptV2Key(payload, _legacyV2TeaKey1, _legacyV2TeaKey2, out keyBytes))
+                {
+                    throw new InvalidOperationException("Failed to decrypt EncV2 ekey.");
+                }
 
-                DecryptTeaCbc(_v2TeaKey1, key, out length);
-                DecryptTeaCbc(_v2TeaKey2, key[..length], out length);
-
-                key = Convert.FromBase64String(Encoding.ASCII.GetString(key[..length])).AsSpan();
+                key = keyBytes.AsSpan();
                 length = key.Length;
 
                 if (length < 8) throw new InvalidOperationException("Key length invalid after v2 decryption.");
@@ -40,6 +44,29 @@ namespace KuGouLiteSdk.Crypto
 
             DecryptTeaCbc(teaKey, key[8..], out length);
             return key[..(length + 8)].ToArray();
+        }
+
+        private static bool TryDecryptV2Key(
+            ReadOnlySpan<byte> payload,
+            ReadOnlySpan<byte> teaKey1,
+            ReadOnlySpan<byte> teaKey2,
+            out byte[] key)
+        {
+            var buffer = payload.ToArray();
+
+            try
+            {
+                DecryptTeaCbc(teaKey1, buffer, out var length);
+                DecryptTeaCbc(teaKey2, buffer.AsSpan(0, length), out length);
+
+                key = Convert.FromBase64String(Encoding.ASCII.GetString(buffer.AsSpan(0, length)));
+                return key.Length >= 8 && key.Length % 8 == 0;
+            }
+            catch (Exception ex) when (ex is FormatException or InvalidOperationException or ArgumentException)
+            {
+                key = [];
+                return false;
+            }
         }
 
         private static void DecryptTeaCbc(ReadOnlySpan<byte> teaKey, Span<byte> buffer, out int length)

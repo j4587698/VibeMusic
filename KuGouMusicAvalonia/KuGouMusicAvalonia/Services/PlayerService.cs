@@ -1030,15 +1030,47 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         int requestId,
         CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrWhiteSpace(playbackSource.EnEkey) && playbackSource.FileSize > 0)
+        var cachePath = AudioCacheService.Instance.GetProgressiveCacheTargetPath(song, playbackSource.Location, playbackSource.Quality);
+
+        var isEncryptedFormat = IsKugouEncryptedFormat(playbackSource.Location);
+
+        if (isEncryptedFormat)
         {
+            if (string.IsNullOrWhiteSpace(playbackSource.EnEkey) || playbackSource.FileSize <= 0)
+            {
+                throw new InvalidOperationException("KuGou encrypted audio is missing en_ekey or file size.");
+            }
+
             var cryptoStream = new KuGouLiteSdk.Crypto.KugouCryptoHttpStream(playbackSource.Location, playbackSource.EnEkey, playbackSource.FileSize);
-            var streamHandle = new StreamHandle(cryptoStream);
-            await LoadPlayerHandleAsync(player, streamHandle, requestId, cancellationToken).ConfigureAwait(false);
+            
+            AudioCallbackHandlerBase cryptoHandle;
+            if (!string.IsNullOrWhiteSpace(cachePath))
+            {
+                var diskHandle = new DiskCachedStreamHandle(cryptoStream, totalSize: playbackSource.FileSize, cacheFilePath: cachePath, deleteCacheOnDispose: true, enableSeek: true, leaveOpen: false);
+                diskHandle.DownloadCompleted += (success, error) =>
+                {
+                    if (success)
+                    {
+                        AudioCacheService.Instance.MarkProgressiveCacheCompleted(song, cachePath, playbackSource.Quality, playbackSource.Location);
+                    }
+                    else
+                    {
+                        AudioCacheService.Instance.MarkProgressiveCacheFailed(song, cachePath, playbackSource.Quality, playbackSource.Location, error ?? new Exception("Download failed"));
+                    }
+                };
+                
+                // Note: DiskCachedStreamHandle natively supports ProgressChanged but we skip registering it as ProgressiveHttpStreamHandle does not expose it via PlayerService.
+                cryptoHandle = diskHandle;
+            }
+            else
+            {
+                cryptoHandle = new StreamHandle(cryptoStream);
+            }
+
+            await LoadPlayerHandleAsync(player, cryptoHandle, requestId, cancellationToken).ConfigureAwait(false);
             return;
         }
 
-        var cachePath = AudioCacheService.Instance.GetProgressiveCacheTargetPath(song, playbackSource.Location, playbackSource.Quality);
         if (!string.IsNullOrWhiteSpace(cachePath))
         {
             ProgressiveHttpStreamHandle? progressiveHandle = null;
@@ -1475,6 +1507,11 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     }
 
     private sealed record PlaybackSource(string Location, bool IsLocalFile, string? Quality, string? EnEkey = null, long FileSize = 0);
+
+    private static bool IsKugouEncryptedFormat(string location) =>
+        location.Contains(".mflac", StringComparison.OrdinalIgnoreCase) ||
+        location.Contains(".mgg", StringComparison.OrdinalIgnoreCase) ||
+        location.Contains(".kgm", StringComparison.OrdinalIgnoreCase);
 
     public void Dispose()
     {

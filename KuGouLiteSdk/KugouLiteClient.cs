@@ -103,10 +103,7 @@ public sealed partial class KugouLiteClient : IDisposable
         var parameters = BuildParameters(request, dfid, mid, token, userid, clientTime);
         var bodyText = SerializeBody(request.Body);
         
-        if (request.Path.Contains("/v6/priv_url"))
-        {
-            try { System.IO.File.AppendAllText("kugou_audio_debug.txt", $"[v6 Payload] {bodyText}\n"); } catch {}
-        }
+
 
         if (request.EncryptKey)
         {
