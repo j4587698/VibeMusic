@@ -81,21 +81,9 @@ sealed class Program
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
 #if DEBUG
-            .WithDeveloperTools()
-            .UseLuminaUIDiagnostics(options => options.StartImmediately = false)
-            .AfterSetup(_ => StartLuminaDiagnostics())
+            .UseLuminaUIDiagnostics()
 #endif
             .WithInterFont()
             .LogToTrace();
 
-#if DEBUG
-    private static void StartLuminaDiagnostics()
-    {
-        var diagnosticsHost = LuminaUIDiagnosticsExtensions.GetLuminaUIDiagnosticsHost();
-        if (diagnosticsHost is { IsRunning: false })
-        {
-            diagnosticsHost.Start();
-        }
-    }
-#endif
 }
