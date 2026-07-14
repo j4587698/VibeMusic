@@ -9,4 +9,5 @@
     <RootNamespace>KuGou.Lite</RootNamespace>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+
 </Project>

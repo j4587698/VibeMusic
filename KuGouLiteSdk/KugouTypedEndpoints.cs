@@ -63,6 +63,28 @@ public sealed partial class KugouLiteClient
         return KugouJsonMapper.ToListResult(response, item => KugouJsonMapper.MapSong(item, KugouSongMapKind.Top));
     }
 
+    public async Task<KugouListResult<KugouSong>> GetYouthRecommendationsTypedAsync(
+        int cardId = 3005,
+        int pageSize = 30,
+        string? tagId = null,
+        string? sourceMixSong = null,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await TopCardYouthAsync(cardId, pageSize, tagId, sourceMixSong, cancellationToken).ConfigureAwait(false);
+        return KugouJsonMapper.ToListResult(response, item => KugouJsonMapper.MapSong(item, KugouSongMapKind.Top));
+    }
+
+    public async Task<KugouListResult<KugouSong>> GetYouthUserSongsTypedAsync(
+        long userId,
+        int type = 0,
+        int page = 1,
+        int pageSize = 30,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await YouthUserSongAsync(userId, type, page, pageSize, cancellationToken).ConfigureAwait(false);
+        return KugouJsonMapper.ToListResult(response, item => KugouJsonMapper.MapSong(item, KugouSongMapKind.Top));
+    }
+
     public async Task<KugouListResult<KugouSong>> GetPersonalFmTypedAsync(IDictionary<string, object?>? parameters = null, CancellationToken cancellationToken = default)
     {
         var values = parameters is null

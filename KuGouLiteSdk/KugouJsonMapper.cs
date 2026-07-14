@@ -182,6 +182,7 @@ internal static partial class KugouJsonMapper
             Get(record, "FileName"),
             Get(record, "name"),
             Get(record, "audio_name"),
+            Get(record, "ori_audio_name"),
             Get(audioInfo, "songname"),
             Get(audioInfo, "filename"),
             Get(audioInfo, "name"),
@@ -235,6 +236,8 @@ internal static partial class KugouJsonMapper
             Get(record, "timelen"),
             Get(record, "duration"),
             Get(audioInfo, "duration_128"),
+            Get(audioInfo, "timelength_128"),
+            Get(audioInfo, "timelength"),
             Get(audioInfo, "duration"))));
         var hash = ReadString(Pick(
             Get(record, "FileHash"),
@@ -666,10 +669,14 @@ internal static partial class KugouJsonMapper
             Get(data, "totalCount"),
             Get(data, "count"),
             Get(data, "counts"),
+            Get(data, "song_count"),
+            Get(data, "list_count"),
             Get(record, "total"),
             Get(record, "totalCount"),
             Get(record, "count"),
-            Get(record, "counts")));
+            Get(record, "counts"),
+            Get(record, "song_count"),
+            Get(record, "list_count")));
         return total > 0 ? total : fallback;
     }
 

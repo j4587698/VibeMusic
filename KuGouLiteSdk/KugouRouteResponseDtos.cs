@@ -17,9 +17,12 @@ public sealed class KugouArtistVideosResponseDto : KugouRouteResponseDto { }
 public sealed class KugouAudioResponseDto : KugouRouteResponseDto { }
 public sealed class KugouAudioAccompanyMatchingResponseDto : KugouRouteResponseDto { }
 public sealed class KugouAudioKtvTotalResponseDto : KugouRouteResponseDto { }
+public sealed class KugouAudioMatchResponseDto : KugouRouteResponseDto { }
 public sealed class KugouAudioRelatedResponseDto : KugouRouteResponseDto { }
 public sealed class KugouBrushResponseDto : KugouRouteResponseDto { }
 public sealed class KugouCaptchaSentResponseDto : KugouRouteResponseDto { }
+public sealed class KugouCaptchaVerifyInfoResponseDto : KugouRouteResponseDto { }
+public sealed class KugouCaptchaVerifySubmitResponseDto : KugouRouteResponseDto { }
 public sealed class KugouCommentAlbumResponseDto : KugouRouteResponseDto { }
 public sealed class KugouCommentCountResponseDto : KugouRouteResponseDto { }
 public sealed class KugouCommentFloorResponseDto : KugouRouteResponseDto { }
@@ -119,6 +122,7 @@ public sealed class KugouThemePlaylistTrackResponseDto : KugouRouteResponseDto {
 public sealed class KugouTopAlbumResponseDto : KugouRouteResponseDto { }
 public sealed class KugouTopCardResponseDto : KugouRouteResponseDto { }
 public sealed class KugouTopCardYouthResponseDto : KugouRouteResponseDto { }
+public sealed class KugouTopCardYouthTagResponseDto : KugouRouteResponseDto { }
 public sealed class KugouTopIpResponseDto : KugouRouteResponseDto { }
 public sealed class KugouTopPlaylistResponseDto : KugouRouteResponseDto { }
 public sealed class KugouTopSongResponseDto : KugouRouteResponseDto { }

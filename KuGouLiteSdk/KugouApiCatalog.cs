@@ -70,11 +70,14 @@ public static class KugouApiCatalog
 /artist/unfollow|取消关注歌手|POST|/followservice/v3/unfollow_singer|-|Both
 /artist/videos|获取歌手 MV|GET|https://openapicdn.kugou.com/kmr/v1/author/videos|-|Query
 /audio|获取音乐相关信息|POST|http://kmr.service.kugou.com/v1/audio/audio|kmr.service.kugou.com|Body
+/audio/match|听歌识曲|POST|/fingerprint.service/v1/music_trackid_mulit|-|Both
 /audio/accompany/matching|获取音乐伴奏信息|GET|https://nsongacsing.kugou.com/sing7/accompanywan/json/v2/cdn/optimal_matching_accompany_2_listen.do|-|Query
 /audio/ktv/total|获取音乐 K 歌数量|GET|https://acsing.service.kugou.com/sing7/listenguide/json/v2/cdn/listenguide/get_total_opus_num_v02.do|-|Query
 /audio/related|获取更多音乐版本|GET|https://listkmrp3cdnretry.kugou.com|-|Query
 /brush|刷刷|POST|/genesisapi/v1/newepoch_song_rec/feed|-|Both
 /captcha/sent|发送验证码|POST|http://login.user.kugou.com/v7/send_mobile_code|-|Body
+/captcha/verify/info|获取验证码信息|POST|/verifyservice/v3/get_verify_info|-|Body
+/captcha/verify/submit|提交验证码验证|POST|https://verifyservice.kugou.com/v4/verify_user_info|-|Both
 /comment/album|专辑评论|POST|/m.comment.service/v1/cmtlist|-|Query
 /comment/count|歌曲评论数|GET|/index.php|sum.comment.service.kugou.com|Query
 /comment/floor|楼层评论|POST|/mcomment/v1/hot_replylist|-|Query
@@ -174,6 +177,7 @@ public static class KugouApiCatalog
 /top/album|新碟上架|POST|/musicadservice/v1/mobile_newalbum_sp|-|Body
 /top/card|歌曲推荐|POST|/singlecardrec.service/v1/single_card_recommend|-|Both
 /top/card/youth|歌曲推荐概念版|POST|youth/v1/song/single_card_recommend|-|Both
+/top/card/youth/tag|曲风盲盒·随机心动|POST|/youth/v1/song/tag_card_recommend|-|Both
 /top/ip|编辑精选|POST|http://musicadservice.kugou.com/v1/daily_recommend|-|Both
 /top/playlist|歌单|POST|/v2/special_recommend|specialrec.service.kugou.com|Body
 /top/song|新歌速递|POST|/musicadservice/container/v1/newsong_publish|-|Body
@@ -251,6 +255,13 @@ public sealed partial class KugouLiteClient
         if (explicitUpstream is null && definition.Route.Equals("/search", StringComparison.OrdinalIgnoreCase))
         {
             upstream = ApplySearchRouteDefaults(values);
+        }
+
+        if (explicitUpstream is null && definition.Route.Equals("/youth/channel/sub", StringComparison.OrdinalIgnoreCase))
+        {
+            var subscribe = !string.Equals(TakeControlValue(values, "t"), "0", StringComparison.Ordinal);
+            upstream = subscribe ? "/youth/v1/channel_subscribe" : "/youth/v1/channel_un_subscribe";
+            methodName = subscribe ? "POST" : "DELETE";
         }
 
         var request = new KugouRequest
