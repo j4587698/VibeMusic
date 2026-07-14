@@ -249,6 +249,28 @@ internal static class KugouCrypto
         return Convert.ToHexString(rsa.Encrypt(NormalizeBuffer(data), RSAEncryptionPadding.Pkcs1)).ToLowerInvariant();
     }
 
+    public static string RsaOaepSha256EncryptBase64(string plaintext, string publicKeyPem)
+    {
+        using var rsa = RSA.Create();
+        rsa.ImportFromPem(publicKeyPem);
+        return Convert.ToBase64String(rsa.Encrypt(Encoding.UTF8.GetBytes(plaintext), RSAEncryptionPadding.OaepSHA256));
+    }
+
+    public static string AesCbcEncryptBase64(string plaintext, string key, string iv)
+    {
+        using var aes = Aes.Create();
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.PKCS7;
+        aes.Key = Encoding.UTF8.GetBytes(key);
+        aes.IV = Encoding.UTF8.GetBytes(iv);
+        using var encryptor = aes.CreateEncryptor();
+        var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
+        return Convert.ToBase64String(encryptor.TransformFinalBlock(plaintextBytes, 0, plaintextBytes.Length));
+    }
+
+    public static string Sha1Hex(string value) =>
+        Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(value))).ToLowerInvariant();
+
     public static KugouPlaylistAesResult PlaylistAesEncrypt(object data)
     {
         var key = RandomString(6).ToLowerInvariant();

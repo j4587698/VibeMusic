@@ -134,10 +134,13 @@ public static class KugouRouteDtoCatalog
         "/artist/videos" => KugouJsonSerializerContext.Default.KugouArtistVideosResponseDto,
         "/audio" => KugouJsonSerializerContext.Default.KugouAudioResponseDto,
         "/audio/accompany/matching" => KugouJsonSerializerContext.Default.KugouAudioAccompanyMatchingResponseDto,
-        "/audio/ktv/total" => KugouJsonSerializerContext.Default.KugouAudioKtvTotalResponseDto,
-        "/audio/related" => KugouJsonSerializerContext.Default.KugouAudioRelatedResponseDto,
+"/audio/ktv/total" => KugouJsonSerializerContext.Default.KugouAudioKtvTotalResponseDto,
+"/audio/match" => KugouJsonSerializerContext.Default.KugouAudioMatchResponseDto,
+"/audio/related" => KugouJsonSerializerContext.Default.KugouAudioRelatedResponseDto,
         "/brush" => KugouJsonSerializerContext.Default.KugouBrushResponseDto,
         "/captcha/sent" => KugouJsonSerializerContext.Default.KugouCaptchaSentResponseDto,
+"/captcha/verify/info" => KugouJsonSerializerContext.Default.KugouCaptchaVerifyInfoResponseDto,
+"/captcha/verify/submit" => KugouJsonSerializerContext.Default.KugouCaptchaVerifySubmitResponseDto,
         "/comment/album" => KugouJsonSerializerContext.Default.KugouCommentAlbumResponseDto,
         "/comment/count" => KugouJsonSerializerContext.Default.KugouCommentCountResponseDto,
         "/comment/floor" => KugouJsonSerializerContext.Default.KugouCommentFloorResponseDto,
@@ -237,6 +240,7 @@ public static class KugouRouteDtoCatalog
         "/top/album" => KugouJsonSerializerContext.Default.KugouTopAlbumResponseDto,
         "/top/card" => KugouJsonSerializerContext.Default.KugouTopCardResponseDto,
         "/top/card/youth" => KugouJsonSerializerContext.Default.KugouTopCardYouthResponseDto,
+"/top/card/youth/tag" => KugouJsonSerializerContext.Default.KugouTopCardYouthTagResponseDto,
         "/top/ip" => KugouJsonSerializerContext.Default.KugouTopIpResponseDto,
         "/top/playlist" => KugouJsonSerializerContext.Default.KugouTopPlaylistResponseDto,
         "/top/song" => KugouJsonSerializerContext.Default.KugouTopSongResponseDto,
@@ -425,9 +429,12 @@ public static class KugouResponseDtoExtensions
 [JsonSerializable(typeof(KugouAudioResponseDto))]
 [JsonSerializable(typeof(KugouAudioAccompanyMatchingResponseDto))]
 [JsonSerializable(typeof(KugouAudioKtvTotalResponseDto))]
+[JsonSerializable(typeof(KugouAudioMatchResponseDto))]
 [JsonSerializable(typeof(KugouAudioRelatedResponseDto))]
 [JsonSerializable(typeof(KugouBrushResponseDto))]
 [JsonSerializable(typeof(KugouCaptchaSentResponseDto))]
+[JsonSerializable(typeof(KugouCaptchaVerifyInfoResponseDto))]
+[JsonSerializable(typeof(KugouCaptchaVerifySubmitResponseDto))]
 [JsonSerializable(typeof(KugouCommentAlbumResponseDto))]
 [JsonSerializable(typeof(KugouCommentCountResponseDto))]
 [JsonSerializable(typeof(KugouCommentFloorResponseDto))]
@@ -527,6 +534,7 @@ public static class KugouResponseDtoExtensions
 [JsonSerializable(typeof(KugouTopAlbumResponseDto))]
 [JsonSerializable(typeof(KugouTopCardResponseDto))]
 [JsonSerializable(typeof(KugouTopCardYouthResponseDto))]
+[JsonSerializable(typeof(KugouTopCardYouthTagResponseDto))]
 [JsonSerializable(typeof(KugouTopIpResponseDto))]
 [JsonSerializable(typeof(KugouTopPlaylistResponseDto))]
 [JsonSerializable(typeof(KugouTopSongResponseDto))]
