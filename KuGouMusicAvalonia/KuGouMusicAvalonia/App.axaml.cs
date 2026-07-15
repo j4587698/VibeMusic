@@ -280,6 +280,15 @@ public partial class App : Application
 
     private static void OnProcessExit(object? sender, EventArgs e)
     {
+        // 关库前先把去抖窗口内未落盘的播放状态/队列同步写入，避免退出丢失。
+        try
+        {
+            PlayerService.Instance.FlushPendingState();
+        }
+        catch
+        {
+        }
+
         LocalMusicStore.Shutdown();
     }
 }

@@ -41,6 +41,16 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     private string _pendingResumeSongKey = string.Empty;
     private double _pendingResumeProgress;
 
+    // —— 异步去抖持久化 ——
+    private readonly DispatcherTimer _persistDebounceTimer;
+    private readonly object _persistGate = new();
+    private PlaybackStateSnapshot? _pendingPersistSnapshot;
+    private bool _persistRunning;
+    private bool _pendingSaveQueue;
+
+    // 队列去重索引：按 songKey 维护当前队列成员，使 AppendToQueue 去重为 O(1)。
+    private readonly HashSet<string> _queueKeys = new(StringComparer.Ordinal);
+
     private static string ErrorLogPath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "KuGouMusicAvalonia",
@@ -175,7 +185,19 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             Interval = TimeSpan.FromMilliseconds(500)
         };
         _progressTimer.Tick += OnProgressTick;
+
+        _persistDebounceTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(1500)
+        };
+        _persistDebounceTimer.Tick += OnPersistDebounceTick;
+
         RestorePersistedPlaybackState();
+    }
+
+    private void OnPersistDebounceTick(object? sender, EventArgs e)
+    {
+        FlushPlaybackState();
     }
 
     public Task PlaySongAsync(KugouSong song)
@@ -229,6 +251,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 
         _radioNextSongProvider = nextSongProvider;
         Queue.Clear();
+        _queueKeys.Clear();
         QueueTitle = string.IsNullOrWhiteSpace(title) ? "FM 电台" : title.Trim();
         CurrentQueueIndex = -1;
         IsRadioMode = true;
@@ -253,7 +276,9 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         var added = 0;
         foreach (var song in songList)
         {
-            if (Queue.Any(item => IsSameSong(item, song)))
+            // O(1) 去重：用 songKey 索引代替对整个队列的线性扫描，消除批量加入时的 O(n²)。
+            var key = LocalMusicStore.GetSongKey(song);
+            if (!string.IsNullOrEmpty(key) && !_queueKeys.Add(key))
             {
                 continue;
             }
@@ -271,7 +296,8 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         if (added > 0)
         {
             StatusMessage = $"已加入 {added} 首到播放队列";
-            PersistPlaybackState(force: true, saveQueue: true);
+            // 去抖持久化：连续添加只触发一次后台写库，不再同步阻塞 UI。
+            PersistPlaybackState(saveQueue: true);
         }
 
         return added;
@@ -284,7 +310,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             return Task.CompletedTask;
         }
 
-        var index = Queue.ToList().FindIndex(item => IsSameSong(item, song));
+        var index = IndexOfQueueSong(song);
         if (index < 0)
         {
             StatusMessage = "这首歌不在当前播放队列中";
@@ -294,6 +320,22 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         return PlayQueueIndexAsync(index);
     }
 
+    /// <summary>
+    /// 在队列中按歌曲身份查找索引。直接索引遍历，不复制集合。
+    /// </summary>
+    private int IndexOfQueueSong(KugouSong song)
+    {
+        for (var i = 0; i < Queue.Count; i++)
+        {
+            if (IsSameSong(Queue[i], song))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     public async Task RemoveFromQueueAsync(KugouSong song)
     {
         if (song is null || Queue.Count == 0)
@@ -301,7 +343,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             return;
         }
 
-        var index = Queue.ToList().FindIndex(item => IsSameSong(item, song));
+        var index = IndexOfQueueSong(song);
         if (index < 0)
         {
             StatusMessage = "这首歌不在当前播放队列中";
@@ -310,7 +352,12 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 
         var currentIndex = ResolveCurrentQueueIndex();
         var isRemovingCurrent = index == currentIndex;
+        var removingKey = LocalMusicStore.GetSongKey(Queue[index]);
         Queue.RemoveAt(index);
+        if (!string.IsNullOrEmpty(removingKey))
+        {
+            _queueKeys.Remove(removingKey);
+        }
 
         if (Queue.Count == 0)
         {
@@ -333,7 +380,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         }
 
         NotifyQueueChanged();
-        PersistPlaybackState(force: true, saveQueue: true);
+        PersistPlaybackState(saveQueue: true);
         StatusMessage = "已从播放队列移除";
     }
 
@@ -343,6 +390,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         ResetActiveLoad();
         DisposeCurrentPlayer();
         Queue.Clear();
+        _queueKeys.Clear();
         QueueTitle = "临时播放";
         CurrentQueueIndex = -1;
         CurrentSong = null;
@@ -842,10 +890,18 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 
     private void ReplaceQueue(IReadOnlyList<KugouSong> songs, string? title)
     {
+        // 替换队列保持与传入列表一致的顺序与数量（调用方的 startIndex 基于原始列表，
+        // 此处不做去重以免索引错位）；仅同步维护去重索引。
         Queue.Clear();
+        _queueKeys.Clear();
         foreach (var song in songs)
         {
             Queue.Add(song);
+            var key = LocalMusicStore.GetSongKey(song);
+            if (!string.IsNullOrEmpty(key))
+            {
+                _queueKeys.Add(key);
+            }
         }
 
         QueueTitle = string.IsNullOrWhiteSpace(title) ? "临时播放" : title.Trim();
@@ -1214,9 +1270,15 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             QueueTitle = string.IsNullOrWhiteSpace(state.QueueTitle) ? "临时播放" : state.QueueTitle;
             IsRadioMode = false;
             Queue.Clear();
+            _queueKeys.Clear();
             foreach (var song in LocalMusicStore.Instance.LoadCurrentQueueSongs())
             {
                 Queue.Add(song);
+                var key = LocalMusicStore.GetSongKey(song);
+                if (!string.IsNullOrEmpty(key))
+                {
+                    _queueKeys.Add(key);
+                }
             }
 
             CurrentQueueIndex = Queue.Count > 0 ? Math.Clamp(state.CurrentQueueIndex, 0, Queue.Count - 1) : -1;
@@ -1406,34 +1468,158 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             return;
         }
 
-        var now = DateTime.UtcNow;
-        if (!force && now - _lastPlaybackStateSaveUtc < TimeSpan.FromSeconds(10))
+        // 累积“是否需要保存队列”。队列写入开销大（全量重写），去抖期间任意一次要求保存队列即合并保存。
+        _pendingSaveQueue |= saveQueue;
+
+        if (force)
+        {
+            // 立即落盘（切歌 / 清空 / 退出等关键时刻）。
+            FlushPlaybackState();
+            return;
+        }
+
+        // 固定窗口内合并多次变更。播放进度每 500ms 更新一次，不能反复重启定时器，
+        // 否则 1.5 秒的保存窗口会在持续播放期间永远无法到期。
+        if (!_persistDebounceTimer.IsEnabled)
+        {
+            _persistDebounceTimer.Start();
+        }
+    }
+
+    /// <summary>
+    /// 立即把当前播放状态落盘。在 UI 线程取值快照，再交由后台线程写库，避免阻塞 UI。
+    /// </summary>
+    private void FlushPlaybackState()
+    {
+        if (_isRestoringPlaybackState)
         {
             return;
         }
 
-        _lastPlaybackStateSaveUtc = now;
-        try
+        _persistDebounceTimer.Stop();
+
+        bool saveQueue = _pendingSaveQueue;
+        _pendingSaveQueue = false;
+        _lastPlaybackStateSaveUtc = DateTime.UtcNow;
+
+        // 在 UI 线程一次性取快照（ObservableCollection 非线程安全，禁止在后台线程枚举）。
+        var snapshot = new PlaybackStateSnapshot(
+            CurrentSong,
+            saveQueue ? new List<KugouSong>(Queue) : null,
+            QueueTitle,
+            CurrentQueueIndex,
+            PlayMode,
+            Volume,
+            Progress,
+            Duration,
+            IsRadioMode,
+            saveQueue);
+
+        QueuePersistWork(snapshot);
+    }
+
+    /// <summary>
+    /// 把一次持久化快照串行排队到后台线程执行，保证写入顺序且不阻塞 UI。
+    /// </summary>
+    private void QueuePersistWork(PlaybackStateSnapshot snapshot)
+    {
+        lock (_persistGate)
         {
-            LocalMusicStore.Instance.SavePlaybackState(
-                CurrentSong,
-                Queue.ToList(),
-                QueueTitle,
-                CurrentQueueIndex,
-                PlayMode,
-                Volume,
-                Progress,
-                Duration,
-                IsRadioMode,
-                saveQueue);
-            // 优化：不再每 10 秒去更新一次不参与实际业务的“历史进度”，以大幅减少磁盘 I/O
-            // 只有在切歌、播放完成或关闭应用时才会去记录最终停留进度。
-            // UpdateCurrentPlaybackHistory(completed: false);
+            // 状态快照可以覆盖旧状态，但不能丢掉尚未写入的队列快照。
+            if (!snapshot.SaveQueue && _pendingPersistSnapshot is { SaveQueue: true } pendingQueueSnapshot)
+            {
+                snapshot = snapshot with
+                {
+                    Queue = pendingQueueSnapshot.Queue,
+                    SaveQueue = true
+                };
+            }
+
+            // 仅保留最新快照：去抖窗口外的旧快照已无意义，避免无谓的重复写入。
+            _pendingPersistSnapshot = snapshot;
+            if (_persistRunning)
+            {
+                return;
+            }
+
+            _persistRunning = true;
         }
-        catch
+
+        _ = Task.Run(ProcessPersistQueue);
+    }
+
+    private void ProcessPersistQueue()
+    {
+        while (true)
         {
+            PlaybackStateSnapshot snapshot;
+            lock (_persistGate)
+            {
+                if (_pendingPersistSnapshot is null)
+                {
+                    _persistRunning = false;
+                    return;
+                }
+
+                snapshot = _pendingPersistSnapshot;
+                _pendingPersistSnapshot = null;
+            }
+
+            try
+            {
+                LocalMusicStore.Instance.SavePlaybackState(
+                    snapshot.CurrentSong,
+                    snapshot.Queue ?? (IReadOnlyList<KugouSong>)Array.Empty<KugouSong>(),
+                    snapshot.QueueTitle,
+                    snapshot.CurrentQueueIndex,
+                    snapshot.PlayMode,
+                    snapshot.Volume,
+                    snapshot.Progress,
+                    snapshot.Duration,
+                    snapshot.IsRadioMode,
+                    snapshot.SaveQueue);
+            }
+            catch
+            {
+            }
         }
     }
+
+    /// <summary>
+    /// 同步等待所有挂起的持久化写入完成。仅用于应用退出 / Dispose，确保不丢数据。
+    /// </summary>
+    private void FlushPlaybackStateBlocking()
+    {
+        FlushPlaybackState();
+
+        // 等待后台写入排空（最多等待若干秒，避免极端情况下卡死退出）。
+        var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            lock (_persistGate)
+            {
+                if (!_persistRunning && _pendingPersistSnapshot is null)
+                {
+                    return;
+                }
+            }
+
+            Thread.Sleep(20);
+        }
+    }
+
+    private sealed record PlaybackStateSnapshot(
+        KugouSong? CurrentSong,
+        List<KugouSong>? Queue,
+        string QueueTitle,
+        int CurrentQueueIndex,
+        PlaybackMode PlayMode,
+        double Volume,
+        double Progress,
+        double Duration,
+        bool IsRadioMode,
+        bool SaveQueue);
+
 
     private double TakePendingResumeProgress(KugouSong song)
     {
@@ -1513,6 +1699,14 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         location.Contains(".mgg", StringComparison.OrdinalIgnoreCase) ||
         location.Contains(".kgm", StringComparison.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// 同步刷新所有挂起的播放状态到磁盘。供应用退出 / 进入后台时调用，确保去抖窗口内的队列变更不丢失。
+    /// </summary>
+    public void FlushPendingState()
+    {
+        FlushPlaybackStateBlocking();
+    }
+
     public void Dispose()
     {
         if (_disposed)
@@ -1522,8 +1716,10 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 
         _disposed = true;
         StopProgressTimer();
+        _persistDebounceTimer.Stop();
         ResetActiveLoad();
-        PersistPlaybackState(force: true);
+        // 退出前同步等待持久化排空，确保队列与播放进度不丢失。
+        FlushPlaybackStateBlocking();
         DisposeCurrentPlayer();
     }
 }
