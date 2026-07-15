@@ -574,7 +574,14 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 
         CurrentSong = song;
         LastErrorDetail = string.Empty;
-        SetProgressFromPlayer(0);
+        
+        var songKey = LocalMusicStore.GetSongKey(song);
+        var isResuming = !string.IsNullOrWhiteSpace(songKey) && string.Equals(songKey, _pendingResumeSongKey, StringComparison.Ordinal);
+        if (!isResuming)
+        {
+            SetProgressFromPlayer(0);
+        }
+        
         Duration = NormalizeDuration(song.Duration);
         IsPlaying = false;
         IsLoading = true;
@@ -648,6 +655,10 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
                     {
                         player.Seek(resumeProgress);
                         SetProgressFromPlayer(resumeProgress);
+                    }
+                    else if (isResuming)
+                    {
+                        SetProgressFromPlayer(0);
                     }
 
                     var playStarted = await Task.Run(() => player.Play(), cancellationToken).ConfigureAwait(false);
@@ -1282,16 +1293,17 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             }
 
             CurrentQueueIndex = Queue.Count > 0 ? Math.Clamp(state.CurrentQueueIndex, 0, Queue.Count - 1) : -1;
-            CurrentSong = LocalMusicStore.Instance.LoadSongSnapshot(state.CurrentSongKey) ??
+            var restoredSong = LocalMusicStore.Instance.LoadSongSnapshot(state.CurrentSongKey) ??
                 (CurrentQueueIndex >= 0 && CurrentQueueIndex < Queue.Count ? Queue[CurrentQueueIndex] : null);
 
-            if (CurrentSong is not null)
+            if (restoredSong is not null)
             {
-                Duration = state.DurationSeconds > 0 ? state.DurationSeconds : NormalizeDuration(CurrentSong.Duration);
+                Duration = state.DurationSeconds > 0 ? state.DurationSeconds : NormalizeDuration(restoredSong.Duration);
                 SetProgressFromPlayer(state.ProgressSeconds);
-                _pendingResumeSongKey = LocalMusicStore.GetSongKey(CurrentSong);
+                _pendingResumeSongKey = LocalMusicStore.GetSongKey(restoredSong);
                 _pendingResumeProgress = state.ProgressSeconds;
                 StatusMessage = "已恢复上次播放";
+                CurrentSong = restoredSong;
             }
         }
         catch

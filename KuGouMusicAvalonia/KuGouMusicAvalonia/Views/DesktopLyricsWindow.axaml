@@ -1,10 +1,9 @@
-<Window xmlns="https://github.com/avaloniaui"
+<lumina:LuminaFloatingWindow xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
         xmlns:services="using:KuGouMusicAvalonia.Services"
-        xmlns:controls="using:KuGouMusicAvalonia.Controls"
         xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
         xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="160"
@@ -77,8 +76,8 @@
       <!-- Lyrics (Always visible) -->
       <StackPanel Grid.Row="1" VerticalAlignment="Center" Spacing="6" Margin="0,4" IsHitTestVisible="False">
         <Grid HorizontalAlignment="Stretch">
-          <controls:OutlinedTextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="{Binding CurrentLineFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" Stroke="#66000000" StrokeThickness="1.5" TextAlignment="Center" TextWrapping="Wrap" MaxLines="{Binding CurrentLineMaxLines}" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding Lyrics.ActiveLine.ShowPlain, FallbackValue=True}" />
-          <controls:KaraokeTextBlock
+          <lumina:LuminaOutlinedTextBlock Text="{Binding Lyrics.CurrentLineText}" FontSize="{Binding CurrentLineFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" Stroke="#66000000" StrokeThickness="1.5" TextAlignment="Center" TextWrapping="Wrap" MaxLines="{Binding CurrentLineMaxLines}" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding Lyrics.ActiveLine.ShowPlain, FallbackValue=True}" />
+          <lumina:LuminaKaraokeTextBlock
               Words="{Binding Lyrics.ActiveLine.Words}"
               PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
               FontSize="{Binding CurrentLineFontSize}"
@@ -92,7 +91,7 @@
               StrokeThickness="1.5"
               IsVisible="{Binding Lyrics.ActiveLine.ShowWords, FallbackValue=False}" />
         </Grid>
-        <controls:OutlinedTextBlock Text="{Binding Lyrics.NextLineText}" FontSize="{Binding NextLineFontSize}" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" Stroke="#66000000" StrokeThickness="1" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" HorizontalAlignment="Stretch" IsVisible="{Binding ShowExpandedContent}" />
+        <lumina:LuminaOutlinedTextBlock Text="{Binding Lyrics.NextLineText}" FontSize="{Binding NextLineFontSize}" FontWeight="Bold" Foreground="{DynamicResource MusicTextMutedBrush}" Stroke="#66000000" StrokeThickness="1" TextAlignment="Center" TextWrapping="Wrap" MaxLines="1" HorizontalAlignment="Stretch" IsVisible="{Binding ShowExpandedContent}" />
       </StackPanel>
 
       <!-- Progress Bar (Visible when hovered) -->
@@ -102,4 +101,4 @@
       
     </Grid>
   </Grid>
-</Window>
+</lumina:LuminaFloatingWindow>

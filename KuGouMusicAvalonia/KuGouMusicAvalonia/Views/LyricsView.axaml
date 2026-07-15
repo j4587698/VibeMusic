@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
              xmlns:services="using:KuGouMusicAvalonia.Services"
-             xmlns:controls="using:KuGouMusicAvalonia.Controls"
              xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
@@ -97,7 +96,7 @@
                                MaxLines="2"
                                VerticalAlignment="Center"
                                IsVisible="{Binding ShowPlain}" />
-                    <controls:KaraokeTextBlock
+                    <lumina:LuminaKaraokeTextBlock
                         Words="{Binding Words}"
                         PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
                         FontSize="{Binding DisplayFontSize}"
@@ -202,7 +201,7 @@
                                  MaxLines="2"
                                  VerticalAlignment="Center"
                                  IsVisible="{Binding ShowPlain}" />
-                      <controls:KaraokeTextBlock
+                      <lumina:LuminaKaraokeTextBlock
                           Words="{Binding Words}"
                           PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
                           FontSize="{Binding DisplayFontSize}"

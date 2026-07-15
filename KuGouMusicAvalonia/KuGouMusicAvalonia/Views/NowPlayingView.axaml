@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:KuGouMusicAvalonia.ViewModels"
              xmlns:services="using:KuGouMusicAvalonia.Services"
-             xmlns:controls="using:KuGouMusicAvalonia.Controls"
              xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
@@ -105,7 +104,7 @@
                   <DataTemplate DataType="services:LyricLine">
                     <Grid MinHeight="50" Margin="0,4" Opacity="{Binding DisplayOpacity}" VerticalAlignment="Center">
                       <TextBlock Text="{Binding Text}" FontSize="{Binding DisplayFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding ShowPlain}" />
-                      <controls:KaraokeTextBlock
+                      <lumina:LuminaKaraokeTextBlock
                           Words="{Binding Words}"
                           PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
                           FontSize="{Binding DisplayFontSize}"
@@ -113,8 +112,8 @@
                           TextAlignment="Center"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Center"
-                          SungBrush="{DynamicResource MusicPrimaryBrush}"
-                          UnsungBrush="{DynamicResource MusicTextBrush}"
+SungBrush="{DynamicResource MusicPrimaryBrush}"
+                           UnsungBrush="{DynamicResource MusicTextBrush}"
                           IsVisible="{Binding ShowWords}" />
                     </Grid>
                   </DataTemplate>
@@ -220,7 +219,7 @@
                     <DataTemplate DataType="services:LyricLine">
                       <Grid MinHeight="50" Margin="0,4" Opacity="{Binding DisplayOpacity}" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Text}" FontSize="{Binding DisplayFontSize}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextAlignment="Center" TextWrapping="Wrap" MaxLines="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsVisible="{Binding ShowPlain}" />
-                        <controls:KaraokeTextBlock
+                        <lumina:LuminaKaraokeTextBlock
                             Words="{Binding Words}"
                             PlaybackPosition="{Binding WordPlaybackPosition, Source={x:Static services:LyricsService.Instance}}"
                             FontSize="{Binding DisplayFontSize}"
