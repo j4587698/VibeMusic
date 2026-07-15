@@ -32,9 +32,13 @@
       <Setter Property="Foreground" Value="{DynamicResource MusicPrimaryBrush}" />
     </Style>
   </UserControl.Styles>
-  <Grid RowDefinitions="*,Auto,Auto" Background="{DynamicResource MusicBackgroundBrush}">
-    <lumina:LuminaShell x:Name="AppShell"
+  <lumina:LuminaOverlayHost SafeAreaMode="Enabled"
+                            Background="{DynamicResource MusicBackgroundBrush}">
+    <controls:AppChromeHost BottomSafeAreaBackground="{DynamicResource MusicSurfaceBrush}">
+      <Grid RowDefinitions="*,Auto,Auto" Background="{DynamicResource MusicBackgroundBrush}">
+        <lumina:LuminaShell x:Name="AppShell"
                         Grid.Row="0"
+                        SafeAreaMode="Disabled"
                         ShellKey="Vibe"
                         ActiveNavigationKey="{Binding ActiveNavigationKey, Mode=OneWay}"
                         IsMenuOpen="{Binding IsShellMenuOpen, Mode=TwoWay}"
@@ -193,8 +197,8 @@
                                          EdgeBrush="{DynamicResource MusicOutlineBrush}"
                                          EdgeThickness="1"
                                          Padding="0">
-            <Grid RowDefinitions="*,3">
-              <Grid ColumnDefinitions="42,*,34,36,44" ColumnSpacing="6" Margin="8,8,10,8">
+            <Grid>
+              <Grid ColumnDefinitions="42,*,34,36,44" ColumnSpacing="6" Margin="8,8,10,12">
                 <Button Grid.ColumnSpan="2" Classes="Ghost" Command="{Binding OpenNowPlayingCommand}" Background="Transparent" Padding="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" ToolTip.Tip="正在播放">
                   <Grid ColumnDefinitions="42,*" ColumnSpacing="8">
                     <Border Classes="spinning-cover" Classes.playing="{Binding Player.IsPlaying}" Width="42" Height="42" CornerRadius="21" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" RenderTransformOrigin="50%,50%" HorizontalAlignment="Left">
@@ -225,7 +229,7 @@
   </lumina:LuminaButton.Icon>
 </Button>
               </Grid>
-              <lumina:LuminaPlaybackSlider Grid.Row="1" Margin="1,0" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="3" ThumbSize="0" TrackBrush="{DynamicResource LuminaDividerBrush}" BufferedBrush="{DynamicResource LuminaBorderBrush}" ProgressBrush="{DynamicResource MusicPrimaryBrush}" />
+              <lumina:LuminaPlaybackSlider Height="8" MinHeight="0" MaxHeight="8" Margin="12,0,12,4" VerticalAlignment="Bottom" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="3" ThumbSize="0" TrackBrush="{DynamicResource LuminaDividerBrush}" BufferedBrush="{DynamicResource LuminaBorderBrush}" ProgressBrush="{DynamicResource MusicPrimaryBrush}" />
             </Grid>
             </lumina:LuminaBlurBackground>
     </Grid>
@@ -383,5 +387,7 @@
         </Grid>
       </Border>
     </Grid>
-  </Grid>
+      </Grid>
+    </controls:AppChromeHost>
+  </lumina:LuminaOverlayHost>
 </UserControl>
