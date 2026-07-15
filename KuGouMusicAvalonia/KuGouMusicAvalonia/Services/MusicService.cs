@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,6 +35,78 @@ public static class MusicService
         !string.IsNullOrWhiteSpace(Client.CookieStore.Get("token")) &&
         !string.IsNullOrWhiteSpace(Client.CookieStore.Get("userid")) &&
         !string.Equals(Client.CookieStore.Get("userid"), "0", StringComparison.Ordinal);
+
+    public static bool TryGetResponseError(KugouResponse response, out string errorMessage)
+    {
+        using var doc = response.TryParseJson();
+        var root = doc?.RootElement;
+        var message = root is { ValueKind: JsonValueKind.Object }
+            ? ReadResponseMessage(root.Value)
+            : null;
+
+        if (!response.IsSuccessStatusCode)
+        {
+            errorMessage = string.IsNullOrWhiteSpace(message)
+                ? $"HTTP {(int)response.StatusCode}"
+                : $"HTTP {(int)response.StatusCode}：{message}";
+            return true;
+        }
+
+        if (root is not { ValueKind: JsonValueKind.Object })
+        {
+            errorMessage = "响应格式无效";
+            return true;
+        }
+
+        var errorCode = ReadResponseInt(root.Value, "error_code") ?? ReadResponseInt(root.Value, "errcode") ?? 0;
+        var status = ReadResponseInt(root.Value, "status");
+        if (errorCode == 0 && status is not 0)
+        {
+            errorMessage = string.Empty;
+            return false;
+        }
+
+        errorMessage = !string.IsNullOrWhiteSpace(message)
+            ? message
+            : errorCode == 20002
+                ? "请先登录或重新登录"
+                : $"API 错误 {errorCode}";
+        return true;
+    }
+
+    private static string? ReadResponseMessage(JsonElement root)
+    {
+        foreach (var name in new[] { "error_msg", "msg", "message", "error" })
+        {
+            if (root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String)
+            {
+                var text = value.GetString();
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    return text;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static int? ReadResponseInt(JsonElement root, string name)
+    {
+        if (!root.TryGetProperty(name, out var value))
+        {
+            return null;
+        }
+
+        if (value.ValueKind == JsonValueKind.Number && value.TryGetInt32(out var number))
+        {
+            return number;
+        }
+
+        return value.ValueKind == JsonValueKind.String && int.TryParse(value.GetString(), out number)
+            ? number
+            : null;
+    }
 
     public static Task<KugouResponse> CreatePlaylistAsync(string name, bool isPrivate = false, CancellationToken cancellationToken = default)
     {
