@@ -7,6 +7,9 @@ using Avalonia.Android;
 using Android.Content;
 using KuGouMusicAvalonia.Services;
 using System.IO;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("KuGouMusicAvalonia.Android")]
 
 namespace KuGouMusicAvalonia.Android;
 
@@ -25,7 +28,7 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
     {
         base.OnCreate(savedInstanceState);
 
-        var musicDir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic);
+        var musicDir = global::Android.OS.Environment.GetExternalStoragePublicDirectory(global::Android.OS.Environment.DirectoryMusic);
         if (musicDir is not null)
         {
             PlatformStoragePaths.ExternalDownloadsDirectory =
@@ -95,4 +98,9 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
             RequestPermissions(new[] { Manifest.Permission.PostNotifications }, NotificationPermissionRequestCode);
         }
     }
+}
+
+public static class PlatformStoragePaths
+{
+    public static string ExternalDownloadsDirectory = string.Empty;
 }
