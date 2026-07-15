@@ -44,16 +44,40 @@
       <Grid Grid.Row="1" IsVisible="{Binding IsWideLayout}" ColumnDefinitions="Auto,*" ColumnSpacing="28">
         <StackPanel Width="{Binding CoverSize}" VerticalAlignment="Center" HorizontalAlignment="Left" Spacing="18" IsVisible="{Binding !IsTightLandscape}">
           <Grid Width="{Binding CoverSize}" Height="{Binding CoverSize}" HorizontalAlignment="Center">
-            <Ellipse Fill="{DynamicResource MusicTextBrush}" Opacity="0.8" />
-            <Ellipse Margin="22" Stroke="{DynamicResource MusicTextBrush}" StrokeThickness="10" Opacity="0.1" />
-            <Ellipse Margin="78" Fill="{DynamicResource MusicCoverFallbackBrush}" />
-            <Ellipse Width="48" Height="48" Fill="{DynamicResource MusicBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <Border Classes="spinning-cover" Classes.playing="{Binding Player.IsPlaying}" Width="150" Height="150" CornerRadius="75" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True" Background="{DynamicResource MusicCoverFallbackBrush}" RenderTransformOrigin="50%,50%">
+            <!-- 唱片主体与封面一起旋转 (恢复 Border 标签以匹配 App.axaml 中的动画样式) -->
+            <Border Classes="spinning-cover" Classes.playing="{Binding Player.IsPlaying}" RenderTransformOrigin="50%,50%">
               <Border.RenderTransform>
                 <RotateTransform />
               </Border.RenderTransform>
-              <lumina:LuminaImage Source="{Binding Player.CurrentCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
+              <Grid>
+                <!-- 黑胶纯黑底板 -->
+                <Ellipse Fill="#0A0A0A" />
+                
+                <!-- 封面外部的深色过渡带 -->
+                <Ellipse Margin="75" Fill="#151515" />
+                <Ellipse Margin="78" Fill="{DynamicResource MusicCoverFallbackBrush}" />
+                
+                <!-- 实际封面 -->
+                <Border Width="150" Height="150" CornerRadius="75" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True" Background="{DynamicResource MusicCoverFallbackBrush}">
+                  <lumina:LuminaImage Source="{Binding Player.CurrentCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
+                </Border>
+              </Grid>
             </Border>
+
+            <!-- 静态的高光反射层 (ConicGradient 提供类似真实黑胶的丝滑蝴蝶状反光) -->
+            <Ellipse IsHitTestVisible="False">
+              <Ellipse.Fill>
+                <ConicGradientBrush Center="50%,50%">
+                  <GradientStop Color="#00FFFFFF" Offset="0" />
+                  <GradientStop Color="#15FFFFFF" Offset="0.12" />
+                  <GradientStop Color="#00FFFFFF" Offset="0.25" />
+                  <GradientStop Color="#00FFFFFF" Offset="0.5" />
+                  <GradientStop Color="#15FFFFFF" Offset="0.62" />
+                  <GradientStop Color="#00FFFFFF" Offset="0.75" />
+                  <GradientStop Color="#00FFFFFF" Offset="1" />
+                </ConicGradientBrush>
+              </Ellipse.Fill>
+            </Ellipse>
           </Grid>
 
           <StackPanel Spacing="7" HorizontalAlignment="Stretch">
@@ -138,16 +162,40 @@
         <Border IsVisible="{Binding IsCoverModeVisible, FallbackValue=False}" Background="Transparent" lumina:LuminaCommand.TappedCommand="{Binding ToggleCompactLyricsCommand}">
           <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" Spacing="18">
             <Grid Width="{Binding CoverSize}" Height="{Binding CoverSize}" HorizontalAlignment="Center">
-              <Ellipse Fill="{DynamicResource MusicTextBrush}" Opacity="0.8" />
-              <Ellipse Margin="22" Stroke="{DynamicResource MusicTextBrush}" StrokeThickness="10" Opacity="0.1" />
-              <Ellipse Margin="78" Fill="{DynamicResource MusicCoverFallbackBrush}" />
-              <Ellipse Width="48" Height="48" Fill="{DynamicResource MusicBackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-              <Border Classes="spinning-cover" Classes.playing="{Binding Player.IsPlaying}" Width="150" Height="150" CornerRadius="75" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True" Background="{DynamicResource MusicCoverFallbackBrush}" RenderTransformOrigin="50%,50%">
+              <!-- 唱片主体与封面一起旋转 (恢复 Border 标签以匹配 App.axaml 中的动画样式) -->
+              <Border Classes="spinning-cover" Classes.playing="{Binding Player.IsPlaying}" RenderTransformOrigin="50%,50%">
                 <Border.RenderTransform>
                   <RotateTransform />
                 </Border.RenderTransform>
-                <lumina:LuminaImage Source="{Binding Player.CurrentCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
+                <Grid>
+                  <!-- 黑胶纯黑底板 -->
+                  <Ellipse Fill="#0A0A0A" />
+                  
+                  <!-- 封面外部的深色过渡带 -->
+                  <Ellipse Margin="75" Fill="#151515" />
+                  <Ellipse Margin="78" Fill="{DynamicResource MusicCoverFallbackBrush}" />
+                  
+                  <!-- 实际封面 -->
+                  <Border Width="150" Height="150" CornerRadius="75" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True" Background="{DynamicResource MusicCoverFallbackBrush}">
+                    <lumina:LuminaImage Source="{Binding Player.CurrentCoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" Stretch="UniformToFill" PlaceholderContent=" " ErrorContent=" " />
+                  </Border>
+                </Grid>
               </Border>
+
+              <!-- 静态的高光反射层 (ConicGradient 提供类似真实黑胶的丝滑蝴蝶状反光) -->
+              <Ellipse IsHitTestVisible="False">
+                <Ellipse.Fill>
+                  <ConicGradientBrush Center="50%,50%">
+                    <GradientStop Color="#00FFFFFF" Offset="0" />
+                    <GradientStop Color="#15FFFFFF" Offset="0.12" />
+                    <GradientStop Color="#00FFFFFF" Offset="0.25" />
+                    <GradientStop Color="#00FFFFFF" Offset="0.5" />
+                    <GradientStop Color="#15FFFFFF" Offset="0.62" />
+                    <GradientStop Color="#00FFFFFF" Offset="0.75" />
+                    <GradientStop Color="#00FFFFFF" Offset="1" />
+                  </ConicGradientBrush>
+                </Ellipse.Fill>
+              </Ellipse>
             </Grid>
 
             <StackPanel Spacing="7" HorizontalAlignment="Stretch" IsVisible="{Binding !IsTightLandscape}">
