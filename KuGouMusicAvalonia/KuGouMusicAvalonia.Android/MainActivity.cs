@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Android;
 using Android.Content;
 using KuGouMusicAvalonia.Services;
+using System.IO;
 
 namespace KuGouMusicAvalonia.Android;
 
@@ -23,6 +24,15 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
+
+        var musicDir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic);
+        if (musicDir is not null)
+        {
+            PlatformStoragePaths.ExternalDownloadsDirectory =
+                Path.Combine(musicDir.AbsolutePath, "VibeMusic");
+            Directory.CreateDirectory(PlatformStoragePaths.ExternalDownloadsDirectory);
+        }
+
         EnsureNotificationPermission();
         AndroidMediaControlManager.Instance.Initialize(this);
         AndroidFloatingLyricsController.Instance.Initialize(this);

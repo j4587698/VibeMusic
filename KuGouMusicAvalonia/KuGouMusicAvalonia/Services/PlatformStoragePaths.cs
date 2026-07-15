@@ -5,10 +5,11 @@ namespace KuGouMusicAvalonia.Services;
 
 internal static class PlatformStoragePaths
 {
+    public static string? ExternalDownloadsDirectory { get; set; }
+
     public static string DefaultDownloadDirectory =>
-        UsesPrivateDownloadDirectory
-            ? Path.Combine(AppStateStore.AppDirectory, "Downloads")
-            : GetDesktopMusicDirectory();
+        ExternalDownloadsDirectory
+        ?? DefaultFallbackDownloadDirectory;
 
     public static string NormalizeDownloadDirectory(string? directory)
     {
@@ -21,7 +22,12 @@ internal static class PlatformStoragePaths
     }
 
     private static bool UsesPrivateDownloadDirectory =>
-        OperatingSystem.IsAndroid() || OperatingSystem.IsIOS();
+        ExternalDownloadsDirectory is null;
+
+    private static string DefaultFallbackDownloadDirectory =>
+        OperatingSystem.IsAndroid() || OperatingSystem.IsIOS()
+            ? Path.Combine(AppStateStore.AppDirectory, "Downloads")
+            : GetDesktopMusicDirectory();
 
     private static string GetDesktopMusicDirectory()
     {

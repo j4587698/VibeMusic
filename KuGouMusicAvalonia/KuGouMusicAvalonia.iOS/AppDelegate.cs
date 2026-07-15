@@ -4,6 +4,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.iOS;
 using Avalonia.Media;
+using KuGouMusicAvalonia.Services;
+using System.IO;
 
 namespace KuGouMusicAvalonia.iOS;
 
@@ -18,6 +20,11 @@ public partial class AppDelegate : AvaloniaAppDelegate<App>
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
         var result = base.FinishedLaunching(application, launchOptions);
+
+        var docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        PlatformStoragePaths.ExternalDownloadsDirectory = Path.Combine(docPath, "VibeMusic");
+        Directory.CreateDirectory(PlatformStoragePaths.ExternalDownloadsDirectory);
+
         IosMediaControlManager.Instance.Initialize();
         return result;
     }
