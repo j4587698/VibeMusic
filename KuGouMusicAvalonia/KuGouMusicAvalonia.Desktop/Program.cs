@@ -21,17 +21,35 @@ sealed class Program
             WriteCrashLog(e.ExceptionObject?.ToString() ?? "Unknown exception");
         };
 
+        var isRestart = args is ["--restart"];
+
         using var singleInstanceMutex = new Mutex(false, SingleInstanceMutexName);
         var hasSingleInstance = false;
 
-        try
+        if (isRestart)
+        {
+            for (var i = 0; i < 50; i++)
+            {
+                hasSingleInstance = TryAcquireSingleInstance(singleInstanceMutex);
+                if (hasSingleInstance)
+                {
+                    break;
+                }
+                Thread.Sleep(100);
+            }
+        }
+        else
         {
             hasSingleInstance = TryAcquireSingleInstance(singleInstanceMutex);
-            if (!hasSingleInstance)
-            {
-                return;
-            }
+        }
 
+        if (!hasSingleInstance)
+        {
+            return;
+        }
+
+        try
+        {
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }
         catch (Exception ex)
