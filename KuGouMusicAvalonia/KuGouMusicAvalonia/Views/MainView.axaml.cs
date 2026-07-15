@@ -23,12 +23,12 @@ public partial class MainView : UserControl
         "NavPlaylists",
         "NavArtists",
         "NavRankings",
-        "NavSearch"
+        "NavSearch",
+        "NavSettings"
     };
 
     private static readonly HashSet<string> InnerNavigationKeys = new(StringComparer.Ordinal)
     {
-        "NavSettings",
         "NavHistory",
         "NavCloud"
     };

@@ -118,6 +118,7 @@ public partial class MainViewModel : ViewModelBase
             "NavArtists" => _artistsViewModel,
             "NavRankings" => _rankingsViewModel,
             "NavSearch" => _searchViewModel,
+            "NavSettings" => RefreshSettingsPage(),
             _ => _discoverViewModel
         };
     }
@@ -126,7 +127,6 @@ public partial class MainViewModel : ViewModelBase
     {
         return value switch
         {
-            "NavSettings" => RefreshSettingsPage(),
             "NavHistory" => _historyViewModel,
             "NavCloud" => RefreshCloudPage(),
             _ => null

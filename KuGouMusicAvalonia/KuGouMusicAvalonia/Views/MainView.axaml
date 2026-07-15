@@ -83,24 +83,9 @@
           <lumina:LuminaNavigationItem Header="歌手" NavigationKey="NavArtists" Icon="{x:Static material:MaterialIconKind.AccountMusic}" />
           <lumina:LuminaNavigationItem Header="排行" NavigationKey="NavRankings" Icon="{x:Static material:MaterialIconKind.ChartBar}" />
           <lumina:LuminaNavigationItem Header="搜索" NavigationKey="NavSearch" Icon="{x:Static material:MaterialIconKind.Magnify}" />
+          <lumina:LuminaNavigationItem Header="我的" NavigationKey="NavSettings" Icon="{x:Static material:MaterialIconKind.AccountCircle}" />
         </lumina:LuminaNavigationView>
       </lumina:LuminaShell.MenuContent>
-
-      <lumina:LuminaShell.MenuFooter>
-        <Button Classes="Ghost"
-                Command="{Binding OpenMyCommand}"
-                Height="40"
-                Padding="8,0"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Stretch"
-                Background="Transparent"
-                ToolTip.Tip="我的">
-          <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-            <icons:MaterialIcon Kind="AccountCircle" Width="22" Height="22" Foreground="{DynamicResource MusicTextSoftBrush}" VerticalAlignment="Center" />
-            <TextBlock Grid.Column="1" Text="我的" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" VerticalAlignment="Center" />
-          </Grid>
-        </Button>
-      </lumina:LuminaShell.MenuFooter>
     </lumina:LuminaShell>
 
     <Grid IsVisible="{Binding ShowMiniPlayer}"
