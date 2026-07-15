@@ -6,7 +6,7 @@
              xmlns:luminactrls="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
              xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="KuGouMusicAvalonia.App"
-             Name="VibeMusic"
+             Name="Vibe Music"
              RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
@@ -28,14 +28,14 @@
 
     <NativeMenu.Menu>
         <NativeMenu>
-            <NativeMenuItem Header="VibeMusic">
+            <NativeMenuItem Header="Vibe Music">
                 <NativeMenuItem.Menu>
                     <NativeMenu>
-                        <NativeMenuItem Header="关于 VibeMusic" Click="About_OnClick" />
+                        <NativeMenuItem Header="关于 Vibe Music" Click="About_OnClick" />
                         <NativeMenuItemSeparator />
-                        <NativeMenuItem Header="隐藏 VibeMusic" Click="HideMainWindow_OnClick" Gesture="Cmd+H" />
+                        <NativeMenuItem Header="隐藏 Vibe Music" Click="HideMainWindow_OnClick" Gesture="Cmd+H" />
                         <NativeMenuItemSeparator />
-                        <NativeMenuItem Header="退出 VibeMusic" Click="ExitApp_OnClick" Gesture="Cmd+Q" />
+                        <NativeMenuItem Header="退出 Vibe Music" Click="ExitApp_OnClick" Gesture="Cmd+Q" />
                     </NativeMenu>
                 </NativeMenuItem.Menu>
             </NativeMenuItem>
@@ -44,7 +44,7 @@
 
     <TrayIcon.Icons>
         <TrayIcons>
-            <TrayIcon Icon="/Assets/vibe-logo.ico" ToolTipText="VibeMusic" Clicked="TrayIcon_OnClicked">
+            <TrayIcon Icon="/Assets/vibe-logo.ico" ToolTipText="Vibe Music" Clicked="TrayIcon_OnClicked">
                 <TrayIcon.Menu>
                     <NativeMenu NeedsUpdate="TrayMenu_NeedsUpdate" Opening="TrayMenu_NeedsUpdate">
                         <NativeMenuItem Header="显示主界面" Click="ShowMainWindow_OnClick" />

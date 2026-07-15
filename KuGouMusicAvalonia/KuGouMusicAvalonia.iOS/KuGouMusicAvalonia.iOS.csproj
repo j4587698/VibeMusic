@@ -11,6 +11,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\*.png" />
+    <ImageAsset Include="Assets.xcassets\LaunchLogo.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\LaunchLogo.imageset\*.png" />
+    <InterfaceDefinition Include="Resources\LaunchScreen.xib" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\KuGouMusicAvalonia\KuGouMusicAvalonia.csproj" />
   </ItemGroup>
 </Project>
