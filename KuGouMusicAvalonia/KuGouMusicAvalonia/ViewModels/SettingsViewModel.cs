@@ -1,3 +1,5 @@
+using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
@@ -172,6 +174,7 @@ public partial class SettingsViewModel : ViewModelBase
     public decimal FloatingLyricsMinFontSize => (decimal)FloatingLyricsService.MinFontSize;
     public decimal FloatingLyricsMaxFontSize => (decimal)FloatingLyricsService.MaxFontSize;
     public string FloatingLyricsFontSizeText => $"{FloatingLyricsFontSize ?? _lastValidFloatingLyricsFontSize:0}";
+
 
     public bool IsFloatingLyricsOpen
     {
@@ -1134,6 +1137,7 @@ public partial class SettingsViewModel : ViewModelBase
             "跟随系统" => ThemeVariant.Default,
             _ => ThemeVariant.Dark
         };
+
     }
 
     private static Bitmap CreateQrBitmap(string text)

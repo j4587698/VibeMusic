@@ -23,12 +23,12 @@ public partial class MainView : UserControl
         "NavPlaylists",
         "NavArtists",
         "NavRankings",
-        "NavSearch"
+        "NavSearch",
+        "NavSettings"
     };
 
     private static readonly HashSet<string> InnerNavigationKeys = new(StringComparer.Ordinal)
     {
-        "NavSettings",
         "NavHistory",
         "NavCloud"
     };
@@ -399,7 +399,7 @@ public partial class MainView : UserControl
     {
         return navigationKey switch
         {
-            "NavSettings" => "我的",
+    
             "NavHistory" => "播放记录",
             "NavCloud" => "云盘",
             _ => null

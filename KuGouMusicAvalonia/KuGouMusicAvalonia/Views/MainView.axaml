@@ -374,7 +374,7 @@
               <TextBlock Text="搜索" FontSize="10" HorizontalAlignment="Center" />
             </StackPanel>
           </Button>
-          <Button Grid.Column="5" Classes="Ghost BottomTab" Classes.active="{Binding IsSettingsActive}" Command="{Binding OpenMyCommand}">
+          <Button Grid.Column="5" Classes="Ghost BottomTab" Classes.active="{Binding IsSettingsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavSettings">
             <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
               <icons:MaterialIcon Kind="AccountCircle" Width="24" Height="24" />
               <TextBlock Text="我的" FontSize="10" HorizontalAlignment="Center" />

@@ -143,6 +143,24 @@ public sealed partial class LyricsService : ObservableObject
             }
 
             var lines = new List<LyricLine>(ParseLines(text));
+
+            // Generate pseudo-words for LRC lines so they have smooth karaoke progress
+            for (var i = 0; i < lines.Count; i++)
+            {
+                var current = lines[i];
+                if (current.Words.Count == 0 && !string.IsNullOrWhiteSpace(current.Text))
+                {
+                    var duration = 2.5; // default duration
+                    if (i + 1 < lines.Count)
+                    {
+                        duration = lines[i + 1].StartTime - current.StartTime;
+                        if (duration > 8.0) duration = 8.0;
+                        if (duration <= 0) duration = 2.5;
+                    }
+                    current.Words.Add(new LuminaUI.Controls.LuminaKaraokeWord(current.Text, current.StartTime, duration));
+                }
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
 
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -258,13 +276,12 @@ public sealed partial class LyricsService : ObservableObject
 
     private double GetPlaybackPosition()
     {
-        var position = _clockAnchorSeconds;
-        if (_player.IsPlaying)
+        if (!_player.IsPlaying)
         {
-            position += _playbackClock.Elapsed.TotalSeconds;
+            return _player.Progress;
         }
 
-        return position;
+        return _clockAnchorSeconds + _playbackClock.Elapsed.TotalSeconds;
     }
 
     private void UpdateInterpolationTimerState()
@@ -360,6 +377,7 @@ public sealed partial class LyricsService : ObservableObject
         CurrentLineText = Lines[index].Text;
         NextLineText = index + 1 < Lines.Count ? Lines[index + 1].Text : string.Empty;
         UpdateFocusedLines(index);
+        UpdateWordProgress();
     }
 
     private void SetActiveLineIndex(int index)
@@ -449,7 +467,7 @@ public sealed partial class LyricsService : ObservableObject
                     var offset = double.Parse(wordMatch.Groups["offset"].Value, CultureInfo.InvariantCulture) / 1000.0;
                     var wordDuration = double.Parse(wordMatch.Groups["duration"].Value, CultureInfo.InvariantCulture) / 1000.0;
                     var wordText = wordMatch.Groups["text"].Value;
-                    lyricLine.Words.Add(new LyricWord(wordText, lineStartTime + offset, wordDuration));
+                    lyricLine.Words.Add(new LuminaUI.Controls.LuminaKaraokeWord(wordText, lineStartTime + offset, wordDuration));
                 }
                 
                 yield return lyricLine;
@@ -517,7 +535,7 @@ public sealed partial class LyricLine : ObservableObject
     
     public double Duration { get; }
     
-    public ObservableCollection<LyricWord> Words { get; } = new();
+    public ObservableCollection<LuminaUI.Controls.LuminaKaraokeWord> Words { get; } = new();
 
     public bool IsPlaceholder { get; init; }
 
@@ -537,19 +555,5 @@ public sealed partial class LyricLine : ObservableObject
     private bool _isActive;
 }
 
-public sealed partial class LyricWord : ObservableObject
-{
-    public LyricWord(string text, double startTime, double duration)
-    {
-        Text = text;
-        StartTime = startTime;
-        Duration = duration;
-    }
 
-    public string Text { get; }
-    public double StartTime { get; }
-    public double Duration { get; }
 
-    [ObservableProperty]
-    private double _progress;
-}

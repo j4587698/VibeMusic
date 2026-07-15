@@ -364,6 +364,7 @@
               </lumina:LuminaInputGroup>
             </lumina:LuminaSettingsOption.TrailingContent>
           </lumina:LuminaSettingsOption>
+
         </StackPanel>
       </Border>
 
