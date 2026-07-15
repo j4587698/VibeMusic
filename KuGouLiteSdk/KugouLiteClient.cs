@@ -101,9 +101,8 @@ public sealed partial class KugouLiteClient : IDisposable
         var clientTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         var parameters = BuildParameters(request, dfid, mid, token, userid, clientTime);
-        var bodyText = SerializeBody(request.Body);
-        
-
+        var binaryBody = request.Body as byte[];
+        var bodyText = binaryBody is null ? SerializeBody(request.Body) : null;
 
         if (request.EncryptKey)
         {
@@ -117,7 +116,9 @@ public sealed partial class KugouLiteClient : IDisposable
             {
                 KugouEncryptType.Web => KugouCrypto.SignatureWebParams(parameters),
                 KugouEncryptType.Register => KugouCrypto.SignatureRegisterParams(parameters),
-                _ => KugouCrypto.SignatureAndroidParams(parameters, bodyText)
+                _ => binaryBody is null
+                    ? KugouCrypto.SignatureAndroidParams(parameters, bodyText)
+                    : KugouCrypto.SignatureAndroidParams(parameters, binaryBody)
             };
         }
 
@@ -134,11 +135,24 @@ public sealed partial class KugouLiteClient : IDisposable
                 .Select(item => $"{item.Key}={item.Value}")));
         }
 
-        if (bodyText is not null)
+        if (binaryBody is not null)
+        {
+            httpRequest.Content = new ByteArrayContent(binaryBody);
+            httpRequest.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(
+                request.Headers.TryGetValue("Content-Type", out var contentType)
+                    ? contentType
+                    : "application/octet-stream");
+        }
+        else if (bodyText is not null)
         {
             httpRequest.Content = request.Body is string
                 ? new StringContent(bodyText, Encoding.UTF8)
                 : new StringContent(bodyText, Encoding.UTF8, "application/json");
+
+            if (request.Headers.TryGetValue("Content-Type", out var contentType))
+            {
+                httpRequest.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+            }
         }
 
         using var response = await _httpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);

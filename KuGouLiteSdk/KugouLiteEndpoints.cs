@@ -1240,6 +1240,22 @@ public partial class KugouLiteClient
 
     public Task<KugouResponse> AudioMatchAsync(byte[] audioData, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(audioData);
+        if (audioData.Length == 0)
+        {
+            throw new ArgumentException("PCM data cannot be empty.", nameof(audioData));
+        }
+
+        if (audioData.Length % sizeof(short) != 0)
+        {
+            throw new ArgumentException("PCM data must contain complete signed 16-bit samples.", nameof(audioData));
+        }
+
+        if (audioData.AsSpan().StartsWith("RIFF"u8))
+        {
+            throw new ArgumentException("Audio matching requires raw 8000 Hz mono signed 16-bit PCM without a WAV header.", nameof(audioData));
+        }
+
         var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var request = new KugouRequest
         {

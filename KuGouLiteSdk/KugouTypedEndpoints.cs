@@ -42,6 +42,37 @@ public sealed partial class KugouLiteClient
         return KugouJsonMapper.ToListResult(response, item => KugouJsonMapper.MapVideo(item) ?? new KugouVideo());
     }
 
+    public async Task<KugouListResult<KugouSong>> AudioMatchTypedAsync(byte[] pcmData, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(pcmData);
+        if (pcmData.Length == 0)
+        {
+            throw new ArgumentException("PCM data cannot be empty.", nameof(pcmData));
+        }
+
+        var response = await AudioMatchAsync(pcmData, cancellationToken).ConfigureAwait(false);
+        var result = KugouJsonMapper.ToListResult(response, item => KugouJsonMapper.MapSong(item, KugouSongMapKind.Search));
+        if (result.Items.Count > 0)
+        {
+            return result;
+        }
+
+        var single = KugouJsonMapper.ToFirstResult(response, item => KugouJsonMapper.MapSong(item, KugouSongMapKind.Search)).Data;
+        return single is not null && (!string.IsNullOrWhiteSpace(single.Hash) || single.MixSongId > 0)
+            ? new KugouListResult<KugouSong>([single], 1, response)
+            : result;
+    }
+
+    public static bool IsAudioMatchNoResult(KugouResponse response)
+    {
+        using var doc = response.TryParseJson();
+        return doc is not null &&
+            doc.RootElement.ValueKind == JsonValueKind.Object &&
+            doc.RootElement.TryGetProperty("error_code", out var errorCode) &&
+            errorCode.TryGetInt32(out var value) &&
+            value == 40000;
+    }
+
     public async Task<KugouListResult<KugouSong>> GetNewSongsTypedAsync(CancellationToken cancellationToken = default)
     {
         var body = D(
