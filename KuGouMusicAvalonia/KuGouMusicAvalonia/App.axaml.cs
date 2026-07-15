@@ -278,6 +278,24 @@ public partial class App : Application
         _trayMenu = trayIcon?.Menu;
     }
 
+    public void RestartAppUI()
+    {
+        _mainViewModel = new MainViewModel();
+
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var oldWindow = desktop.MainWindow;
+            var newWindow = new MainWindow { DataContext = _mainViewModel };
+            desktop.MainWindow = newWindow;
+            newWindow.Show();
+            oldWindow?.Close();
+        }
+        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleView)
+        {
+            singleView.MainView = new MainView { DataContext = _mainViewModel };
+        }
+    }
+
     private static void OnProcessExit(object? sender, EventArgs e)
     {
         // 关库前先把去抖窗口内未落盘的播放状态/队列同步写入，避免退出丢失。

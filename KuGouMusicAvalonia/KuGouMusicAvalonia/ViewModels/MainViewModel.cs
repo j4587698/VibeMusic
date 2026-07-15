@@ -59,17 +59,26 @@ public partial class MainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
     private bool _isInnerPageActive;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDiscoverActive))]
+    [NotifyPropertyChangedFor(nameof(IsPlaylistsActive))]
+    [NotifyPropertyChangedFor(nameof(IsArtistsActive))]
+    [NotifyPropertyChangedFor(nameof(IsRankingsActive))]
+    [NotifyPropertyChangedFor(nameof(IsSearchActive))]
+    [NotifyPropertyChangedFor(nameof(IsSettingsActive))]
+    private string _selectedRootNavigationKey = "NavDiscover";
+
     public PlayerService Player => PlayerService.Instance;
 
     public bool IsDesktopLayout => !IsCompactLayout;
 
-    public bool IsDiscoverActive => ActiveNavigationKey == "NavDiscover";
-    public bool IsPlaylistsActive => ActiveNavigationKey == "NavPlaylists";
-    public bool IsArtistsActive => ActiveNavigationKey == "NavArtists";
-    public bool IsRankingsActive => ActiveNavigationKey == "NavRankings";
+    public bool IsDiscoverActive => SelectedRootNavigationKey == "NavDiscover";
+    public bool IsPlaylistsActive => SelectedRootNavigationKey == "NavPlaylists";
+    public bool IsArtistsActive => SelectedRootNavigationKey == "NavArtists";
+    public bool IsRankingsActive => SelectedRootNavigationKey == "NavRankings";
     public bool IsHistoryActive => ActiveNavigationKey == "NavHistory";
-    public bool IsSearchActive => ActiveNavigationKey == "NavSearch";
-    public bool IsSettingsActive => ActiveNavigationKey == "NavSettings";
+    public bool IsSearchActive => SelectedRootNavigationKey == "NavSearch";
+    public bool IsSettingsActive => SelectedRootNavigationKey == "NavSettings";
     public bool IsLyricsActive => ActiveNavigationKey == "NavLyrics";
     public bool ShowMiniPlayer => Player.HasSong && ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
     public bool ShowCompactMiniPlayer => IsCompactLayout && ShowMiniPlayer;
@@ -102,6 +111,19 @@ public partial class MainViewModel : ViewModelBase
         {
             IsShellMenuOpen = false;
         }
+
+        if (value is "NavDiscover" or "NavPlaylists" or "NavArtists" or "NavRankings" or "NavSearch" or "NavSettings")
+        {
+            SelectedRootNavigationKey = value;
+        }
+    }
+
+    partial void OnSelectedRootNavigationKeyChanged(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value) && value != ActiveNavigationKey)
+        {
+            Navigate(value);
+        }
     }
 
     partial void OnIsCompactLayoutChanged(bool value)
@@ -118,6 +140,7 @@ public partial class MainViewModel : ViewModelBase
             "NavArtists" => _artistsViewModel,
             "NavRankings" => _rankingsViewModel,
             "NavSearch" => _searchViewModel,
+            "NavSettings" => RefreshSettingsPage(),
             _ => _discoverViewModel
         };
     }
@@ -126,7 +149,6 @@ public partial class MainViewModel : ViewModelBase
     {
         return value switch
         {
-            "NavSettings" => RefreshSettingsPage(),
             "NavHistory" => _historyViewModel,
             "NavCloud" => RefreshCloudPage(),
             _ => null
