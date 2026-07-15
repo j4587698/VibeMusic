@@ -443,10 +443,7 @@ internal sealed class LocalMusicStore : IDisposable
         lock (_gate)
         {
             _favorites.DeleteAll();
-            foreach (var record in songRecords)
-            {
-                _songs.Upsert(record);
-            }
+            _songs.Upsert(songRecords);
 
             if (favoriteRecords.Count > 0)
             {
@@ -916,7 +913,8 @@ internal sealed class LocalMusicStore : IDisposable
     {
         _queueItems.DeleteMany(item => item.QueueId == CurrentQueueId);
         var now = DateTime.UtcNow;
-        var records = new List<PlaybackQueueItemRecord>();
+        var songRecords = new List<LocalSongRecord>(queue.Count);
+        var queueRecords = new List<PlaybackQueueItemRecord>(queue.Count);
         for (var index = 0; index < queue.Count; index++)
         {
             var song = queue[index];
@@ -926,8 +924,8 @@ internal sealed class LocalMusicStore : IDisposable
                 continue;
             }
 
-            _songs.Upsert(ToSongRecord(song));
-            records.Add(new PlaybackQueueItemRecord
+            songRecords.Add(ToSongRecord(song));
+            queueRecords.Add(new PlaybackQueueItemRecord
             {
                 Id = $"{CurrentQueueId}:{index:D6}:{songKey}",
                 QueueId = CurrentQueueId,
@@ -937,9 +935,10 @@ internal sealed class LocalMusicStore : IDisposable
             });
         }
 
-        if (records.Count > 0)
+        _songs.Upsert(songRecords);
+        if (queueRecords.Count > 0)
         {
-            _queueItems.Insert(records);
+            _queueItems.Insert(queueRecords);
         }
     }
 
