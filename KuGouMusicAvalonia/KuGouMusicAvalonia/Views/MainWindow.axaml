@@ -7,7 +7,7 @@
                                                                                  mc:Ignorable="d" d:DesignWidth="1180" d:DesignHeight="760"
                                                                                  x:Class="KuGouMusicAvalonia.Views.MainWindow"
                                                                                  Icon="/Assets/vibe-logo.ico"
-                                                                                 Title="VibeMusic"
+                                                                                 Title="Vibe Music"
                                                                                  Width="1180"
                                                                                  Height="760"
                                                                                  MinWidth="360"

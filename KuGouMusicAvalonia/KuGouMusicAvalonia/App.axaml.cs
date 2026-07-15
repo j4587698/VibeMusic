@@ -164,8 +164,8 @@ public partial class App : Application
             var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0";
             await LuminaDialogService.Instance.ShowConfirmAsync(
                 window,
-                "关于 VibeMusic",
-                $"VibeMusic\n版本 {version}",
+                "关于 Vibe Music",
+                $"Vibe Music\n版本 {version}",
                 confirmText: "确定",
                 cancelText: "关闭");
         }

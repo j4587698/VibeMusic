@@ -6,5 +6,5 @@
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-	<application android:label="VibeMusic" android:icon="@drawable/Icon" android:usesCleartextTraffic="true" android:requestLegacyExternalStorage="true" />
+	<application android:label="Vibe Music" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:usesCleartextTraffic="true" android:requestLegacyExternalStorage="true" />
 </manifest>
