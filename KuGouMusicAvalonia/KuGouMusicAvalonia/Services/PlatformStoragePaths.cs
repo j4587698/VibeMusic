@@ -3,7 +3,7 @@ using System.IO;
 
 namespace KuGouMusicAvalonia.Services;
 
-internal static class PlatformStoragePaths
+public static class PlatformStoragePaths
 {
     public static string? ExternalDownloadsDirectory { get; set; }
 

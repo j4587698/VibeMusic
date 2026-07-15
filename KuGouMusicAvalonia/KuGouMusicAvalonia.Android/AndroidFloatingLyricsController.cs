@@ -533,7 +533,7 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
 
     private (int X, int Y) ClampOverlayPosition(int x, int y)
     {
-        var displayMetrics = _context?.Resources?.DisplayMetrics ?? Android.App.Application.Context.Resources?.DisplayMetrics;
+        var displayMetrics = _context?.Resources?.DisplayMetrics ?? global::Android.App.Application.Context.Resources?.DisplayMetrics;
         if (displayMetrics is null || _rootView is null)
         {
             return (x, y);
