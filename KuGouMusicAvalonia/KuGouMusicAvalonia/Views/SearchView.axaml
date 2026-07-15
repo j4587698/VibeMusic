@@ -14,6 +14,7 @@
              x:Class="KuGouMusicAvalonia.Views.SearchView"
              x:DataType="vm:SearchViewModel"
              x:CompileBindings="True">
+  <Grid>
   <controls:PageInsetListBox ItemsSource="{Binding PageItems}"
                              Background="Transparent"
                              BorderThickness="0"
@@ -70,6 +71,12 @@
               <Button Classes="Ghost" Content="单曲" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Song}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" Margin="0,0,8,8" />
               <Button Classes="Ghost" Content="歌单" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Playlist}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" Margin="0,0,8,8" />
               <Button Classes="Ghost" Content="歌手" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).SetSearchTypeCommand}" CommandParameter="{x:Static vm:SearchType.Artist}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" Margin="0,0,8,8" />
+              <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:SearchViewModel)DataContext).OpenAudioMatchUICommand}" Height="34" CornerRadius="17" Padding="14,0" FontWeight="Bold" Background="{DynamicResource MusicSurfaceHighBrush}" Margin="0,0,8,8">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <icons:MaterialIcon Kind="Microphone" Width="18" Height="18" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                  <TextBlock Text="听歌识曲" FontWeight="Bold" VerticalAlignment="Center" />
+                </StackPanel>
+              </Button>
             </WrapPanel>
           </StackPanel>
 
@@ -227,4 +234,65 @@
       </DataTemplate>
     </ListBox.DataTemplates>
   </controls:PageInsetListBox>
+
+  <!-- Audio Match Overlay -->
+  <Grid IsVisible="{Binding IsAudioMatchUIVisible}" Background="#D0000000" ZIndex="100">
+    <Button Classes="Ghost Icon" Command="{Binding CloseAudioMatchUICommand}" Width="44" Height="44" CornerRadius="22" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="24" Background="#30FFFFFF">
+      <icons:MaterialIcon Kind="Close" Width="24" Height="24" Foreground="White" />
+    </Button>
+
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="40">
+      <TextBlock Text="{Binding AudioMatchStatus}" FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" />
+
+      <Grid Width="240" Height="240" HorizontalAlignment="Center">
+        <!-- Ripple Animation when recording -->
+        <Border CornerRadius="120" Background="{DynamicResource MusicPrimaryBrush}" Opacity="0.3" IsVisible="{Binding IsRecording}">
+          <Border.Styles>
+            <Style Selector="Border">
+              <Style.Animations>
+                <Animation Duration="0:0:1.5" IterationCount="Infinite">
+                  <KeyFrame Cue="0%">
+                    <Setter Property="ScaleTransform.ScaleX" Value="1"/>
+                    <Setter Property="ScaleTransform.ScaleY" Value="1"/>
+                    <Setter Property="Opacity" Value="0.6"/>
+                  </KeyFrame>
+                  <KeyFrame Cue="100%">
+                    <Setter Property="ScaleTransform.ScaleX" Value="1.6"/>
+                    <Setter Property="ScaleTransform.ScaleY" Value="1.6"/>
+                    <Setter Property="Opacity" Value="0"/>
+                  </KeyFrame>
+                </Animation>
+              </Style.Animations>
+            </Style>
+          </Border.Styles>
+        </Border>
+
+        <!-- Loading Indicator when matching -->
+        <icons:MaterialIcon Kind="Loading" Width="80" Height="80" Foreground="{DynamicResource MusicPrimaryBrush}" IsVisible="{Binding IsAudioMatching}" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <icons:MaterialIcon.Styles>
+            <Style Selector="icons|MaterialIcon">
+              <Style.Animations>
+                <Animation Duration="0:0:1" IterationCount="Infinite">
+                  <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0" />
+                  </KeyFrame>
+                  <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360" />
+                  </KeyFrame>
+                </Animation>
+              </Style.Animations>
+            </Style>
+          </icons:MaterialIcon.Styles>
+        </icons:MaterialIcon>
+
+        <!-- Main Button (Press and Hold) -->
+        <Border x:Name="AudioMatchRecordButton" Width="140" Height="140" CornerRadius="70" Background="{DynamicResource MusicPrimaryGradient}" HorizontalAlignment="Center" VerticalAlignment="Center" PointerPressed="OnRecordButtonPressed" PointerReleased="OnRecordButtonReleased" Cursor="Hand" IsVisible="{Binding !IsAudioMatching}">
+          <icons:MaterialIcon Kind="Microphone" Width="56" Height="56" Foreground="White" />
+        </Border>
+      </Grid>
+
+      <TextBlock Text="按住上方按钮不要松开" FontSize="16" Foreground="#A0FFFFFF" HorizontalAlignment="Center" IsVisible="{Binding !IsAudioMatching}" />
+    </StackPanel>
+  </Grid>
+  </Grid>
 </UserControl>

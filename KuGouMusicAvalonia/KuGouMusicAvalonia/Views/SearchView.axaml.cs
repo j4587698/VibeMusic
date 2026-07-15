@@ -21,4 +21,34 @@ public partial class SearchView : UserControl
             }
         }
     }
+
+    private void OnRecordButtonPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (DataContext is SearchViewModel vm)
+        {
+            if (sender is Control control)
+            {
+                e.Pointer.Capture(control);
+            }
+            if (vm.StartRecordingCommand.CanExecute(null))
+            {
+                vm.StartRecordingCommand.Execute(null);
+            }
+        }
+    }
+
+    private void OnRecordButtonReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (DataContext is SearchViewModel vm)
+        {
+            if (sender is Control control)
+            {
+                e.Pointer.Capture(null);
+            }
+            if (vm.StopRecordingAndMatchCommand.CanExecute(null))
+            {
+                vm.StopRecordingAndMatchCommand.Execute(null);
+            }
+        }
+    }
 }

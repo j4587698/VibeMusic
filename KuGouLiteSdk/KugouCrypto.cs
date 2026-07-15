@@ -306,8 +306,18 @@ internal static class KugouCrypto
 
     public static string SignatureAndroidParams(IDictionary<string, object?> parameters, string? body)
     {
+        return SignatureAndroidParams(parameters, Encoding.UTF8.GetBytes(body ?? string.Empty));
+    }
+
+    public static string SignatureAndroidParams(IDictionary<string, object?> parameters, byte[] body)
+    {
         var payload = string.Concat(parameters.OrderBy(item => item.Key, StringComparer.Ordinal).Select(item => $"{item.Key}={FormatValueForSignature(item.Value)}"));
-        return Md5Hex($"{KugouConstants.AndroidSignatureSalt}{payload}{body ?? string.Empty}{KugouConstants.AndroidSignatureSalt}");
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.MD5);
+        hash.AppendData(Encoding.UTF8.GetBytes(KugouConstants.AndroidSignatureSalt));
+        hash.AppendData(Encoding.UTF8.GetBytes(payload));
+        hash.AppendData(body);
+        hash.AppendData(Encoding.UTF8.GetBytes(KugouConstants.AndroidSignatureSalt));
+        return Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant();
     }
 
     public static string SignatureWebParams(IDictionary<string, object?> parameters)
