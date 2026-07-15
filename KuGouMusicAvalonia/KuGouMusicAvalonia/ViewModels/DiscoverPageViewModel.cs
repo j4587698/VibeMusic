@@ -46,6 +46,15 @@ public partial class DiscoverViewModel : ViewModelBase
     [ObservableProperty]
     private string _personalFmStatusMessage = "正在加载猜你喜欢";
 
+    [ObservableProperty]
+    private ObservableCollection<KugouSong> _youthSongs = new();
+
+    [ObservableProperty]
+    private bool _isYouthLoading;
+
+    [ObservableProperty]
+    private string _youthStatusMessage = string.Empty;
+
     public string HeroTitle => FeaturedSong?.Title ?? "还没有歌曲";
 
     public string HeroArtist => FeaturedSong?.Artist ?? "从新歌速递、猜你喜欢或歌手分类开始";
@@ -85,6 +94,44 @@ public partial class DiscoverViewModel : ViewModelBase
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task LoadYouthRecommendationAsync()
+    {
+        if (IsYouthLoading) return;
+        IsYouthLoading = true;
+        YouthStatusMessage = "正在加载 Youth 推荐...";
+
+        try
+        {
+            var result = await MusicService.Client.GetYouthRecommendationsTypedAsync(cardId: 3005, pageSize: 30);
+            YouthSongs.Clear();
+            if (MusicService.TryGetResponseError(result.Raw, out var errorMessage))
+            {
+                YouthStatusMessage = $"Youth 推荐加载失败：{errorMessage}";
+            }
+            else if (result.Items.Count == 0)
+            {
+                YouthStatusMessage = "Youth 推荐暂无内容";
+            }
+            else
+            {
+                foreach (var song in result.Items)
+                {
+                    YouthSongs.Add(song);
+                }
+                YouthStatusMessage = $"已加载 {result.Items.Count} 首 Youth 推荐";
+            }
+        }
+        catch (System.Exception ex)
+        {
+            YouthStatusMessage = $"Youth 推荐加载失败：{ex.Message}";
+        }
+        finally
+        {
+            IsYouthLoading = false;
         }
     }
 
@@ -155,6 +202,34 @@ public partial class DiscoverViewModel : ViewModelBase
         if (NewSongs.Count == 0) return;
         var added = PlayerService.Instance.AppendToQueue(NewSongs.ToList(), "新歌速递");
         StatusMessage = added > 0 ? $"已加入 {added} 首到播放队列" : "这些歌曲已在播放队列中";
+    }
+
+    [RelayCommand]
+    private async Task PlayYouthSongAsync(KugouSong song)
+    {
+        if (song is null) return;
+        if (PlayerService.IsSameSong(song, PlayerService.Instance.CurrentSong))
+        {
+            PlayerService.Instance.TogglePlayPause();
+            return;
+        }
+        var index = YouthSongs.IndexOf(song);
+        await PlayerService.Instance.PlayQueueAsync(YouthSongs.ToList(), index < 0 ? 0 : index, "Youth 推荐", replaceQueue: true);
+    }
+
+    [RelayCommand]
+    private async Task PlayAllYouthAsync()
+    {
+        if (YouthSongs.Count == 0) return;
+        await PlayerService.Instance.PlayQueueAsync(YouthSongs.ToList(), 0, "Youth 推荐", replaceQueue: true);
+    }
+
+    [RelayCommand]
+    private void QueueAllYouth()
+    {
+        if (YouthSongs.Count == 0) return;
+        var added = PlayerService.Instance.AppendToQueue(YouthSongs.ToList(), "Youth 推荐");
+        YouthStatusMessage = added > 0 ? $"已加入 {added} 首到播放队列" : "这些歌曲已在播放队列中";
     }
 
     [RelayCommand]
