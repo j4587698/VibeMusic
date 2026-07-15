@@ -52,6 +52,12 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _verifyCode = string.Empty;
     [ObservableProperty]
+    private string _loginUsername = string.Empty;
+    [ObservableProperty]
+    private string _loginPassword = string.Empty;
+    [ObservableProperty]
+    private string _weChatLoginCode = string.Empty;
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLoggedIn))]
     [NotifyPropertyChangedFor(nameof(IsLoggedInPanelVisible))]
     [NotifyPropertyChangedFor(nameof(IsLoginPromptVisible))]
@@ -467,6 +473,90 @@ public partial class SettingsViewModel : ViewModelBase
         catch (Exception ex)
         {
             LoginStatus = $"登录失败：{ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task LoginByPasswordAsync()
+    {
+        if (string.IsNullOrWhiteSpace(LoginUsername))
+        {
+            LoginStatus = "请输入用户名";
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var response = await MusicService.Client.LoginByPasswordAsync(LoginUsername.Trim(), LoginPassword);
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            if (isSuccess)
+            {
+                MusicService.SaveSession();
+                LoginStatus = "已登录，登录态已保存";
+                VipPrivilegeService.Instance.ResetSessionState();
+                RefreshLoginState();
+                if (IsLoggedIn)
+                {
+                    IsLoginDialogOpen = false;
+                    await RefreshUserDataAsync();
+                    await RefreshVipStateAsync();
+                }
+            }
+            else
+            {
+                LoginStatus = $"登录失败：{errorMsg}";
+            }
+        }
+        catch (Exception ex)
+        {
+            LoginStatus = $"登录失败：{ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task LoginByWeChatAsync()
+    {
+        if (string.IsNullOrWhiteSpace(WeChatLoginCode))
+        {
+            LoginStatus = "请输入微信授权码";
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var response = await MusicService.Client.LoginByOpenPlatAsync(WeChatLoginCode.Trim());
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            if (isSuccess)
+            {
+                MusicService.SaveSession();
+                LoginStatus = "已登录，登录态已保存";
+                VipPrivilegeService.Instance.ResetSessionState();
+                RefreshLoginState();
+                if (IsLoggedIn)
+                {
+                    IsLoginDialogOpen = false;
+                    await RefreshUserDataAsync();
+                    await RefreshVipStateAsync();
+                }
+            }
+            else
+            {
+                LoginStatus = $"登录失败：{errorMsg}";
+            }
+        }
+        catch (Exception ex)
+        {
+            LoginStatus = $"微信登录失败：{ex.Message}";
         }
         finally
         {
@@ -996,6 +1086,47 @@ public partial class SettingsViewModel : ViewModelBase
         ShellNavigationService.Instance.Navigate("NavCloud");
     }
 
+    [RelayCommand]
+    private async Task ShowDeviceListAsync()
+    {
+        if (IsBusy) return;
+        IsBusy = true;
+        try
+        {
+            var response = await MusicService.Client.LoginDeviceListAsync();
+            var doc = response.TryParseJson();
+            if (doc is not null && doc.RootElement.TryGetProperty("data", out var data))
+            {
+                var deviceList = new List<string>();
+                if (data.ValueKind == System.Text.Json.JsonValueKind.Array)
+                {
+                    foreach (var item in data.EnumerateArray())
+                    {
+                        var name = item.TryGetProperty("devicename", out var dn) ? dn.GetString() : "";
+                        var model = item.TryGetProperty("devicemodel", out var dm) ? dm.GetString() : "";
+                        var uuid = item.TryGetProperty("uuid", out var u) ? u.GetString() : "";
+                        deviceList.Add($"{name} {model} ({uuid})");
+                    }
+                }
+                LoginStatus = deviceList.Count > 0
+                    ? $"已登录设备：{string.Join("；", deviceList.Take(3))}{(deviceList.Count > 3 ? $" 等 {deviceList.Count} 台" : "")}"
+                    : "未找到已登录设备";
+            }
+            else
+            {
+                LoginStatus = "获取设备列表失败";
+            }
+        }
+        catch (Exception ex)
+        {
+            LoginStatus = $"设备列表加载失败：{ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     public void RefreshLocalHistory()
     {
         var history = LocalMusicStore.Instance.LoadLocalHistory(100);
@@ -1009,47 +1140,9 @@ public partial class SettingsViewModel : ViewModelBase
 
     private static void ExtractKugouResponse(KugouResponse response, out bool isSuccess, out string errorMessage)
     {
-        isSuccess = response.IsSuccessStatusCode;
-        errorMessage = string.Empty;
-        if (!isSuccess)
-        {
-            errorMessage = $"HTTP {(int)response.StatusCode}";
-            return;
-        }
-
-        var doc = response.TryParseJson();
-        if (doc != null)
-        {
-            var root = doc.RootElement;
-            int errorCode = 0;
-            int status = 1;
-
-            if (root.TryGetProperty("error_code", out var ec) && ec.ValueKind == System.Text.Json.JsonValueKind.Number)
-            {
-                errorCode = ec.GetInt32();
-            }
-            else if (root.TryGetProperty("errcode", out var err) && err.ValueKind == System.Text.Json.JsonValueKind.Number)
-            {
-                errorCode = err.GetInt32();
-            }
-
-            if (root.TryGetProperty("status", out var st) && st.ValueKind == System.Text.Json.JsonValueKind.Number)
-            {
-                status = st.GetInt32();
-            }
-
-            // In some KUGOU apis, status=0 is failure, or error_code != 0 is failure.
-            if (errorCode != 0 || status == 0)
-            {
-                isSuccess = false;
-                var msg = root.TryGetProperty("msg", out var m) && m.ValueKind == System.Text.Json.JsonValueKind.String ? m.GetString() :
-                          root.TryGetProperty("message", out var m2) && m2.ValueKind == System.Text.Json.JsonValueKind.String ? m2.GetString() :
-                          root.TryGetProperty("error", out var m3) && m3.ValueKind == System.Text.Json.JsonValueKind.String ? m3.GetString() : null;
-
-                errorMessage = string.IsNullOrWhiteSpace(msg) ? $"API Error Code: {errorCode}" : msg;
-            }
-        }
+        isSuccess = !MusicService.TryGetResponseError(response, out errorMessage);
     }
+
 }
 
 public sealed record UserLibraryItem(string Title, string Subtitle, string CoverUrl, string Category = "");
