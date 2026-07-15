@@ -86,48 +86,11 @@
       </DataTemplate>
 
       <DataTemplate DataType="kugou:KugouSong">
-        <Border Margin="12,0,12,8" CornerRadius="14" Background="{DynamicResource MusicSurfaceBrush}" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="1" Padding="10">
-          <Grid ColumnDefinitions="52,*,Auto" ColumnSpacing="12">
-            <Border Width="46" Height="46" CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
-              <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
-            </Border>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <controls:PlayingIndicator VerticalAlignment="Center">
-                  <controls:PlayingIndicator.IsVisible>
-                    <MultiBinding Converter="{x:Static converters:SongEqualityConverter.Instance}">
-                      <Binding />
-                      <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
-                    </MultiBinding>
-                  </controls:PlayingIndicator.IsVisible>
-                </controls:PlayingIndicator>
-                <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontWeight="Black" HorizontalAlignment="Stretch">
-                  <lumina:LuminaAutoScrollText.Foreground>
-                    <MultiBinding Converter="{x:Static converters:SongPlayingBrushConverter.Instance}">
-                      <Binding />
-                      <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
-                    </MultiBinding>
-                  </lumina:LuminaAutoScrollText.Foreground>
-                </lumina:LuminaAutoScrollText>
-              </StackPanel>
-              <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
-            </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-              <!-- Actions -->
-              <Button Classes="Primary Icon" Width="36" Height="36" CornerRadius="18" ToolTip.Tip="播放/暂停" Background="{DynamicResource MusicPrimaryGradient}" Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).PlaySongCommand}" CommandParameter="{Binding}">
-                  <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="22" Height="22">
-                    <icons:MaterialIcon.Kind>
-                      <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
-                        <Binding />
-                        <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
-                        <Binding Path="IsPlaying" Source="{x:Static services:PlayerService.Instance}" />
-                      </MultiBinding>
-                    </icons:MaterialIcon.Kind>
-                  </icons:MaterialIcon>
-                </Button>
-            </StackPanel>
-          </Grid>
-        </Border>
+        <controls:MusicSongItem ItemBackground="{DynamicResource MusicSurfaceBrush}"
+                                ItemBorderBrush="{DynamicResource LuminaDividerBrush}"
+                                PlayCommand="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).PlaySongCommand}"
+                                AddToQueueCommand="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).AddSongToQueueCommand}"
+                                ShowDownloadButton="False" />
       </DataTemplate>
     </ListBox.DataTemplates>
   </controls:PageInsetListBox>

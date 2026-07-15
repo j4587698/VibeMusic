@@ -50,7 +50,8 @@ public partial class ArtistDetailViewModel : ViewModelBase
 
     public string Title => Artist.Name;
     public string CoverUrl => Artist.Pic;
-    public string Intro => string.IsNullOrWhiteSpace(Artist.Intro) ? "这个歌手还没有简介" : Artist.Intro;
+    public string Intro => Artist.Intro;
+    public bool HasIntro => !string.IsNullOrWhiteSpace(Artist.Intro);
     public string MetaText => Songs.Count > 0
         ? $"已加载 {Songs.Count}/{(_totalSongs > 0 ? _totalSongs : Songs.Count)} 首可播放歌曲 · 热度 {Artist.Heat} · {Artist.FansCount} 粉丝"
         : $"热度 {Artist.Heat} · {Artist.FansCount} 粉丝";
@@ -162,8 +163,15 @@ public partial class ArtistDetailViewModel : ViewModelBase
             PlayerService.Instance.TogglePlayPause();
             return;
         }
-        var index = Songs.IndexOf(song);
-        await PlayerService.Instance.PlayQueueAsync(Songs.ToList(), index < 0 ? 0 : index, Title, replaceQueue: true);
+        PlayerService.Instance.AppendToQueue(new[] { song });
+        await PlayerService.Instance.PlayQueueSongAsync(song);
+    }
+
+    [RelayCommand]
+    private void AddSongToQueue(KugouSong song)
+    {
+        if (song is null) return;
+        PlayerService.Instance.AppendToQueue(new[] { song });
     }
 
     [RelayCommand]

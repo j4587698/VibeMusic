@@ -229,7 +229,7 @@ public partial class PlaylistsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.YouthChannelAllAsync(page: 1, pageSize: 50);
-            if (MusicService.TryGetResponseError(response, out var errorMessage))
+            if (MusicService.TryGetResponseError(response, out var errorMessage, out _, out _))
             {
                 ChannelsStatus = $"加载失败：{errorMessage}";
             }

@@ -2,6 +2,7 @@ using KuGou.Lite;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -36,13 +37,27 @@ public static class MusicService
         !string.IsNullOrWhiteSpace(Client.CookieStore.Get("userid")) &&
         !string.Equals(Client.CookieStore.Get("userid"), "0", StringComparison.Ordinal);
 
-    public static bool TryGetResponseError(KugouResponse response, out string errorMessage)
+    public static bool TryGetResponseError(KugouResponse response, out string errorMessage, out int errorCode, out string eventId)
     {
+        errorCode = 0;
+        eventId = string.Empty;
+
         using var doc = response.TryParseJson();
         var root = doc?.RootElement;
         var message = root is { ValueKind: JsonValueKind.Object }
             ? ReadResponseMessage(root.Value)
             : null;
+
+        if (root is { ValueKind: JsonValueKind.Object })
+        {
+            if (root.Value.TryGetProperty("data", out var dataObj) && dataObj.ValueKind == JsonValueKind.Object)
+            {
+                if (dataObj.TryGetProperty("eventid", out var ev) && ev.ValueKind == JsonValueKind.String)
+                {
+                    eventId = ev.GetString() ?? string.Empty;
+                }
+            }
+        }
 
         if (!response.IsSuccessStatusCode)
         {
@@ -58,7 +73,7 @@ public static class MusicService
             return true;
         }
 
-        var errorCode = ReadResponseInt(root.Value, "error_code") ?? ReadResponseInt(root.Value, "errcode") ?? 0;
+        errorCode = ReadResponseInt(root.Value, "error_code") ?? ReadResponseInt(root.Value, "errcode") ?? 0;
         var status = ReadResponseInt(root.Value, "status");
         if (errorCode == 0 && status is not 0)
         {
@@ -386,6 +401,15 @@ public static class MusicService
         _client?.Dispose();
         _client = CreateClient(loadSavedCookies: false);
     }
+
+    public static void ClearAllData()
+    {
+        LocalMusicStore.Instance.ClearAllData();
+        _client?.Dispose();
+        _client = CreateClient(loadSavedCookies: false);
+        PlayerService.Instance.ClearQueue();
+    }
+
 
     private static long ParseLongOrZero(string? value)
     {

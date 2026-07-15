@@ -61,7 +61,7 @@
               <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center" MinWidth="0">
                 <TextBlock Text="ARTIST" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
                 <lumina:LuminaAutoScrollText Text="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).Title}" FontSize="26" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-                <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).Intro}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
+                <TextBlock Text="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).Intro}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" IsVisible="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).HasIntro}" />
                 <WrapPanel Margin="0,4,0,0">
                   <Button Classes="Primary Icon" Command="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).PlayAllCommand}" Width="38" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Padding="0" Margin="0,0,10,10" ToolTip.Tip="播放已加载" lumina:LuminaButton.IconSize="22">
                     <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
@@ -86,33 +86,12 @@
       </DataTemplate>
 
       <DataTemplate DataType="kugou:KugouSong">
-        <Border Margin="12,0,12,8" CornerRadius="14" Background="{DynamicResource MusicSurfaceBrush}" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="1" Padding="10">
-          <Grid ColumnDefinitions="52,*,Auto" ColumnSpacing="12">
-            <Border Width="46" Height="46" CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
-              <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
-            </Border>
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
-              <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-              <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
-            </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-              <Button Classes="Ghost Icon" Width="36" Height="36" CornerRadius="18" ToolTip.Tip="下载到本地"
-                      Command="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).DownloadSongCommand}"
-                      CommandParameter="{Binding}" lumina:LuminaButton.IconSize="20">
-  <lumina:LuminaButton.Icon>
-    <icons:MaterialIcon Kind="Download" Width="20" Height="20" Foreground="{DynamicResource MusicTextSoftBrush}" />
-  </lumina:LuminaButton.Icon>
-</Button>
-              <Button Classes="Primary Icon" Width="36" Height="36" CornerRadius="18" ToolTip.Tip="播放此歌手上下文" Background="{DynamicResource MusicPrimaryGradient}"
-                      Command="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).PlaySongCommand}"
-                      CommandParameter="{Binding}" lumina:LuminaButton.IconSize="22">
-  <lumina:LuminaButton.Icon>
-    <icons:MaterialIcon Kind="Play" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-  </lumina:LuminaButton.Icon>
-</Button>
-            </StackPanel>
-          </Grid>
-        </Border>
+        <controls:MusicSongItem ItemBackground="{DynamicResource MusicSurfaceBrush}"
+                                ItemBorderBrush="{DynamicResource LuminaDividerBrush}"
+                                PlayCommand="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).PlaySongCommand}"
+                                AddToQueueCommand="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).AddSongToQueueCommand}"
+                                DownloadCommand="{Binding $parent[UserControl].((vm:ArtistDetailViewModel)DataContext).DownloadSongCommand}"
+                                PlayButtonToolTip="播放此歌手上下文" />
       </DataTemplate>
 
       <DataTemplate DataType="vm:ArtistDetailFooterSection">

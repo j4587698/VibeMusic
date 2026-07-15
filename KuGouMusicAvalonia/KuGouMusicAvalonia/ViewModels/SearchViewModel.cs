@@ -170,9 +170,15 @@ public partial class SearchViewModel : ViewModelBase
             PlayerService.Instance.TogglePlayPause();
             return;
         }
-        var songs = SearchResults.OfType<KugouSong>().ToList();
-        var index = songs.IndexOf(song);
-        await PlayerService.Instance.PlayQueueAsync(songs, index < 0 ? 0 : index, $"搜索：{Keyword}", replaceQueue: true);
+        PlayerService.Instance.AppendToQueue(new[] { song });
+        await PlayerService.Instance.PlayQueueSongAsync(song);
+    }
+
+    [RelayCommand]
+    private void AddSongToQueue(KugouSong song)
+    {
+        if (song is null) return;
+        PlayerService.Instance.AppendToQueue(new[] { song });
     }
 
     [RelayCommand]
@@ -314,7 +320,7 @@ public partial class SearchViewModel : ViewModelBase
             {
                 AudioMatchStatus = "未能识别出歌曲，请靠近音源并延长录音时间";
             }
-            else if (MusicService.TryGetResponseError(result.Raw, out var errorMessage))
+            else if (MusicService.TryGetResponseError(result.Raw, out var errorMessage, out _, out _))
             {
                 AudioMatchStatus = $"识别失败：{errorMessage}";
             }

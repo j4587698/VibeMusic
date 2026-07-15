@@ -89,6 +89,7 @@ public partial class DiscoverViewModel : ViewModelBase
         try
         {
             await LoadNewSongsAsync();
+            await LoadYouthRecommendationAsync();
             await LoadPersonalFmAsync();
         }
         finally
@@ -108,7 +109,7 @@ public partial class DiscoverViewModel : ViewModelBase
         {
             var result = await MusicService.Client.GetYouthRecommendationsTypedAsync(cardId: 3005, pageSize: 30);
             YouthSongs.Clear();
-            if (MusicService.TryGetResponseError(result.Raw, out var errorMessage))
+            if (MusicService.TryGetResponseError(result.Raw, out var errorMessage, out _, out _))
             {
                 YouthStatusMessage = $"Youth 推荐加载失败：{errorMessage}";
             }
@@ -175,8 +176,15 @@ public partial class DiscoverViewModel : ViewModelBase
             PlayerService.Instance.TogglePlayPause();
             return;
         }
-        var index = NewSongs.IndexOf(song);
-        await PlayerService.Instance.PlayQueueAsync(NewSongs.ToList(), index < 0 ? 0 : index, "新歌速递", replaceQueue: true);
+        PlayerService.Instance.AppendToQueue(new[] { song });
+        await PlayerService.Instance.PlayQueueSongAsync(song);
+    }
+
+    [RelayCommand]
+    private void AddSongToQueue(KugouSong song)
+    {
+        if (song is null) return;
+        PlayerService.Instance.AppendToQueue(new[] { song });
     }
 
     [RelayCommand]
@@ -184,8 +192,8 @@ public partial class DiscoverViewModel : ViewModelBase
     {
         if (FeaturedSong is not null)
         {
-            var index = NewSongs.IndexOf(FeaturedSong);
-            await PlayerService.Instance.PlayQueueAsync(NewSongs.ToList(), index < 0 ? 0 : index, "新歌速递", replaceQueue: true);
+            PlayerService.Instance.AppendToQueue(new[] { FeaturedSong });
+            await PlayerService.Instance.PlayQueueSongAsync(FeaturedSong);
         }
     }
 
@@ -213,8 +221,15 @@ public partial class DiscoverViewModel : ViewModelBase
             PlayerService.Instance.TogglePlayPause();
             return;
         }
-        var index = YouthSongs.IndexOf(song);
-        await PlayerService.Instance.PlayQueueAsync(YouthSongs.ToList(), index < 0 ? 0 : index, "Youth 推荐", replaceQueue: true);
+        PlayerService.Instance.AppendToQueue(new[] { song });
+        await PlayerService.Instance.PlayQueueSongAsync(song);
+    }
+
+    [RelayCommand]
+    private void AddYouthSongToQueue(KugouSong song)
+    {
+        if (song is null) return;
+        PlayerService.Instance.AppendToQueue(new[] { song });
     }
 
     [RelayCommand]
