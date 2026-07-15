@@ -203,6 +203,132 @@ public partial class PlaylistsViewModel : ViewModelBase
 
 
 
+    [ObservableProperty]
+    private ObservableCollection<KugouYouthChannel> _youthChannels = new();
+
+    [ObservableProperty]
+    private bool _isChannelsLoading;
+
+    [ObservableProperty]
+    private string _channelsStatus = string.Empty;
+
+    [RelayCommand]
+    private async Task LoadChannelsAsync()
+    {
+        if (IsChannelsLoading) return;
+        if (!MusicService.IsLoggedIn)
+        {
+            ChannelsStatus = "登录后可查看已订阅的 Youth 频道";
+            return;
+        }
+
+        IsChannelsLoading = true;
+        ChannelsStatus = "正在加载...";
+        YouthChannels.Clear();
+
+        try
+        {
+            var response = await MusicService.Client.YouthChannelAllAsync(page: 1, pageSize: 50);
+            if (MusicService.TryGetResponseError(response, out var errorMessage))
+            {
+                ChannelsStatus = $"加载失败：{errorMessage}";
+            }
+            else
+            {
+                using var doc = response.TryParseJson();
+                if (doc is null)
+                {
+                    ChannelsStatus = "响应解析失败";
+                }
+                else
+                {
+                    var items = ExtractYouthChannels(doc.RootElement);
+                    foreach (var channel in items)
+                    {
+                        YouthChannels.Add(channel);
+                    }
+                    ChannelsStatus = YouthChannels.Count > 0
+                        ? $"已订阅 {YouthChannels.Count} 个频道"
+                        : "暂无订阅，可在官方酷狗概念版中订阅频道";
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            ChannelsStatus = $"加载失败：{ex.Message}";
+        }
+        finally
+        {
+            IsChannelsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SubscribeChannelAsync(KugouYouthChannel channel)
+    {
+        if (channel is null || string.IsNullOrWhiteSpace(channel.Id)) return;
+        try
+        {
+            await MusicService.Client.YouthChannelSubscribeAsync(channel.Id);
+            channel.IsSubscribed = true;
+            ChannelsStatus = $"已订阅「{channel.Name}」";
+        }
+        catch (System.Exception ex)
+        {
+            ChannelsStatus = $"订阅失败：{ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task UnsubscribeChannelAsync(KugouYouthChannel channel)
+    {
+        if (channel is null || string.IsNullOrWhiteSpace(channel.Id)) return;
+        try
+        {
+            await MusicService.Client.YouthChannelUnsubscribeAsync(channel.Id);
+            channel.IsSubscribed = false;
+            YouthChannels.Remove(channel);
+            ChannelsStatus = $"已取消订阅「{channel.Name}」";
+        }
+        catch (System.Exception ex)
+        {
+            ChannelsStatus = $"取消订阅失败：{ex.Message}";
+        }
+    }
+
+    private static List<KugouYouthChannel> ExtractYouthChannels(System.Text.Json.JsonElement root)
+    {
+        var result = new List<KugouYouthChannel>();
+        if (root.ValueKind != System.Text.Json.JsonValueKind.Object) return result;
+
+        var data = root.TryGetProperty("data", out var value) ? value : root;
+        var items = data.ValueKind switch
+        {
+            System.Text.Json.JsonValueKind.Array => data,
+            System.Text.Json.JsonValueKind.Object => TryGetArray(data, "list", "items", "channels"),
+            _ => default
+        };
+
+        if (items.ValueKind != System.Text.Json.JsonValueKind.Array) return result;
+
+        foreach (var item in items.EnumerateArray())
+        {
+            var channel = KugouYouthChannel.FromJson(item);
+            if (channel is not null) result.Add(channel);
+        }
+        return result;
+    }
+
+    private static System.Text.Json.JsonElement TryGetArray(System.Text.Json.JsonElement obj, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (obj.TryGetProperty(name, out var arr) && arr.ValueKind == System.Text.Json.JsonValueKind.Array)
+                return arr;
+        }
+        return default;
+    }
+
     [RelayCommand]
     private void OpenPlaylist(KugouPlaylist playlist)
     {
@@ -290,5 +416,60 @@ public partial class PlaylistsViewModel : ViewModelBase
             IsCreatingPlaylist = false;
         }
     }
+}
 
+public sealed class KugouYouthChannel
+{
+    public string Id { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string CoverUrl { get; init; } = string.Empty;
+    public int SongCount { get; init; }
+    public int SubCount { get; init; }
+    public bool IsSubscribed { get; set; } = true;
+
+    public static KugouYouthChannel? FromJson(System.Text.Json.JsonElement item)
+    {
+        if (item.ValueKind != System.Text.Json.JsonValueKind.Object) return null;
+        var id = ReadString(item, "global_collection_id", "collection_id", "id", "channel_id");
+        if (string.IsNullOrWhiteSpace(id)) return null;
+
+        var cover = ReadString(item, "cover", "img", "pic", "collection_cover", "cover_url");
+        if (!string.IsNullOrWhiteSpace(cover) && !cover.StartsWith("http"))
+        {
+            cover = null;
+        }
+
+        return new KugouYouthChannel
+        {
+            Id = id,
+            Name = ReadString(item, "collection_name", "name", "title", "channel_name") ?? "未命名频道",
+            CoverUrl = cover ?? string.Empty,
+            SongCount = ReadInt(item, "song_count", "count", "music_count", "audio_count"),
+            SubCount = ReadInt(item, "sub_count", "subscribe_count", "fans_count"),
+            IsSubscribed = true
+        };
+    }
+
+    private static string? ReadString(System.Text.Json.JsonElement obj, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (obj.TryGetProperty(name, out var prop) && prop.ValueKind == System.Text.Json.JsonValueKind.String)
+            {
+                var val = prop.GetString();
+                if (!string.IsNullOrWhiteSpace(val)) return val;
+            }
+        }
+        return null;
+    }
+
+    private static int ReadInt(System.Text.Json.JsonElement obj, params string[] names)
+    {
+        foreach (var name in names)
+        {
+            if (obj.TryGetProperty(name, out var prop) && prop.TryGetInt32(out var val))
+                return val;
+        }
+        return 0;
+    }
 }
