@@ -11,6 +11,7 @@ using QRCoder;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -39,6 +40,15 @@ public partial class SettingsViewModel : ViewModelBase
 
     [ObservableProperty]
     private double _loginDialogWidth = 420;
+
+    [ObservableProperty]
+    private bool _isCaptchaDialogOpen;
+
+    [ObservableProperty]
+    private string _captchaEventId = string.Empty;
+
+    [ObservableProperty]
+    private string _captchaVerifyCode = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasQrCode))]
@@ -412,7 +422,14 @@ public partial class SettingsViewModel : ViewModelBase
         CancelQrPolling("已取消扫码");
     }
 
-    [RelayCommand]
+    [ObservableProperty]
+    private string _sendCodeButtonText = "获取验证码";
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SendCodeCommand))]
+    private bool _canSendCode = true;
+
+    [RelayCommand(CanExecute = nameof(CanSendCode))]
     private async Task SendCodeAsync()
     {
         if (string.IsNullOrWhiteSpace(PhoneNumber))
@@ -425,8 +442,23 @@ public partial class SettingsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.SendCaptchaAsync(PhoneNumber.Trim());
-            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
-            LoginStatus = isSuccess ? "验证码已发送" : $"验证码发送失败：{errorMsg}";
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg, out var errorCode, out var eventId);
+            
+            if (!isSuccess && errorCode == 20006)
+            {
+                await StartCaptchaVerificationAsync(eventId, () => SendCodeCommand.Execute(null));
+                return;
+            }
+
+            if (isSuccess)
+            {
+                LoginStatus = "验证码已发送";
+                _ = StartSendCodeCountdownAsync();
+            }
+            else
+            {
+                LoginStatus = $"验证码发送失败：{errorMsg}";
+            }
         }
         catch (Exception ex)
         {
@@ -436,6 +468,18 @@ public partial class SettingsViewModel : ViewModelBase
         {
             IsBusy = false;
         }
+    }
+
+    private async Task StartSendCodeCountdownAsync()
+    {
+        CanSendCode = false;
+        for (var i = 60; i > 0; i--)
+        {
+            SendCodeButtonText = $"{i}s 后重试";
+            await Task.Delay(1000);
+        }
+        SendCodeButtonText = "获取验证码";
+        CanSendCode = true;
     }
 
     [RelayCommand]
@@ -451,7 +495,12 @@ public partial class SettingsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.LoginByCellphoneAsync(PhoneNumber.Trim(), VerifyCode.Trim());
-            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg, out var errorCode, out var eventId);
+            if (errorCode == 20006)
+            {
+                await StartCaptchaVerificationAsync(eventId, () => LoginByPhoneCommand.Execute(null));
+                return;
+            }
             if (isSuccess)
             {
                 MusicService.SaveSession();
@@ -493,7 +542,12 @@ public partial class SettingsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.LoginByPasswordAsync(LoginUsername.Trim(), LoginPassword);
-            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg, out var errorCode, out var eventId);
+            if (errorCode == 20006)
+            {
+                await StartCaptchaVerificationAsync(eventId, () => LoginByPasswordCommand.Execute(null));
+                return;
+            }
             if (isSuccess)
             {
                 MusicService.SaveSession();
@@ -535,7 +589,7 @@ public partial class SettingsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.LoginByOpenPlatAsync(WeChatLoginCode.Trim());
-            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg, out _, out _);
             if (isSuccess)
             {
                 MusicService.SaveSession();
@@ -571,7 +625,7 @@ public partial class SettingsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.Client.RefreshTokenAsync();
-            ExtractKugouResponse(response, out var isSuccess, out var errorMsg);
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg, out _, out _);
             if (isSuccess)
             {
                 MusicService.SaveSession();
@@ -613,6 +667,41 @@ public partial class SettingsViewModel : ViewModelBase
         IsLoginDialogOpen = false;
         ClearUserProfile();
         NotifyLoginStateChanged();
+    }
+
+    [RelayCommand]
+    private Task OpenDataDirectoryAsync()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = AppStateStore.AppDirectory,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            LoginStatus = $"打开数据目录失败：{ex.Message}";
+        }
+
+        return Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private void ClearAllData()
+    {
+        CancelQrPolling("已清除扫码状态");
+        
+        // 1. 彻底清理底层数据和配置
+        MusicService.ClearAllData();
+        VipPrivilegeService.Instance.ResetSessionState();
+        
+        // 2. 软重启，重建整个 UI 根节点，从而销毁所有旧 ViewModel 并重置状态
+        if (Application.Current is App app)
+        {
+            app.RestartAppUI();
+        }
     }
 
     [RelayCommand]
@@ -1138,9 +1227,55 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
-    private static void ExtractKugouResponse(KugouResponse response, out bool isSuccess, out string errorMessage)
+    private static void ExtractKugouResponse(KugouResponse response, out bool isSuccess, out string errorMessage, out int errorCode, out string eventId)
     {
-        isSuccess = !MusicService.TryGetResponseError(response, out errorMessage);
+        isSuccess = !MusicService.TryGetResponseError(response, out errorMessage, out errorCode, out eventId);
+    }
+    
+    private async Task StartCaptchaVerificationAsync(string eventId, Action retryAction)
+    {
+        if (string.IsNullOrWhiteSpace(eventId))
+        {
+            LoginStatus = "风控拦截，但未返回 eventid，自动绕过失败";
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            LoginStatus = "正在全自动绕过风控验证...";
+            var response = await MusicService.Client.SubmitVerifyCodeAsync(eventId, string.Empty);
+            ExtractKugouResponse(response, out var isSuccess, out var errorMsg, out _, out _);
+            if (isSuccess)
+            {
+                LoginStatus = "自动验证成功，正在继续登录...";
+                retryAction();
+            }
+            else
+            {
+                LoginStatus = $"自动验证失败：{errorMsg}";
+            }
+        }
+        catch (Exception ex)
+        {
+            LoginStatus = $"自动验证发生异常：{ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private void CloseCaptchaDialog()
+    {
+        IsCaptchaDialogOpen = false;
+    }
+
+    [RelayCommand]
+    private Task SubmitCaptchaAsync()
+    {
+        return Task.CompletedTask;
     }
 
 }

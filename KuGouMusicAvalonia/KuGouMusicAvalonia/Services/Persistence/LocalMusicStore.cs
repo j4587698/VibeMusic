@@ -670,6 +670,56 @@ internal sealed class LocalMusicStore : IDisposable
         }
     }
 
+    public void ClearAllData()
+    {
+        lock (_gate)
+        {
+            DisposeDatabase();
+
+            var appDir = AppStateStore.AppDirectory;
+            if (!Directory.Exists(appDir))
+            {
+                Directory.CreateDirectory(appDir);
+                OpenDatabase();
+                return;
+            }
+
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsIOS())
+            {
+                foreach (var item in Directory.EnumerateFileSystemEntries(appDir))
+                {
+                    var name = Path.GetFileName(item);
+                    if (string.Equals(name, "Downloads", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (Directory.Exists(item))
+                        {
+                            Directory.Delete(item, recursive: true);
+                        }
+                        else
+                        {
+                            File.Delete(item);
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+            else
+            {
+                Directory.Delete(appDir, recursive: true);
+            }
+
+            Directory.CreateDirectory(appDir);
+            OpenDatabase();
+        }
+    }
+
     public string? FindCachedLyric(string hash, string format)
     {
         if (string.IsNullOrWhiteSpace(hash) || string.IsNullOrWhiteSpace(format))
