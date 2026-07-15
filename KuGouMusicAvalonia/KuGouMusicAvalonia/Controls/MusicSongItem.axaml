@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:KuGouMusicAvalonia.Converters"
+             xmlns:controls="clr-namespace:KuGouMusicAvalonia.Controls"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:lumina="clr-namespace:LuminaUI.Controls;assembly=LuminaUI"
+             xmlns:services="clr-namespace:KuGouMusicAvalonia.Services"
+             x:Class="KuGouMusicAvalonia.Controls.MusicSongItem"
+             x:Name="Root"
+             x:CompileBindings="False">
+  <Border Margin="12,0,12,8" CornerRadius="14"
+          Background="{Binding ItemBackground, ElementName=Root}"
+          BorderBrush="{Binding ItemBorderBrush, ElementName=Root}"
+          BorderThickness="1" Padding="10">
+    <Grid ColumnSpacing="12">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Border Width="{Binding CoverWidth, ElementName=Root}" Height="{Binding CoverHeight, ElementName=Root}"
+              CornerRadius="10" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+        <lumina:LuminaImage Source="{Binding CoverUrl}" PlaceholderContent=" " ErrorContent=" " />
+      </Border>
+
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <controls:PlayingIndicator VerticalAlignment="Center">
+            <controls:PlayingIndicator.IsVisible>
+              <MultiBinding Converter="{x:Static converters:SongEqualityConverter.Instance}">
+                <Binding />
+                <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+              </MultiBinding>
+            </controls:PlayingIndicator.IsVisible>
+          </controls:PlayingIndicator>
+          <lumina:LuminaAutoScrollText Text="{Binding Title}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontWeight="Black" HorizontalAlignment="Stretch">
+            <lumina:LuminaAutoScrollText.Foreground>
+              <MultiBinding Converter="{x:Static converters:SongPlayingBrushConverter.Instance}">
+                <Binding />
+                <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+              </MultiBinding>
+            </lumina:LuminaAutoScrollText.Foreground>
+          </lumina:LuminaAutoScrollText>
+        </StackPanel>
+        <lumina:LuminaAutoScrollText Text="{Binding Artist}" IsRunning="{Binding $parent[Border].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+        <Button Classes="Ghost Icon" Width="36" Height="36" CornerRadius="18" ToolTip.Tip="下载到本地"
+                IsVisible="{Binding ShowDownloadButton, ElementName=Root}"
+                Command="{Binding DownloadCommand, ElementName=Root}"
+                CommandParameter="{Binding}" lumina:LuminaButton.IconSize="20">
+          <lumina:LuminaButton.Icon>
+            <icons:MaterialIcon Kind="Download" Width="20" Height="20" Foreground="{DynamicResource MusicTextSoftBrush}" />
+          </lumina:LuminaButton.Icon>
+        </Button>
+        <Button Classes="Ghost Icon" Width="32" Height="32" CornerRadius="16" ToolTip.Tip="添加到队列"
+                Command="{Binding AddToQueueCommand, ElementName=Root}"
+                CommandParameter="{Binding}" lumina:LuminaButton.IconSize="18">
+          <lumina:LuminaButton.Icon>
+            <icons:MaterialIcon Kind="PlaylistMusic" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" />
+          </lumina:LuminaButton.Icon>
+        </Button>
+        <Button Classes="Primary Icon" Width="36" Height="36" CornerRadius="18"
+                ToolTip.Tip="{Binding PlayButtonToolTip, ElementName=Root}"
+                Background="{DynamicResource MusicPrimaryGradient}"
+                Command="{Binding PlayCommand, ElementName=Root}"
+                CommandParameter="{Binding}">
+          <icons:MaterialIcon Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="22" Height="22">
+            <icons:MaterialIcon.Kind>
+              <MultiBinding Converter="{x:Static converters:SongPlayIconConverter.Instance}">
+                <Binding />
+                <Binding Path="CurrentSong" Source="{x:Static services:PlayerService.Instance}" />
+                <Binding Path="IsPlaying" Source="{x:Static services:PlayerService.Instance}" />
+              </MultiBinding>
+            </icons:MaterialIcon.Kind>
+          </icons:MaterialIcon>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</UserControl>

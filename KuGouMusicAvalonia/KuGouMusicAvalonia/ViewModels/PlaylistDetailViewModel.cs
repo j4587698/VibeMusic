@@ -177,8 +177,15 @@ public partial class PlaylistDetailViewModel : ViewModelBase
             PlayerService.Instance.TogglePlayPause();
             return;
         }
-        var index = Songs.IndexOf(song);
-        await PlayerService.Instance.PlayQueueAsync(Songs.ToList(), index < 0 ? 0 : index, Title, replaceQueue: true);
+        PlayerService.Instance.AppendToQueue(new[] { song });
+        await PlayerService.Instance.PlayQueueSongAsync(song);
+    }
+
+    [RelayCommand]
+    private void AddSongToQueue(KugouSong song)
+    {
+        if (song is null) return;
+        PlayerService.Instance.AppendToQueue(new[] { song });
     }
 
     [RelayCommand]

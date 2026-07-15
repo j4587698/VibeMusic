@@ -135,9 +135,15 @@ public partial class CloudViewModel : ViewModelBase
             PlayerService.Instance.TogglePlayPause();
             return;
         }
+        PlayerService.Instance.AppendToQueue(new[] { song });
+        await PlayerService.Instance.PlayQueueSongAsync(song);
+    }
 
-        var index = Songs.IndexOf(song);
-        await PlayerService.Instance.PlayQueueAsync(Songs.ToList(), index < 0 ? 0 : index, "云盘/收藏", replaceQueue: true);
+    [RelayCommand]
+    private void AddSongToQueue(KugouSong song)
+    {
+        if (song is null) return;
+        PlayerService.Instance.AppendToQueue(new[] { song });
     }
 
     [RelayCommand]
