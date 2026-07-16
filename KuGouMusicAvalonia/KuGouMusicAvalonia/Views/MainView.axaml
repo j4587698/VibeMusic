@@ -233,7 +233,11 @@
             </Border>
     </Grid>
 
-    <Grid Grid.RowSpan="2" IsVisible="{Binding IsQueueOpen}" ZIndex="20">
+    <Grid Grid.RowSpan="2"
+          IsVisible="{Binding IsQueueOpen}"
+          ZIndex="20"
+          lumina:LuminaBack.IsEnabled="{Binding IsQueueOpen}"
+          lumina:LuminaBack.Command="{Binding CloseQueueCommand}">
       <Border Background="{DynamicResource MusicGlassBrush}" lumina:LuminaCommand.TappedCommand="{Binding CloseQueueCommand}" />
       <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="{Binding QueuePopupWidth}" Margin="16,16,16,90" CornerRadius="22" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="16" BoxShadow="{DynamicResource MusicFloatingShadow}">
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">

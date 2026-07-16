@@ -27,6 +27,7 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
     protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
+        PlatformApplicationService.ExitApplication = FinishAndRemoveTask;
 
         var musicDir = global::Android.OS.Environment.GetExternalStoragePublicDirectory(global::Android.OS.Environment.DirectoryMusic);
         if (musicDir is not null)
@@ -54,6 +55,7 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
 
     protected override void OnDestroy()
     {
+        PlatformApplicationService.ExitApplication = null;
         if (_isBound)
         {
             UnbindService(this);

@@ -17,6 +17,8 @@ namespace KuGouMusicAvalonia.Views;
 
 public partial class MainView : UserControl
 {
+    private static readonly TimeSpan AndroidBackExitWindow = TimeSpan.FromSeconds(2);
+
     private static readonly HashSet<string> RootNavigationKeys = new(StringComparer.Ordinal)
     {
         "NavDiscover",
@@ -37,6 +39,7 @@ public partial class MainView : UserControl
     private bool _routesRegistered;
     private bool _syncingActiveNavigationKey;
     private bool _isStackOperationRunning;
+    private DateTimeOffset _lastUnhandledAndroidBackRequestedAt;
 
     public MainView()
     {
@@ -78,6 +81,7 @@ public partial class MainView : UserControl
         base.OnAttachedToVisualTree(e);
 
         AppShell.PropertyChanged += AppShell_PropertyChanged;
+        AppShell.UnhandledBackRequested += OnUnhandledBackRequested;
 
         var navigation = ShellNavigationService.Instance;
         navigation.NavigationRequested += OnNavigationRequested;
@@ -99,6 +103,7 @@ public partial class MainView : UserControl
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
     {
         AppShell.PropertyChanged -= AppShell_PropertyChanged;
+        AppShell.UnhandledBackRequested -= OnUnhandledBackRequested;
 
         var navigation = ShellNavigationService.Instance;
         navigation.NavigationRequested -= OnNavigationRequested;
@@ -111,6 +116,26 @@ public partial class MainView : UserControl
         navigation.ArtistDetailRequested -= OnArtistDetailRequested;
 
         base.OnDetachedFromVisualTree(e);
+    }
+
+    private void OnUnhandledBackRequested(object? sender, LuminaBackRequestedEventArgs e)
+    {
+        if (!OperatingSystem.IsAndroid())
+        {
+            return;
+        }
+
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+        if (now - _lastUnhandledAndroidBackRequestedAt <= AndroidBackExitWindow)
+        {
+            _lastUnhandledAndroidBackRequestedAt = default;
+            e.Handled = PlatformApplicationService.TryExitApplication();
+            return;
+        }
+
+        _lastUnhandledAndroidBackRequestedAt = now;
+        e.Handled = true;
+        AppShell.ShowToast("再按一次返回退出", AndroidBackExitWindow);
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -9,7 +9,9 @@
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
              x:Class="KuGouMusicAvalonia.Views.NowPlayingView"
              x:DataType="vm:NowPlayingViewModel"
-             x:CompileBindings="True">
+             x:CompileBindings="True"
+             lumina:LuminaBack.IsEnabled="{Binding IsLyricSeekPreviewVisible}"
+             lumina:LuminaBack.Command="{Binding CancelLyricSeekPreviewCommand}">
   <Grid Background="{DynamicResource MusicBackgroundBrush}">
     <Border Background="{DynamicResource MusicHeroGradient}" Opacity="0.26" />
 
