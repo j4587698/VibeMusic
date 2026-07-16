@@ -194,7 +194,11 @@
   </controls:PageInsetListBox>
 
   <!-- Audio Match Overlay -->
-  <Grid IsVisible="{Binding IsAudioMatchUIVisible}" Background="#D0000000" ZIndex="100">
+  <Grid IsVisible="{Binding IsAudioMatchUIVisible}"
+        Background="#D0000000"
+        ZIndex="100"
+        lumina:LuminaBack.IsEnabled="{Binding IsAudioMatchUIVisible}"
+        lumina:LuminaBack.Command="{Binding CloseAudioMatchUICommand}">
     <Button Classes="Ghost Icon" Command="{Binding CloseAudioMatchUICommand}" Width="44" Height="44" CornerRadius="22" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="24" Background="#30FFFFFF">
       <icons:MaterialIcon Kind="Close" Width="24" Height="24" Foreground="White" />
     </Button>

@@ -442,7 +442,10 @@
     </StackPanel>
   </ScrollViewer>
 
-  <Grid IsVisible="{Binding IsLoginDialogOpen}" ZIndex="40">
+  <Grid IsVisible="{Binding IsLoginDialogOpen}"
+        ZIndex="40"
+        lumina:LuminaBack.IsEnabled="{Binding IsLoginDialogOpen}"
+        lumina:LuminaBack.Command="{Binding CloseLoginDialogCommand}">
     <Border Background="{DynamicResource MusicFloatingGlassBrush}" lumina:LuminaCommand.TappedCommand="{Binding CloseLoginDialogCommand}" />
     <Border Width="{Binding LoginDialogWidth}"
             HorizontalAlignment="Center"
