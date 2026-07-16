@@ -99,8 +99,3 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
         }
     }
 }
-
-public static class PlatformStoragePaths
-{
-    public static string ExternalDownloadsDirectory = string.Empty;
-}
