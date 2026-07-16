@@ -9,8 +9,57 @@ using System.Threading.Tasks;
 
 namespace KuGouMusicAvalonia.ViewModels;
 
+public sealed class RankingsHeaderSection
+{
+    public static RankingsHeaderSection Instance { get; } = new();
+
+    private RankingsHeaderSection()
+    {
+    }
+}
+
+public sealed class RankingsAllSection
+{
+    public static RankingsAllSection Instance { get; } = new();
+
+    private RankingsAllSection()
+    {
+    }
+}
+
+public sealed class RankingsFooterSection
+{
+    public static RankingsFooterSection Instance { get; } = new();
+
+    private RankingsFooterSection()
+    {
+    }
+}
+
+public sealed class FeaturedRankRow
+{
+    public FeaturedRankRow(IReadOnlyList<KugouRank> ranks)
+    {
+        Ranks = ranks;
+    }
+
+    public IReadOnlyList<KugouRank> Ranks { get; }
+}
+
+public sealed class RankCardRow
+{
+    public RankCardRow(IReadOnlyList<KugouRank> ranks)
+    {
+        Ranks = ranks;
+    }
+
+    public IReadOnlyList<KugouRank> Ranks { get; }
+}
+
 public partial class RankingsViewModel : ViewModelBase
 {
+    private int _cardsPerRow = 4;
+
     [ObservableProperty]
     private ObservableCollection<KugouRank> _featuredRanks = new();
 
@@ -28,13 +77,28 @@ public partial class RankingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _statusMessage = "正在同步酷狗排行榜";
 
+    public ObservableCollection<object> PageItems { get; } = new();
+
     public string SelectedRankName => SelectedRank?.Name ?? "排行榜";
 
     public string SelectedRankPic => SelectedRank?.Pic ?? string.Empty;
 
     public RankingsViewModel()
     {
+        RebuildPageItems();
         _ = LoadRankingsAsync();
+    }
+
+    public void SetCardsPerRow(int cardsPerRow)
+    {
+        var normalizedCount = System.Math.Max(1, cardsPerRow);
+        if (_cardsPerRow == normalizedCount)
+        {
+            return;
+        }
+
+        _cardsPerRow = normalizedCount;
+        RebuildPageItems();
     }
 
     [RelayCommand]
@@ -55,6 +119,7 @@ public partial class RankingsViewModel : ViewModelBase
             var combined = topTask.Result.Items.Concat(allTask.Result.Items)
                                                  .Where(item => item.Id > 0 && seen.Add(item.Id));
             Ranks = new ObservableCollection<KugouRank>(combined);
+            RebuildPageItems();
 
             StatusMessage = Ranks.Count > 0 ? $"已同步 {Ranks.Count} 个榜单" : "暂时没有拿到排行榜";
         }
@@ -76,4 +141,23 @@ public partial class RankingsViewModel : ViewModelBase
         ShellNavigationService.Instance.OpenRankingDetail(rank);
     }
 
+    private void RebuildPageItems()
+    {
+        PageItems.Clear();
+        PageItems.Add(RankingsHeaderSection.Instance);
+
+        foreach (var row in FeaturedRanks.Chunk(_cardsPerRow))
+        {
+            PageItems.Add(new FeaturedRankRow(row));
+        }
+
+        PageItems.Add(RankingsAllSection.Instance);
+
+        foreach (var row in Ranks.Chunk(_cardsPerRow))
+        {
+            PageItems.Add(new RankCardRow(row));
+        }
+
+        PageItems.Add(RankingsFooterSection.Instance);
+    }
 }

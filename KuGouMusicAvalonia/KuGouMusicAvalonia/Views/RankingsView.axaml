@@ -11,60 +11,101 @@
              x:Class="KuGouMusicAvalonia.Views.RankingsView"
              x:DataType="vm:RankingsViewModel"
              x:CompileBindings="True">
-  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="12,0,12,28" Spacing="18">
-      <Border CornerRadius="18" MinHeight="150" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
-        <Grid Margin="16" ColumnDefinitions="*,88" ColumnSpacing="12" VerticalAlignment="Center">
-          <StackPanel Spacing="9" VerticalAlignment="Center">
-            <TextBlock Text="KUGOU CHARTS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-            <TextBlock Text="酷狗排行榜" FontSize="26" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
-            <TextBlock Text="{Binding StatusMessage}" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
-            <Button Classes="Primary Icon" Command="{Binding LoadRankingsCommand}" Width="38" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Left" Padding="0" ToolTip.Tip="刷新榜单" lumina:LuminaButton.IconSize="22">
-              <icons:MaterialIcon Kind="Refresh" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-            </Button>
-          </StackPanel>
-          <Border Grid.Column="1" Width="84" Height="84" CornerRadius="16" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <lumina:LuminaImage Source="{Binding SelectedRankPic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+  <controls:PageInsetListBox x:Name="RankingsPageList"
+                             ItemsSource="{Binding PageItems}"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             BasePadding="0"
+                             Focusable="False"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+    <ListBox.ItemsPanel>
+      <ItemsPanelTemplate>
+        <VirtualizingStackPanel />
+      </ItemsPanelTemplate>
+    </ListBox.ItemsPanel>
+
+    <ListBox.Styles>
+      <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </ControlTemplate>
+        </Setter>
+      </Style>
+    </ListBox.Styles>
+
+    <ListBox.DataTemplates>
+      <DataTemplate DataType="vm:RankingsHeaderSection">
+        <StackPanel Margin="12,0,12,8" Spacing="18">
+          <Border CornerRadius="18" MinHeight="150" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True">
+            <Grid Margin="16" ColumnDefinitions="*,88" ColumnSpacing="12" VerticalAlignment="Center">
+              <StackPanel Spacing="9" VerticalAlignment="Center">
+                <TextBlock Text="KUGOU CHARTS" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                <TextBlock Text="酷狗排行榜" FontSize="26" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding $parent[UserControl].((vm:RankingsViewModel)DataContext).StatusMessage}" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" MaxLines="2" />
+                <Button Classes="Primary Icon" Command="{Binding $parent[UserControl].((vm:RankingsViewModel)DataContext).LoadRankingsCommand}" Width="38" Height="38" CornerRadius="19" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Left" Padding="0" ToolTip.Tip="刷新榜单" lumina:LuminaButton.IconSize="22">
+                  <icons:MaterialIcon Kind="Refresh" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                </Button>
+              </StackPanel>
+              <Border Grid.Column="1" Width="84" Height="84" CornerRadius="16" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <lumina:LuminaImage Source="{Binding $parent[UserControl].((vm:RankingsViewModel)DataContext).SelectedRankPic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+              </Border>
+            </Grid>
           </Border>
-        </Grid>
-      </Border>
 
-      <Grid ColumnDefinitions="*,Auto">
-        <StackPanel>
-          <TextBlock Text="推荐榜" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-          <TextBlock Text="选择任意榜单查看实时歌曲" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel>
+              <TextBlock Text="推荐榜" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <TextBlock Text="选择任意榜单查看实时歌曲" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </StackPanel>
+            <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding $parent[UserControl].((vm:RankingsViewModel)DataContext).IsLoading}" Width="120" Height="4" VerticalAlignment="Center" />
+          </Grid>
         </StackPanel>
-        <ProgressBar Grid.Column="1" IsIndeterminate="True" IsVisible="{Binding IsLoading}" Width="120" Height="4" VerticalAlignment="Center" />
-      </Grid>
+      </DataTemplate>
 
-      <ItemsControl ItemsSource="{Binding FeaturedRanks}" HorizontalAlignment="Left">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <WrapPanel HorizontalAlignment="Left" />
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-          <DataTemplate DataType="kugou:KugouRank">
-            <lumina:LuminaCard Width="156" Height="128" Margin="0,0,8,10" Padding="8" Classes="Glass Interactive" CornerRadius="14" Cursor="Hand"
-                               lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:RankingsViewModel)DataContext).SelectRankCommand}"
-                               lumina:LuminaCommand.TappedCommandParameter="{Binding}">
-              <Grid RowDefinitions="68,34" RowSpacing="8">
-                <Border CornerRadius="11" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
-                  <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
-                </Border>
-                <lumina:LuminaAutoScrollText Grid.Row="1" IdleTextAlignment="Center" IsRunning="{Binding $parent[lumina:LuminaCard].IsPointerOver}" Text="{Binding Name}" FontWeight="Black" FontSize="14" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-              </Grid>
-            </lumina:LuminaCard>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-
-      <StackPanel Spacing="10">
-        <TextBlock Text="全部榜单" FontSize="18" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-        <ItemsControl ItemsSource="{Binding Ranks}" HorizontalAlignment="Left">
+      <DataTemplate DataType="vm:FeaturedRankRow">
+        <ItemsControl ItemsSource="{Binding Ranks}" Margin="12,0,12,0" HorizontalAlignment="Left">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate>
-              <WrapPanel HorizontalAlignment="Left" />
+              <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="kugou:KugouRank">
+              <lumina:LuminaCard Width="156" Height="128" Margin="0,0,8,10" Padding="8" Classes="Glass Interactive" CornerRadius="14" Cursor="Hand"
+                                 lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:RankingsViewModel)DataContext).SelectRankCommand}"
+                                 lumina:LuminaCommand.TappedCommandParameter="{Binding}">
+                <Grid RowDefinitions="68,34" RowSpacing="8">
+                  <Border CornerRadius="11" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+                    <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                  </Border>
+                  <lumina:LuminaAutoScrollText Grid.Row="1" IdleTextAlignment="Center" IsRunning="{Binding $parent[lumina:LuminaCard].IsPointerOver}" Text="{Binding Name}" FontWeight="Black" FontSize="14" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                </Grid>
+              </lumina:LuminaCard>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </DataTemplate>
+
+      <DataTemplate DataType="vm:RankingsAllSection">
+        <TextBlock Margin="12,8,12,10" Text="全部榜单" FontSize="18" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+      </DataTemplate>
+
+      <DataTemplate DataType="vm:RankCardRow">
+        <ItemsControl ItemsSource="{Binding Ranks}" Margin="12,0,12,0" HorizontalAlignment="Left">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" />
             </ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
@@ -83,9 +124,11 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
-      </StackPanel>
+      </DataTemplate>
 
-      <controls:PageBottomInsetSpacer />
-    </StackPanel>
-  </ScrollViewer>
+      <DataTemplate DataType="vm:RankingsFooterSection">
+        <Border Height="28" />
+      </DataTemplate>
+    </ListBox.DataTemplates>
+  </controls:PageInsetListBox>
 </UserControl>
