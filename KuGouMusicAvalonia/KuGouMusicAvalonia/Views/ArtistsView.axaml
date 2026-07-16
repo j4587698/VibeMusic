@@ -128,7 +128,7 @@
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate DataType="kugou:KugouArtist">
-              <lumina:LuminaCard Width="144" Height="202" Margin="0,0,10,12" Padding="9" Classes="Glass Interactive" CornerRadius="14" Cursor="Hand"
+              <lumina:LuminaCard Width="144" Height="202" Margin="0,0,10,12" Padding="9" Classes="Interactive" CornerRadius="14" Cursor="Hand"
                                  lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:ArtistsViewModel)DataContext).OpenArtistCommand}"
                                  lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                 <StackPanel Spacing="12" HorizontalAlignment="Stretch">

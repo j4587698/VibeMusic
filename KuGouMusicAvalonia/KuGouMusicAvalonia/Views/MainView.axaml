@@ -191,12 +191,11 @@
                     Background="Transparent"
                     BoxShadow="{DynamicResource MusicFloatingShadow}"
                     IsHitTestVisible="False" />
-            <lumina:LuminaBlurBackground CornerRadius="18"
-                                         BlurRadius="36"
-                                         TintBrush="{DynamicResource MusicFloatingGlassBrush}"
-                                         EdgeBrush="{DynamicResource MusicOutlineBrush}"
-                                         EdgeThickness="1"
-                                         Padding="0">
+            <Border CornerRadius="18"
+                    Background="{DynamicResource MusicGlassBrush}"
+                    BorderBrush="{DynamicResource MusicOutlineBrush}"
+                    BorderThickness="1"
+                    Padding="0">
             <Grid>
               <Grid ColumnDefinitions="42,*,34,36,44" ColumnSpacing="6" Margin="8,8,10,12">
                 <Button Grid.ColumnSpan="2" Classes="Ghost" Command="{Binding OpenNowPlayingCommand}" Background="Transparent" Padding="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" ToolTip.Tip="正在播放">
@@ -231,7 +230,7 @@
               </Grid>
               <lumina:LuminaPlaybackSlider Height="8" MinHeight="0" MaxHeight="8" Margin="12,0,12,4" VerticalAlignment="Bottom" Minimum="0" Maximum="{Binding Player.Duration}" Value="{Binding Player.Progress, Mode=TwoWay}" BufferedValue="{Binding Player.BufferedProgress}" TrackHeight="3" ThumbSize="0" TrackBrush="{DynamicResource LuminaDividerBrush}" BufferedBrush="{DynamicResource LuminaBorderBrush}" ProgressBrush="{DynamicResource MusicPrimaryBrush}" />
             </Grid>
-            </lumina:LuminaBlurBackground>
+            </Border>
     </Grid>
 
     <Grid Grid.RowSpan="2" IsVisible="{Binding IsQueueOpen}" ZIndex="20">
