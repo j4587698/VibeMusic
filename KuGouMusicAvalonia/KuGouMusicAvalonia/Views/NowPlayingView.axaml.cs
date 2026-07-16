@@ -68,7 +68,7 @@ public partial class NowPlayingView : UserControl
         if (DataContext is NowPlayingViewModel viewModel)
         {
             viewModel.IsWideLayout = width >= SplitLayoutMinWidth && width > height;
-            viewModel.IsTightLandscape = width > height && height <= 520;
+            viewModel.IsTightLandscape = width > height;
 
             // Calculate cover size based on available height
             // Reserve space for: top bar (~60), progress (~40), bottom controls (~50), margins (~40)

@@ -412,9 +412,9 @@ public partial class MainView : UserControl
         {
             var width = Bounds.Width;
             var height = Bounds.Height;
-            var isShortLandscape = width > height && height > 0 && height <= 520;
+            var isLandscape = height > 0 && width > height;
 
-            viewModel.IsCompactLayout = width > 0 && (width < 680 || isShortLandscape);
+            viewModel.IsCompactLayout = width > 0 && width < 680 && !isLandscape;
             if (width > 0)
             {
                 viewModel.QueuePopupWidth = Math.Clamp(width - 32, 300, 420);
