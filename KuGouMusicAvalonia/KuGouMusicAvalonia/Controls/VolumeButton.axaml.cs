@@ -11,7 +11,7 @@ namespace KuGouMusicAvalonia.Controls;
 public partial class VolumeButton : UserControl
 {
     public static readonly StyledProperty<double> VolumeProperty =
-        AvaloniaProperty.Register<VolumeButton, double>(nameof(Volume), 70, defaultBindingMode: BindingMode.TwoWay);
+        AvaloniaProperty.Register<VolumeButton, double>(nameof(Volume), 100, defaultBindingMode: BindingMode.TwoWay);
 
     public static readonly DirectProperty<VolumeButton, string> VolumeTextProperty =
         AvaloniaProperty.RegisterDirect<VolumeButton, string>(nameof(VolumeText), control => control.VolumeText);
@@ -34,7 +34,7 @@ public partial class VolumeButton : UserControl
     private const double SliderHeight = 106;
     private const double SliderThumbSize = 10;
     private const double SliderTrackRange = SliderHeight - SliderThumbSize;
-    private double _lastAudibleVolume = 70;
+    private double _lastAudibleVolume = 100;
     private double _selectionHeight = SliderTrackRange * 0.7;
     private Thickness _thumbMargin = new(0, 0, 0, SliderTrackRange * 0.7);
     private string _volumeText = "70";
@@ -100,7 +100,7 @@ public partial class VolumeButton : UserControl
         }
     }
 
-    private static void OpenFlyout_Click(object? sender, RoutedEventArgs e)
+    private void OpenFlyout_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { Flyout: { } flyout } button)
         {

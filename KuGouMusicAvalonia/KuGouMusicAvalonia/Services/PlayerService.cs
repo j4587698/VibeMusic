@@ -98,7 +98,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     private double _duration = 240;
 
     [ObservableProperty]
-    private double _volume = 70;
+    private double _volume = 100;
 
     [ObservableProperty]
     private string _statusMessage = "播放器就绪";
