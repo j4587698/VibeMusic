@@ -64,7 +64,7 @@
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate DataType="kugou:KugouSong">
-              <lumina:LuminaCard Width="150" Height="208" Margin="0,0,14,6" Padding="10" Classes="Glass Interactive" CornerRadius="14" Cursor="Hand"
+              <lumina:LuminaCard Width="150" Height="208" Margin="0,0,14,6" Padding="10" Classes="Interactive" CornerRadius="14" Cursor="Hand"
                                  lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:DiscoverViewModel)DataContext).PlaySongCommand}"
                                  lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                 <StackPanel Spacing="12">
@@ -146,7 +146,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
               <DataTemplate DataType="kugou:KugouSong">
-                <lumina:LuminaCard Width="150" Height="208" Margin="0,0,14,6" Padding="10" Classes="Glass Interactive" CornerRadius="14" Cursor="Hand"
+                <lumina:LuminaCard Width="150" Height="208" Margin="0,0,14,6" Padding="10" Classes="Interactive" CornerRadius="14" Cursor="Hand"
                                    lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:DiscoverViewModel)DataContext).PlayYouthSongCommand}"
                                    lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                   <StackPanel Spacing="12">
