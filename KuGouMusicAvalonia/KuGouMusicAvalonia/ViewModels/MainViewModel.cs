@@ -32,6 +32,7 @@ public partial class MainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsLyricsActive))]
     [NotifyPropertyChangedFor(nameof(ShowMiniPlayer))]
     [NotifyPropertyChangedFor(nameof(ShowCompactMiniPlayer))]
+    [NotifyPropertyChangedFor(nameof(ShowAppFooter))]
     [NotifyPropertyChangedFor(nameof(ShowCompactChrome))]
     [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
     [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
@@ -41,6 +42,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDesktopLayout))]
     [NotifyPropertyChangedFor(nameof(ShowCompactMiniPlayer))]
+    [NotifyPropertyChangedFor(nameof(ShowAppFooter))]
     [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
     [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
     [NotifyPropertyChangedFor(nameof(PageBottomInset))]
@@ -82,6 +84,7 @@ public partial class MainViewModel : ViewModelBase
     public bool IsLyricsActive => ActiveNavigationKey == "NavLyrics";
     public bool ShowMiniPlayer => Player.HasSong && ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
     public bool ShowCompactMiniPlayer => IsCompactLayout && ShowMiniPlayer;
+    public bool ShowAppFooter => IsCompactLayout || ShowMiniPlayer;
     public bool ShowCompactChrome => ActiveNavigationKey is not "NavNowPlaying" and not "NavLyrics";
     public bool ShowShellChrome => IsDesktopLayout || ShowCompactChrome;
     public bool ShowShellHeader => ShowCompactChrome && IsInnerPageActive;
@@ -98,6 +101,7 @@ public partial class MainViewModel : ViewModelBase
             {
                 OnPropertyChanged(nameof(ShowMiniPlayer));
                 OnPropertyChanged(nameof(ShowCompactMiniPlayer));
+                OnPropertyChanged(nameof(ShowAppFooter));
                 OnPropertyChanged(nameof(PageBottomInset));
             }
         };
