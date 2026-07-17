@@ -132,7 +132,7 @@ public partial class MainViewModel : ViewModelBase
 
     partial void OnIsCompactLayoutChanged(bool value)
     {
-        IsShellMenuOpen = !value;
+        IsShellMenuOpen = false;
     }
 
     public object ResolveRootNavigationPage(string value)
