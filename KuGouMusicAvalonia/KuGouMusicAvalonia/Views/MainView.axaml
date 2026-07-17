@@ -31,14 +31,17 @@
     <Style Selector="Button.Ghost.BottomTab.active">
       <Setter Property="Foreground" Value="{DynamicResource MusicPrimaryBrush}" />
     </Style>
+    <Style Selector="Border.QueuePopup">
+      <Setter Property="Margin" Value="16" />
+    </Style>
+    <Style Selector="Border.QueuePopup.compact">
+      <Setter Property="Margin" Value="16,16,16,90" />
+    </Style>
   </UserControl.Styles>
-  <lumina:LuminaOverlayHost SafeAreaMode="Enabled"
-                            Background="{DynamicResource MusicBackgroundBrush}">
-    <controls:AppChromeHost BottomSafeAreaBackground="{DynamicResource MusicSurfaceBrush}">
-      <Grid RowDefinitions="*,Auto,Auto" Background="{DynamicResource MusicBackgroundBrush}">
-        <lumina:LuminaShell x:Name="AppShell"
-                        Grid.Row="0"
-                        SafeAreaMode="Disabled"
+  <lumina:LuminaShell x:Name="AppShell"
+                        SafeAreaMode="Enabled"
+                        Background="{DynamicResource MusicBackgroundBrush}"
+                        FooterBackground="{DynamicResource MusicSurfaceBrush}"
                         ShellKey="Vibe"
                         ActiveNavigationKey="{Binding ActiveNavigationKey, Mode=OneWay}"
                         IsMenuOpen="{Binding IsShellMenuOpen, Mode=TwoWay}"
@@ -90,11 +93,12 @@
           <lumina:LuminaNavigationItem Header="我的" NavigationKey="NavSettings" Icon="{x:Static material:MaterialIconKind.AccountCircle}" />
         </lumina:LuminaNavigationView>
       </lumina:LuminaShell.MenuContent>
-    </lumina:LuminaShell>
+
+      <lumina:LuminaShell.FooterContent>
+        <Grid IsVisible="{Binding ShowAppFooter}">
 
     <Grid IsVisible="{Binding ShowMiniPlayer}"
-          IsHitTestVisible="{Binding IsDesktopLayout}"
-          Grid.Row="1">
+          IsHitTestVisible="{Binding IsDesktopLayout}">
           <Border IsVisible="{Binding IsDesktopLayout}" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="0,1,0,0" Padding="8,6,10,6">
             <Grid ColumnDefinitions="220,*,Auto" ColumnSpacing="12">
               <Border Background="Transparent" Padding="0">
@@ -181,8 +185,58 @@
           </Border>
     </Grid>
 
+          <Grid IsVisible="{Binding IsCompactLayout}"
+                Background="{DynamicResource MusicSurfaceBrush}"
+                Margin="0"
+                Height="56">
+            <Border BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="0,1,0,0">
+              <Grid ColumnDefinitions="*,*,*,*,*,*">
+                <Button Grid.Column="0" Classes="Ghost BottomTab" Classes.active="{Binding IsDiscoverActive}" Command="{Binding NavigateCommand}" CommandParameter="NavDiscover">
+                  <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <icons:MaterialIcon Kind="Home" Width="24" Height="24" />
+                    <TextBlock Text="主页" FontSize="10" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="1" Classes="Ghost BottomTab" Classes.active="{Binding IsPlaylistsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavPlaylists">
+                  <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <icons:MaterialIcon Kind="PlaylistMusic" Width="24" Height="24" />
+                    <TextBlock Text="乐库" FontSize="10" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="2" Classes="Ghost BottomTab" Classes.active="{Binding IsArtistsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavArtists">
+                  <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <icons:MaterialIcon Kind="AccountMusic" Width="24" Height="24" />
+                    <TextBlock Text="歌手" FontSize="10" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="3" Classes="Ghost BottomTab" Classes.active="{Binding IsRankingsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavRankings">
+                  <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <icons:MaterialIcon Kind="ChartBar" Width="24" Height="24" />
+                    <TextBlock Text="排行" FontSize="10" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="4" Classes="Ghost BottomTab" Classes.active="{Binding IsSearchActive}" Command="{Binding NavigateCommand}" CommandParameter="NavSearch">
+                  <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <icons:MaterialIcon Kind="Magnify" Width="24" Height="24" />
+                    <TextBlock Text="搜索" FontSize="10" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="5" Classes="Ghost BottomTab" Classes.active="{Binding IsSettingsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavSettings">
+                  <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <icons:MaterialIcon Kind="AccountCircle" Width="24" Height="24" />
+                    <TextBlock Text="我的" FontSize="10" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </Grid>
+            </Border>
+          </Grid>
+        </Grid>
+      </lumina:LuminaShell.FooterContent>
+
+      <lumina:LuminaShell.OverlayContent>
+        <Grid>
+
     <Grid IsVisible="{Binding ShowCompactMiniPlayer}"
-          Grid.Row="0"
           Margin="12,0,12,18"
           ClipToBounds="False"
           VerticalAlignment="Bottom"
@@ -233,13 +287,22 @@
             </Border>
     </Grid>
 
-    <Grid Grid.RowSpan="2"
-          IsVisible="{Binding IsQueueOpen}"
+    <Grid IsVisible="{Binding IsQueueOpen}"
           ZIndex="20"
           lumina:LuminaBack.IsEnabled="{Binding IsQueueOpen}"
           lumina:LuminaBack.Command="{Binding CloseQueueCommand}">
       <Border Background="{DynamicResource MusicGlassBrush}" lumina:LuminaCommand.TappedCommand="{Binding CloseQueueCommand}" />
-      <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="{Binding QueuePopupWidth}" Margin="16,16,16,90" CornerRadius="22" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="16" BoxShadow="{DynamicResource MusicFloatingShadow}">
+      <Border Classes="QueuePopup"
+              Classes.compact="{Binding IsCompactLayout}"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Bottom"
+              Width="{Binding QueuePopupWidth}"
+              CornerRadius="22"
+              Background="{DynamicResource MusicGlassBrush}"
+              BorderBrush="{DynamicResource MusicOutlineBrush}"
+              BorderThickness="1"
+              Padding="16"
+              BoxShadow="{DynamicResource MusicFloatingShadow}">
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
           <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
             <StackPanel Spacing="2">
@@ -343,54 +406,7 @@
       </Border>
     </Grid>
 
-    <Grid Grid.Row="2"
-          IsVisible="{Binding IsCompactLayout}"
-          Background="{DynamicResource MusicSurfaceBrush}"
-          Margin="0"
-          Height="56"
-          ZIndex="100">
-      <Border BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="0,1,0,0">
-        <Grid ColumnDefinitions="*,*,*,*,*,*">
-          <Button Grid.Column="0" Classes="Ghost BottomTab" Classes.active="{Binding IsDiscoverActive}" Command="{Binding NavigateCommand}" CommandParameter="NavDiscover">
-            <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-              <icons:MaterialIcon Kind="Home" Width="24" Height="24" />
-              <TextBlock Text="主页" FontSize="10" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Grid.Column="1" Classes="Ghost BottomTab" Classes.active="{Binding IsPlaylistsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavPlaylists">
-            <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-              <icons:MaterialIcon Kind="PlaylistMusic" Width="24" Height="24" />
-              <TextBlock Text="乐库" FontSize="10" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Grid.Column="2" Classes="Ghost BottomTab" Classes.active="{Binding IsArtistsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavArtists">
-            <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-              <icons:MaterialIcon Kind="AccountMusic" Width="24" Height="24" />
-              <TextBlock Text="歌手" FontSize="10" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Grid.Column="3" Classes="Ghost BottomTab" Classes.active="{Binding IsRankingsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavRankings">
-            <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-              <icons:MaterialIcon Kind="ChartBar" Width="24" Height="24" />
-              <TextBlock Text="排行" FontSize="10" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Grid.Column="4" Classes="Ghost BottomTab" Classes.active="{Binding IsSearchActive}" Command="{Binding NavigateCommand}" CommandParameter="NavSearch">
-            <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-              <icons:MaterialIcon Kind="Magnify" Width="24" Height="24" />
-              <TextBlock Text="搜索" FontSize="10" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Button>
-          <Button Grid.Column="5" Classes="Ghost BottomTab" Classes.active="{Binding IsSettingsActive}" Command="{Binding NavigateCommand}" CommandParameter="NavSettings">
-            <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-              <icons:MaterialIcon Kind="AccountCircle" Width="24" Height="24" />
-              <TextBlock Text="我的" FontSize="10" HorizontalAlignment="Center" />
-            </StackPanel>
-          </Button>
         </Grid>
-      </Border>
-    </Grid>
-      </Grid>
-    </controls:AppChromeHost>
-  </lumina:LuminaOverlayHost>
+      </lumina:LuminaShell.OverlayContent>
+  </lumina:LuminaShell>
 </UserControl>
