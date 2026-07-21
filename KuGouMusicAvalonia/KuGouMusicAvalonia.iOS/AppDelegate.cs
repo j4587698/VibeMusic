@@ -19,12 +19,12 @@ public partial class AppDelegate : AvaloniaAppDelegate<App>
 {
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
-        var result = base.FinishedLaunching(application, launchOptions);
-
         var docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         PlatformStoragePaths.ExternalDownloadsDirectory = Path.Combine(docPath, "VibeMusic");
         Directory.CreateDirectory(PlatformStoragePaths.ExternalDownloadsDirectory);
+        PlatformAudioStorage.Initialize(new FileSystemAudioStorage(() => MusicService.DownloadDirectory));
 
+        var result = base.FinishedLaunching(application, launchOptions);
         IosMediaControlManager.Instance.Initialize();
         return result;
     }

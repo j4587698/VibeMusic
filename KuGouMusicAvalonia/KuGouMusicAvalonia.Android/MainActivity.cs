@@ -6,7 +6,6 @@ using Avalonia;
 using Avalonia.Android;
 using Android.Content;
 using KuGouMusicAvalonia.Services;
-using System.IO;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("KuGouMusicAvalonia.Android")]
@@ -22,22 +21,19 @@ namespace KuGouMusicAvalonia.Android;
 public class MainActivity : AvaloniaMainActivity, IServiceConnection
 {
     private const int NotificationPermissionRequestCode = 1001;
+    private const int StoragePermissionRequestCode = 1002;
     private bool _isBound;
 
     protected override void OnCreate(Bundle? savedInstanceState)
     {
+        PlatformStoragePaths.ExternalDownloadsDirectory = "Music/VibeMusic";
+        PlatformAudioStorage.Initialize(new AndroidMediaStoreAudioStorage(this));
+
         base.OnCreate(savedInstanceState);
         PlatformApplicationService.ExitApplication = FinishAndRemoveTask;
 
-        var musicDir = global::Android.OS.Environment.GetExternalStoragePublicDirectory(global::Android.OS.Environment.DirectoryMusic);
-        if (musicDir is not null)
-        {
-            PlatformStoragePaths.ExternalDownloadsDirectory =
-                Path.Combine(musicDir.AbsolutePath, "VibeMusic");
-            Directory.CreateDirectory(PlatformStoragePaths.ExternalDownloadsDirectory);
-        }
-
         EnsureNotificationPermission();
+        EnsureLegacyStoragePermission();
         AndroidMediaControlManager.Instance.Initialize(this);
         AndroidFloatingLyricsController.Instance.Initialize(this);
         FloatingLyricsService.Instance.RestorePersistedState();
@@ -99,4 +95,18 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
             RequestPermissions(new[] { Manifest.Permission.PostNotifications }, NotificationPermissionRequestCode);
         }
     }
+
+    private void EnsureLegacyStoragePermission()
+    {
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+        {
+            return;
+        }
+
+        if (CheckSelfPermission(Manifest.Permission.WriteExternalStorage) != Permission.Granted)
+        {
+            RequestPermissions(new[] { Manifest.Permission.WriteExternalStorage }, StoragePermissionRequestCode);
+        }
+    }
+
 }

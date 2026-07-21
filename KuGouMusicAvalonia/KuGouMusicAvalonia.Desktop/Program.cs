@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using Avalonia;
+using KuGouMusicAvalonia.Services;
 using LuminaUI.Diagnostics;
 
 namespace KuGouMusicAvalonia.Desktop;
@@ -96,12 +97,15 @@ sealed class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        PlatformAudioStorage.Initialize(new FileSystemAudioStorage(() => MusicService.DownloadDirectory));
+        return AppBuilder.Configure<App>()
             .UsePlatformDetect()
 #if DEBUG
             .UseLuminaUIDiagnostics()
 #endif
             .WithInterFont()
             .LogToTrace();
+    }
 
 }
