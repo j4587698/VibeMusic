@@ -135,7 +135,7 @@ public partial class MainView : UserControl
 
         _lastUnhandledAndroidBackRequestedAt = now;
         e.Handled = true;
-        AppShell.ShowToast("再按一次返回退出", AndroidBackExitWindow);
+        AppShell.ShowToast("再按一次关闭界面", AndroidBackExitWindow);
     }
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)

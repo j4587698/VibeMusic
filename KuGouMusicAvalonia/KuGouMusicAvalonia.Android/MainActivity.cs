@@ -62,7 +62,6 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
             _isBound = false;
         }
         AndroidFloatingLyricsController.Instance.Dispose();
-        AndroidMediaControlManager.Instance.Dispose();
         base.OnDestroy();
     }
 
