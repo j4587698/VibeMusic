@@ -636,7 +636,9 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 
                     if (playbackSource.IsLocalFile)
                     {
-                        var handle = await Task.Run(() => new CachedStreamHandle(File.OpenRead(playbackSource.Location)), cancellationToken).ConfigureAwait(false);
+                        var handle = await Task.Run(
+                            () => new CachedStreamHandle(PlatformAudioStorage.OpenRead(playbackSource.Location)),
+                            cancellationToken).ConfigureAwait(false);
                         await LoadPlayerHandleAsync(player, handle, requestId, cancellationToken).ConfigureAwait(false);
                     }
                     else
@@ -760,7 +762,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
                 return;
             }
 
-            var path = await AudioCacheService.Instance
+            await AudioCacheService.Instance
                 .DownloadSourceAsync(
                     song,
                     source.Location,
@@ -772,7 +774,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
                         DownloadTotalBytes = progress.TotalBytes.HasValue ? Math.Max(progress.TotalBytes.Value, 0) : 0;
                     }))
                 .ConfigureAwait(false);
-            StatusMessage = $"已下载《{title}》到 {path}";
+            StatusMessage = $"已下载《{title}》到 {PlatformAudioStorage.DisplayDirectory}";
         }
         catch (Exception ex)
         {
@@ -1113,12 +1115,19 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             AudioCallbackHandlerBase cryptoHandle;
             if (!string.IsNullOrWhiteSpace(cachePath))
             {
-                var diskHandle = new DiskCachedStreamHandle(cryptoStream, totalSize: playbackSource.FileSize, cacheFilePath: cachePath, deleteCacheOnDispose: true, enableSeek: true, leaveOpen: false);
+                var diskHandle = new DiskCachedStreamHandle(
+                    cryptoStream,
+                    totalSize: playbackSource.FileSize,
+                    cacheFilePath: cachePath,
+                    commitCacheOnComplete: true,
+                    deleteCacheOnDispose: false,
+                    enableSeek: true,
+                    leaveOpen: false);
                 diskHandle.DownloadCompleted += (success, error) =>
                 {
                     if (success)
                     {
-                        AudioCacheService.Instance.MarkProgressiveCacheCompleted(song, cachePath, playbackSource.Quality, playbackSource.Location);
+                        _ = AudioCacheService.Instance.MarkProgressiveCacheCompletedAsync(song, cachePath, playbackSource.Quality, playbackSource.Location);
                     }
                     else
                     {
@@ -1198,7 +1207,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         {
             if (args.State == ProgressiveDownloadState.Completed && !string.IsNullOrWhiteSpace(args.FinalFilePath))
             {
-                AudioCacheService.Instance.MarkProgressiveCacheCompleted(song, args.FinalFilePath, playbackSource.Quality, playbackSource.Location);
+                _ = AudioCacheService.Instance.MarkProgressiveCacheCompletedAsync(song, args.FinalFilePath, playbackSource.Quality, playbackSource.Location);
                 return;
             }
 
@@ -1425,18 +1434,6 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 
     private static void HandleLocalPlaybackFailure(KugouSong song, string localPath, Exception ex)
     {
-        try
-        {
-            if (File.Exists(localPath))
-            {
-                File.Delete(localPath);
-            }
-        }
-        catch
-        {
-            // Ignore cleanup failure and continue with remote fallback.
-        }
-
         LocalMusicStore.Instance.MarkDownloadFailed(song, localPath, null, localPath, ex);
     }
 

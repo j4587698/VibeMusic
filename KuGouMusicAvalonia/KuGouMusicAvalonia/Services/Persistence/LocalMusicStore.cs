@@ -489,7 +489,7 @@ internal sealed class LocalMusicStore : IDisposable
         var candidates = FindDownloadCandidates(song);
         foreach (var candidate in candidates)
         {
-            if (File.Exists(candidate.FilePath))
+            if (PlatformAudioStorage.Exists(candidate.FilePath))
             {
                 MarkDownloadVerified(candidate);
                 return candidate.FilePath;
@@ -499,16 +499,6 @@ internal sealed class LocalMusicStore : IDisposable
         }
 
         return null;
-    }
-
-    public void SaveDiscoveredDownload(KugouSong song, string filePath)
-    {
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            return;
-        }
-
-        SaveDownloadRecord(song, filePath, string.Empty, string.Empty, CompletedDownloadStatus, null);
     }
 
     public void MarkDownloadStarted(KugouSong song, string filePath, string? quality, string sourceUrl)
@@ -935,7 +925,7 @@ internal sealed class LocalMusicStore : IDisposable
         var normalizedQuality = string.IsNullOrWhiteSpace(quality) ? "default" : quality.Trim().ToLowerInvariant();
         var id = BuildDownloadId(songKey, normalizedQuality);
         var now = DateTime.UtcNow;
-        var fileInfo = TryGetFileInfo(filePath);
+        var fileSize = PlatformAudioStorage.GetLength(filePath);
 
         lock (_gate)
         {
@@ -947,7 +937,7 @@ internal sealed class LocalMusicStore : IDisposable
                 Hash = FirstNonEmpty(song.Hash, GetKnownHashes(song).FirstOrDefault()),
                 Quality = normalizedQuality,
                 FilePath = filePath,
-                FileSize = fileInfo?.Length ?? existing?.FileSize ?? 0,
+                FileSize = fileSize ?? existing?.FileSize ?? 0,
                 Status = status,
                 SourceUrl = sourceUrl,
                 ErrorMessage = errorMessage ?? string.Empty,
@@ -1071,18 +1061,6 @@ internal sealed class LocalMusicStore : IDisposable
     private static string BuildDownloadId(string songKey, string quality)
     {
         return $"{songKey}|{quality}";
-    }
-
-    private static FileInfo? TryGetFileInfo(string filePath)
-    {
-        try
-        {
-            return File.Exists(filePath) ? new FileInfo(filePath) : null;
-        }
-        catch
-        {
-            return null;
-        }
     }
 
     private static string? EmptyToNull(string value)
