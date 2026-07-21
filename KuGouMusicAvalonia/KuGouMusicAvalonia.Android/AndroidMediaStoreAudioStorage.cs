@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using AndroidUri = Android.Net.Uri;
+using GlobalAndroid = global::Android;
 
 namespace KuGouMusicAvalonia.Android;
 
@@ -65,7 +66,7 @@ internal sealed class AndroidMediaStoreAudioStorage : IPlatformAudioStorage
             : null;
     }
 
-    public Stream OpenRead(string location)
+    public System.IO.Stream OpenRead(string location)
     {
         if (Build.VERSION.SdkInt < BuildVersionCodes.Q)
         {
@@ -111,7 +112,7 @@ internal sealed class AndroidMediaStoreAudioStorage : IPlatformAudioStorage
     {
         var collection = MediaStore.Audio.Media.ExternalContentUri
             ?? throw new InvalidOperationException("无法访问 Android 公共音乐目录。");
-        var relativePath = $"{global::Android.OS.Environment.DirectoryMusic}/{AlbumDirectoryName}/";
+        var relativePath = $"{GlobalAndroid.OS.Environment.DirectoryMusic}/{AlbumDirectoryName}/";
         var uniqueDisplayName = GetUniqueDisplayName(collection, relativePath, displayName);
 
         using var values = new ContentValues();
