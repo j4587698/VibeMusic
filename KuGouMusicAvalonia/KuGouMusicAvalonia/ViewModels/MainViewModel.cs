@@ -1,7 +1,11 @@
+using Avalonia;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KuGou.Lite;
 using KuGouMusicAvalonia.Services;
+using LuminaUI.Controls;
+using System;
 using System.Threading.Tasks;
 
 namespace KuGouMusicAvalonia.ViewModels;
@@ -37,6 +41,8 @@ public partial class MainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
     [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
     [NotifyPropertyChangedFor(nameof(PageBottomInset))]
+    [NotifyPropertyChangedFor(nameof(PageContentPaddingValue))]
+    [NotifyPropertyChangedFor(nameof(HeaderedPageContentPaddingValue))]
     private string _activeNavigationKey = "NavDiscover";
 
     [ObservableProperty]
@@ -46,6 +52,9 @@ public partial class MainViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(ShowShellChrome))]
     [NotifyPropertyChangedFor(nameof(ShowShellHeader))]
     [NotifyPropertyChangedFor(nameof(PageBottomInset))]
+    [NotifyPropertyChangedFor(nameof(PageContentPaddingValue))]
+    [NotifyPropertyChangedFor(nameof(HeaderedPageContentPaddingValue))]
+    [NotifyPropertyChangedFor(nameof(FooterPlacementValue))]
     private bool _isCompactLayout;
 
     [ObservableProperty]
@@ -89,6 +98,17 @@ public partial class MainViewModel : ViewModelBase
     public bool ShowShellChrome => IsDesktopLayout || ShowCompactChrome;
     public bool ShowShellHeader => ShowCompactChrome && IsInnerPageActive;
     public double PageBottomInset => ShowCompactMiniPlayer ? CompactMiniPlayerPageBottomInset : 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PlayerBarLeftWidth))]
+    private double _renderScaling = 1.0;
+
+    public GridLength PlayerBarLeftWidth => new(350.0 / RenderScaling);
+    public Thickness PageContentPaddingValue => ComputePageContentPadding(isHeadered: false);
+    public Thickness HeaderedPageContentPaddingValue => ComputePageContentPadding(isHeadered: true);
+    public LuminaShellFooterPlacement FooterPlacementValue => IsDesktopLayout
+        ? LuminaShellFooterPlacement.ContentArea
+        : LuminaShellFooterPlacement.Normal;
     public NowPlayingViewModel NowPlayingPage => _nowPlayingViewModel;
     public LyricsViewModel LyricsPage => _lyricsViewModel;
 
@@ -157,6 +177,18 @@ public partial class MainViewModel : ViewModelBase
             "NavCloud" => RefreshCloudPage(),
             _ => null
         };
+    }
+
+    private Thickness ComputePageContentPadding(bool isHeadered)
+    {
+        if (ActiveNavigationKey is "NavNowPlaying" or "NavLyrics")
+            return default;
+
+        var top = IsCompactLayout
+            ? (isHeadered ? 0 : 8)
+            : (isHeadered ? 4 : 20);
+
+        return new Thickness(0, top, 0, 0);
     }
 
     private object RefreshCloudPage()

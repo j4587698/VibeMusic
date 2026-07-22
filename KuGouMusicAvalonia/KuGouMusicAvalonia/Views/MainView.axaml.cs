@@ -39,13 +39,11 @@ public partial class MainView : UserControl
     private bool _routesRegistered;
     private bool _syncingActiveNavigationKey;
     private bool _isStackOperationRunning;
-    private bool _layoutRestructured;
     private DateTimeOffset _lastUnhandledAndroidBackRequestedAt;
 
     public MainView()
     {
         InitializeComponent();
-        Loaded += (_, _) => RestructureLayout();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -442,43 +440,11 @@ public partial class MainView : UserControl
             var isLandscape = height > 0 && width > height;
 
             viewModel.IsCompactLayout = width > 0 && width < 680 && !isLandscape;
+            viewModel.RenderScaling = TopLevel.GetTopLevel(this)?.RenderScaling ?? 1.0;
             if (width > 0)
             {
                 viewModel.QueuePopupWidth = Math.Clamp(width - 32, 300, 420);
             }
         }
-    }
-
-    private void RestructureLayout()
-    {
-        if (_layoutRestructured) return;
-
-        if (!TryFindVisualChild(AppShell, "PART_Footer", out Border? footer)) return;
-        if (!TryFindVisualChild(AppShell, "PART_SplitView", out SplitView? splitView)) return;
-
-        if (footer.Parent is not Panel parentPanel) return;
-        if (splitView.Content is not Border contentBorder) return;
-        if (contentBorder.Child is not Grid contentGrid) return;
-
-        parentPanel.Children.Remove(footer);
-        contentGrid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-        var footerRow = contentGrid.RowDefinitions.Count - 1;
-        Grid.SetRow(footer, footerRow);
-        contentGrid.Children.Add(footer);
-        _layoutRestructured = true;
-    }
-
-    private static bool TryFindVisualChild<T>(Visual root, string name, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T? result) where T : class
-    {
-        result = null;
-        foreach (var visual in root.GetVisualDescendants())
-        {
-            if (visual is T typed && visual.Name == name)
-            {
-                result = typed;
-                return true;
-            }
-        }
-        return false;
     }
 }
