@@ -3,7 +3,9 @@ using System.IO;
 using System.Threading;
 using Avalonia;
 using KuGouMusicAvalonia.Services;
+#if DEBUG
 using LuminaUI.Diagnostics;
+#endif
 
 namespace KuGouMusicAvalonia.Desktop;
 
