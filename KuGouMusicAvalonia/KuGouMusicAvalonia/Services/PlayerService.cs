@@ -27,6 +27,15 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 {
     public static PlayerService Instance { get; } = new();
 
+    private static readonly AudioPlayerOptions MusicPlaybackOptions = new()
+    {
+        SampleRate = 0,
+        LatencyMode = AudioLatencyMode.Playback,
+        Usage = AudioPlaybackUsage.Media,
+        ContentType = AudioContentType.Music,
+        ShareMode = AudioShareMode.Shared
+    };
+
     private readonly DispatcherTimer _progressTimer;
     private readonly object _playerLock = new();
     private AudioPlayer? _audioPlayer;
@@ -630,7 +639,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
                 try
                 {
                     StatusMessage = playbackSource.IsLocalFile ? "正在打开已下载歌曲" : "正在打开音频流";
-                    player = new AudioPlayer();
+                    player = new AudioPlayer(MusicPlaybackOptions);
                     player.Volume = ToPlayerVolume(Volume);
                     player.PlayCompleted = () => Dispatcher.UIThread.Post(OnPlaybackCompleted);
 
