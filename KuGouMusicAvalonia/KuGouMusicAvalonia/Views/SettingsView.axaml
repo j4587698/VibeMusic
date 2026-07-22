@@ -412,8 +412,8 @@
         <StackPanel Spacing="12">
           <TextBlock Text="数据管理" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
           <TextBlock Text="管理应用本地数据文件" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
-          <WrapPanel HorizontalAlignment="Left" IsVisible="{Binding IsDesktopSettingVisible}">
-            <Button Classes="Ghost" Command="{Binding OpenDataDirectoryCommand}" Height="42" CornerRadius="21" Padding="16,0" Margin="0,0,10,0" Background="{DynamicResource MusicSurfaceHighBrush}">
+          <WrapPanel HorizontalAlignment="Left">
+            <Button Classes="Ghost" Command="{Binding OpenDataDirectoryCommand}" Height="42" CornerRadius="21" Padding="16,0" Margin="0,0,10,0" Background="{DynamicResource MusicSurfaceHighBrush}" IsVisible="{Binding IsDesktopSettingVisible}">
               <StackPanel Orientation="Horizontal" Spacing="8">
                 <icons:MaterialIcon Kind="FolderOutline" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
                 <TextBlock Text="打开数据目录" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
