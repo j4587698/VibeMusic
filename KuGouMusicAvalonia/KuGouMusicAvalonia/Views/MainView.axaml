@@ -49,14 +49,15 @@
                         IsShellHeaderVisible="{Binding ShowShellHeader}"
                         IsMenuAutoResponsive="{Binding IsDesktopLayout}"
                         IsCompactMenuEnabled="{Binding IsDesktopLayout}"
+                        FooterPlacement="{Binding FooterPlacementValue}"
                         CanCompactMenu="True"
                         AutoNavigate="False"
                         CachePages="False"
                         CloseMenuOnNavigate="True"
                         OpenPaneLength="204"
                         CompactPaneLength="48"
-                        PageContentPadding="{Binding ActiveNavigationKey, Converter={StaticResource ShellPageContentPaddingConverter}}"
-                        HeaderedPageContentPadding="{Binding ActiveNavigationKey, Converter={StaticResource ShellPageContentPaddingConverter}, ConverterParameter=Headered}"
+                        PageContentPadding="{Binding PageContentPaddingValue}"
+                        HeaderedPageContentPadding="{Binding HeaderedPageContentPaddingValue}"
                         PaneBackground="{DynamicResource MusicBackgroundBrush}"
                         DefaultPageTitle="VIBE"
                         IsWindowGlassEnabled="{Binding $parent[lumina:LuminaWindow].IsWindowGlassEnabled, FallbackValue=False}">
@@ -100,7 +101,11 @@
     <Grid IsVisible="{Binding ShowMiniPlayer}"
           IsHitTestVisible="{Binding IsDesktopLayout}">
           <Border IsVisible="{Binding IsDesktopLayout}" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="0,1,0,0" Padding="8,6,10,6">
-            <Grid ColumnDefinitions="220,*" ColumnSpacing="12">
+            <Grid ColumnSpacing="12">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="{Binding PlayerBarLeftWidth}" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
               <Border Background="Transparent" Padding="0">
                 <Button Classes="Ghost" Command="{Binding OpenNowPlayingCommand}" Background="Transparent" Padding="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Cursor="Hand" ToolTip.Tip="正在播放">
                   <Grid ColumnDefinitions="46,*" ColumnSpacing="8">
@@ -155,11 +160,11 @@
     <icons:MaterialIcon Kind="SkipPrevious" Width="23" Height="23" Foreground="{DynamicResource MusicTextBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
-                    <Button Classes="Primary Icon" Width="42" Height="42" CornerRadius="21" Command="{Binding TogglePlayCommand}" ToolTip.Tip="{Binding Player.PlaybackStateText}" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}" lumina:LuminaButton.IconSize="25">
+                    <Button Classes="Primary Icon" Width="36" Height="36" CornerRadius="18" Command="{Binding TogglePlayCommand}" ToolTip.Tip="{Binding Player.PlaybackStateText}" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" lumina:LuminaButton.IsLoading="{Binding Player.IsLoading}" lumina:LuminaButton.IconSize="23">
   <lumina:LuminaButton.Icon>
     <Grid>
-                          <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="25" Height="25" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
-                          <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="25" Height="25" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                          <icons:MaterialIcon IsVisible="{Binding !Player.IsPlaying}" Kind="Play" Width="23" Height="23" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                          <icons:MaterialIcon IsVisible="{Binding Player.IsPlaying}" Kind="Pause" Width="23" Height="23" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
                         </Grid>
   </lumina:LuminaButton.Icon>
 </Button>
