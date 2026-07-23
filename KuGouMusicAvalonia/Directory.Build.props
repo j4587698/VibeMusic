@@ -1,12 +1,12 @@
 <Project>
   <PropertyGroup>
     <!-- Manually maintain unified app version here for all platforms. -->
-    <Version>1.1.4</Version>
-    <AssemblyVersion>1.1.4.0</AssemblyVersion>
-    <FileVersion>1.1.4.0</FileVersion>
-    <InformationalVersion>1.1.4</InformationalVersion>
+    <Version>1.1.5</Version>
+    <AssemblyVersion>1.1.5.0</AssemblyVersion>
+    <FileVersion>1.1.5.0</FileVersion>
+    <InformationalVersion>1.1.5</InformationalVersion>
 
     <!-- Android version code must be an integer and should increase monotonically. -->
-    <AppVersionCode>8</AppVersionCode>
+    <AppVersionCode>9</AppVersionCode>
   </PropertyGroup>
 </Project>
