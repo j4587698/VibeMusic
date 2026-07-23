@@ -4,7 +4,7 @@
     <TargetFramework>net10.0-android</TargetFramework>
     <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
-    <ApplicationId>com.CompanyName.KuGouMusicAvalonia</ApplicationId>
+    <ApplicationId>com.jvxiang.VibeMusic</ApplicationId>
     <ApplicationVersion>$(AppVersionCode)</ApplicationVersion>
     <ApplicationDisplayVersion>$(Version)</ApplicationDisplayVersion>
     <AndroidPackageFormat>apk</AndroidPackageFormat>

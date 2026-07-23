@@ -185,7 +185,7 @@ public partial class MainView : UserControl
 
         if (_viewModel != null)
         {
-            host.Bind(PageContentHost.BottomInsetProperty, new Binding(nameof(MainViewModel.PageBottomInset))
+            host.Bind(PageContentHost.BottomInsetProperty, new ReflectionBinding(nameof(MainViewModel.PageBottomInset))
             {
                 Source = _viewModel
             });
