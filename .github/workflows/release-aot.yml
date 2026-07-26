@@ -459,15 +459,36 @@ jobs:
           }
 
           $ecdsa = [Security.Cryptography.ECDsa]::Create()
-          try {
-            $ecdsa.ImportPkcs8PrivateKey($keyBytes, [ref]$null)
-          } catch {
+          $imported = $false
+
+          # 私钥有两种常见 DER 编码，取决于生成方式：
+          #   PKCS#8 PrivateKeyInfo (RFC 5208)  —— .NET ExportPkcs8PrivateKey、部分 openssl genpkey
+          #   SEC1 ECPrivateKey     (RFC 5915)  —— openssl ecparam -genkey，以及某些 openssl genpkey 版本
+          # 两种都接受，避免因为生成命令的细微差异卡住发布。
+          foreach ($format in 'Pkcs8', 'Sec1') {
+            try {
+              if ($format -eq 'Pkcs8') {
+                $ecdsa.ImportPkcs8PrivateKey($keyBytes, [ref]$null)
+              } else {
+                $ecdsa.ImportECPrivateKey($keyBytes, [ref]$null)
+              }
+              $imported = $true
+              Write-Host "private key format: $format"
+              break
+            } catch {
+              # 导入失败后对象状态不保证干净，换格式前重建。
+              $ecdsa.Dispose()
+              $ecdsa = [Security.Cryptography.ECDsa]::Create()
+            }
+          }
+
+          if (-not $imported) {
             # 只打印结构线索，绝不打印密钥内容。
             $hint = switch ($keyBytes.Length) {
               91      { ' 91 字节是 SubjectPublicKeyInfo 的长度 —— 你多半把 signing.pub.der 的公钥贴成了私钥。' }
               default { '' }
             }
-            Write-Error "UPDATE_SIGNING_KEY 不是合法的 PKCS#8 私钥（解码后 $($keyBytes.Length) 字节，P-256 私钥应为 121 字节）。$hint"
+            Write-Error "UPDATE_SIGNING_KEY 既不是 PKCS#8 也不是 SEC1 编码的 EC 私钥（解码后 $($keyBytes.Length) 字节）。$hint"
             exit 1
           }
 
