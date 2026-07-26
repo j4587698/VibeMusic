@@ -41,15 +41,4 @@
     </ItemGroup>
     <Copy SourceFiles="@(UpdaterFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
-
-  <!-- 本地调试：SimpleAudioPlayer 走项目引用，但 native 仍由 NuGet 包提供。
-       这里用本地新编译的 native 覆盖输出，确保运行的是最新 native。 -->
-  <PropertyGroup>
-    <LocalNativeAudioPlayerDll>E:\SimpleAudioPlayer\build\native-win64\bin\libaudio_player.dll</LocalNativeAudioPlayerDll>
-  </PropertyGroup>
-  <Target Name="OverrideLocalNativeAudioPlayer" AfterTargets="Build" Condition="Exists('$(LocalNativeAudioPlayerDll)')">
-    <Copy SourceFiles="$(LocalNativeAudioPlayerDll)" DestinationFolder="$(OutDir)runtimes\win-x64\native" />
-    <Copy SourceFiles="$(LocalNativeAudioPlayerDll)" DestinationFolder="$(OutDir)" />
-    <Message Importance="high" Text="[native] 已用本地编译的 libaudio_player.dll 覆盖输出" />
-  </Target>
 </Project>
