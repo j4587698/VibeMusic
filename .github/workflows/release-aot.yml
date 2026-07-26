@@ -364,6 +364,14 @@ jobs:
           $mirrorBase = $env:MIRROR_BASE_URL
           if ($mirrorBase) { $mirrorBase = $mirrorBase.TrimEnd('/') }
 
+          # 镜像地址来自仓库 Variable（不是 Secret）。为空时 manifest 只会写 GitHub 直链，
+          # 国内客户端会退化成直连 GitHub —— 这通常是配置漏掉了，所以显式警告出来。
+          if ($mirrorBase) {
+            Write-Host "mirror base url: $mirrorBase"
+          } else {
+            Write-Warning "vars.UPDATE_MIRROR_BASE_URL 为空，manifest 只会包含 GitHub 直链，国内用户可能无法下载。请在 Settings > Secrets and variables > Actions > Variables 添加该变量。"
+          }
+
           # 每个 RID/ABI 的落地形态：kind 决定客户端怎么装，executable 决定替换后重启谁。
           $profiles = @{
             'win-x64'     = @{ kind = 'zip';     exe = 'VibeMusic.exe' }

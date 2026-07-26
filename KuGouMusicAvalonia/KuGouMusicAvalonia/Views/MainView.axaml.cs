@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
-using Avalonia.Data;
 using Avalonia.VisualTree;
 using KuGou.Lite;
 using KuGouMusicAvalonia.Controls;
@@ -34,6 +33,8 @@ public partial class MainView : UserControl
         "NavHistory",
         "NavCloud"
     };
+
+    private readonly List<PageContentHost> _pageHosts = new();
 
     private MainViewModel? _viewModel;
     private bool _routesRegistered;
@@ -66,6 +67,7 @@ public partial class MainView : UserControl
         }
 
         _routesRegistered = false;
+        _pageHosts.Clear();
         AppShell.ClearRoutes();
         _viewModel = DataContext as MainViewModel;
         if (_viewModel != null)
@@ -151,12 +153,31 @@ public partial class MainView : UserControl
             }
         }
 
+        if (e.PropertyName == nameof(MainViewModel.PageBottomInset))
+        {
+            UpdatePageBottomInset();
+        }
+
         if (e.PropertyName == nameof(MainViewModel.ActiveNavigationKey) &&
             !_syncingActiveNavigationKey &&
             _viewModel != null &&
             RootNavigationKeys.Contains(_viewModel.ActiveNavigationKey))
         {
             NavigateRoot(_viewModel.ActiveNavigationKey);
+        }
+    }
+
+    private void UpdatePageBottomInset()
+    {
+        if (_viewModel == null)
+        {
+            return;
+        }
+
+        double inset = _viewModel.PageBottomInset;
+        foreach (var host in _pageHosts)
+        {
+            host.BottomInset = inset;
         }
     }
 
@@ -183,12 +204,12 @@ public partial class MainView : UserControl
             Content = viewModel
         };
 
+        // 这里刻意不使用 ReflectionBinding：它带有 RequiresUnreferencedCode/RequiresDynamicCode，
+        // 在 NativeAOT 发布时会产生 IL2026/IL3050 且行为不可靠。改为直接订阅 INotifyPropertyChanged。
+        _pageHosts.Add(host);
         if (_viewModel != null)
         {
-            host.Bind(PageContentHost.BottomInsetProperty, new ReflectionBinding(nameof(MainViewModel.PageBottomInset))
-            {
-                Source = _viewModel
-            });
+            host.BottomInset = _viewModel.PageBottomInset;
         }
 
         return host;
