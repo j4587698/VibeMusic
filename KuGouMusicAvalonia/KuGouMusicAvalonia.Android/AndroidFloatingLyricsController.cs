@@ -164,6 +164,14 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             return;
         }
 
+        // 添加后视图才有实际尺寸，此时再把恢复的位置纠正到屏幕内（处理横竖屏、分辨率变化）。
+        _rootView?.Post(() =>
+        {
+            ClampCurrentPosition();
+            UpdateOverlayLayout();
+            PersistOverlayPosition();
+        });
+
         Subscribe();
         _isOpen = true;
         StateChanged?.Invoke(this, EventArgs.Empty);
@@ -197,6 +205,7 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
     private void CloseOnMainThread()
     {
         Unsubscribe();
+        PersistOverlayPosition();
 
         if (_rootView is not null && _windowManager is not null)
         {
@@ -305,6 +314,14 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
             Gravity = GravityFlags.Top | GravityFlags.CenterHorizontal,
             Y = Dp(92)
         };
+
+        if (MusicService.FloatingLyricsOverlayX is { } savedX && MusicService.FloatingLyricsOverlayY is { } savedY)
+        {
+            layoutParams.Gravity = GravityFlags.Top | GravityFlags.Left;
+            layoutParams.X = savedX;
+            layoutParams.Y = savedY;
+        }
+
         return layoutParams;
     }
 
@@ -531,6 +548,17 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
         _layoutParams.Y = position.Y;
     }
 
+    private void PersistOverlayPosition()
+    {
+        if (_layoutParams is null || (_layoutParams.Gravity & GravityFlags.Left) != GravityFlags.Left)
+        {
+            return;
+        }
+
+        MusicService.FloatingLyricsOverlayX = _layoutParams.X;
+        MusicService.FloatingLyricsOverlayY = _layoutParams.Y;
+    }
+
     private (int X, int Y) ClampOverlayPosition(int x, int y)
     {
         var displayMetrics = _context?.Resources?.DisplayMetrics ?? global::Android.App.Application.Context.Resources?.DisplayMetrics;
@@ -593,6 +621,10 @@ internal sealed class AndroidFloatingLyricsController : IFloatingLyricsControlle
                     var x = _startX + (int)Math.Round(e.RawX - _downRawX);
                     var y = _startY + (int)Math.Round(e.RawY - _downRawY);
                     owner.MoveOverlay(x, y);
+                    return true;
+                case MotionEventActions.Up:
+                case MotionEventActions.Cancel:
+                    owner.PersistOverlayPosition();
                     return true;
                 default:
                     return true;
