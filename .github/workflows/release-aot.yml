@@ -448,8 +448,45 @@ jobs:
             exit 1
           }
 
+          # 容忍 PEM 头尾与复制时混入的换行/空格：控制台复制长 base64 极易带上折行。
+          $normalized = ($env:UPDATE_SIGNING_KEY -replace '-----[^-]+-----', '') -replace '\s', ''
+
+          try {
+            $keyBytes = [Convert]::FromBase64String($normalized)
+          } catch {
+            Write-Error "UPDATE_SIGNING_KEY 不是合法的 base64（规范化后长度 $($normalized.Length)）。"
+            exit 1
+          }
+
           $ecdsa = [Security.Cryptography.ECDsa]::Create()
-          $ecdsa.ImportPkcs8PrivateKey([Convert]::FromBase64String($env:UPDATE_SIGNING_KEY.Trim()), [ref]$null)
+          try {
+            $ecdsa.ImportPkcs8PrivateKey($keyBytes, [ref]$null)
+          } catch {
+            # 只打印结构线索，绝不打印密钥内容。
+            $hint = switch ($keyBytes.Length) {
+              91      { ' 91 字节是 SubjectPublicKeyInfo 的长度 —— 你多半把 signing.pub.der 的公钥贴成了私钥。' }
+              default { '' }
+            }
+            Write-Error "UPDATE_SIGNING_KEY 不是合法的 PKCS#8 私钥（解码后 $($keyBytes.Length) 字节，P-256 私钥应为 121 字节）。$hint"
+            exit 1
+          }
+
+          # 私钥必须与客户端内置的公钥配对，否则发出去的版本会被所有客户端拒绝，
+          # 而且要等用户报障才会发现。这里提前拦住。
+          $derivedPublicKey = [Convert]::ToBase64String($ecdsa.ExportSubjectPublicKeyInfo())
+          $signingSource = Get-Content ./KuGouMusicAvalonia/KuGouMusicAvalonia/Services/Update/UpdateSigning.cs -Raw
+          $embedded = [regex]::Match($signingSource, 'PublicKeyBase64\s*=\s*(?:\r?\n\s*)?"([^"]*)"')
+          if (-not $embedded.Success) {
+            Write-Error "无法从 UpdateSigning.cs 解析 PublicKeyBase64。"
+            exit 1
+          }
+          if ($embedded.Groups[1].Value -ne $derivedPublicKey) {
+            Write-Host "UpdateSigning.cs : $($embedded.Groups[1].Value)"
+            Write-Host "由私钥派生       : $derivedPublicKey"
+            Write-Error "签名私钥与客户端内置公钥不匹配，本次发布会被所有客户端拒绝。请确认 UPDATE_SIGNING_KEY 与 UpdateSigning.cs 里的公钥出自同一次密钥生成。"
+            exit 1
+          }
+
           $signature = $ecdsa.SignData($bytes, [Security.Cryptography.HashAlgorithmName]::SHA256)
           $ecdsa.Dispose()
 
