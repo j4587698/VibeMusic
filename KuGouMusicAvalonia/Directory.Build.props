@@ -1,12 +1,19 @@
 <Project>
   <PropertyGroup>
     <!-- Manually maintain unified app version here for all platforms. -->
-    <Version>1.2.0</Version>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
-    <InformationalVersion>1.2.0</InformationalVersion>
+    <Version>1.2.1</Version>
+
+    <!--
+      必须由 Version 派生，不能各写各的。
+      客户端 UpdatePlatform.CurrentVersion 读的是 AssemblyVersion；
+      如果它没跟着 Version 一起改，用户装了新版仍会被判定为旧版本，陷入反复提示更新的死循环。
+      注意：AssemblyVersion 只接受纯数字，Version 不能带 -beta 之类的后缀。
+    -->
+    <AssemblyVersion>$(Version).0</AssemblyVersion>
+    <FileVersion>$(Version).0</FileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
 
     <!-- Android version code must be an integer and should increase monotonically. -->
-    <AppVersionCode>10</AppVersionCode>
+    <AppVersionCode>11</AppVersionCode>
   </PropertyGroup>
 </Project>

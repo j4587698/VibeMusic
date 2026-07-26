@@ -100,6 +100,34 @@ jobs:
             -p:InformationalVersion=$version `
             -o $outDir
 
+      - name: Publish updater (${{ matrix.rid }})
+        shell: pwsh
+        run: |
+          $version = "${{ steps.ver.outputs.version }}"
+          $rid = "${{ matrix.rid }}"
+
+          # updater 必须和主程序一样 self-contained + AOT：
+          # 用户机器上只有解压出来的这个目录，没有 .NET 运行时。
+          dotnet publish ./KuGouMusicAvalonia/KuGouMusicAvalonia.Updater/KuGouMusicAvalonia.Updater.csproj `
+            -c Release `
+            -r $rid `
+            --self-contained true `
+            -p:PublishAot=true `
+            -p:PublishTrimmed=true `
+            -p:DebugType=None `
+            -p:DebugSymbols=false `
+            -p:StripSymbols=true `
+            -p:Version=$version `
+            -o "./artifacts/updater/$rid"
+
+          $exe = if ($rid -like 'win-*') { 'VibeMusic.Updater.exe' } else { 'VibeMusic.Updater' }
+          $src = Join-Path "./artifacts/updater/$rid" $exe
+          if (-not (Test-Path $src)) {
+            Write-Error "Updater executable not found at $src"
+            exit 1
+          }
+          Copy-Item $src -Destination "./artifacts/publish/$rid/$exe" -Force
+
       - name: Remove debug and extra files
         shell: pwsh
         run: |
@@ -107,6 +135,15 @@ jobs:
           $outDir = "./artifacts/publish/$rid"
           Get-ChildItem -Path $outDir -Recurse -File -Include *.pdb,*.dbg,*.xml | Remove-Item -Force -ErrorAction SilentlyContinue
           Get-ChildItem -Path $outDir -Recurse -Directory -Filter *.dSYM | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
+      - name: Ensure executable bits (unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          outDir="./artifacts/publish/${{ matrix.rid }}"
+          chmod +x "$outDir/VibeMusic"
+          chmod +x "$outDir/VibeMusic.Updater"
 
       - name: Create macOS .app bundle
         if: runner.os == 'macOS'
@@ -308,7 +345,120 @@ jobs:
         run: |
           [xml]$props = Get-Content ./KuGouMusicAvalonia/Directory.Build.props
           $version = $props.Project.PropertyGroup.Version
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "release_tag=v$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Generate signed update manifest
+        shell: pwsh
+        env:
+          UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+          MIRROR_BASE_URL: ${{ vars.UPDATE_MIRROR_BASE_URL }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          [xml]$props = Get-Content ./KuGouMusicAvalonia/Directory.Build.props
+          $version = $props.Project.PropertyGroup.Version
+          $versionCode = [long]$props.Project.PropertyGroup.AppVersionCode
+          $tag = "v$version"
+          $ghBase = "https://github.com/${{ github.repository }}/releases/download/$tag"
+          $mirrorBase = $env:MIRROR_BASE_URL
+          if ($mirrorBase) { $mirrorBase = $mirrorBase.TrimEnd('/') }
+
+          # 每个 RID/ABI 的落地形态：kind 决定客户端怎么装，executable 决定替换后重启谁。
+          $profiles = @{
+            'win-x64'     = @{ kind = 'zip';     exe = 'VibeMusic.exe' }
+            'linux-x64'   = @{ kind = 'zip';     exe = 'VibeMusic' }
+            'osx-x64'     = @{ kind = 'app-zip'; exe = 'VibeMusic.app' }
+            'osx-arm64'   = @{ kind = 'app-zip'; exe = 'VibeMusic.app' }
+            'arm64-v8a'   = @{ kind = 'apk';     exe = $null }
+            'armeabi-v7a' = @{ kind = 'apk';     exe = $null }
+          }
+
+          $assets = @()
+          $files = Get-ChildItem -Path ./release-assets -File |
+                   Where-Object { $_.Extension -in '.zip', '.apk' } |
+                   Sort-Object Name
+
+          foreach ($file in $files) {
+            # 文件名格式由 build 阶段固定：vibemusic-<version>-<platform>.<ext>
+            $prefix = "vibemusic-$version-"
+            if (-not $file.BaseName.StartsWith($prefix)) {
+              Write-Error "Unexpected asset name: $($file.Name)"
+              exit 1
+            }
+            $platform = $file.BaseName.Substring($prefix.Length)
+            $layout = $profiles[$platform]
+            if (-not $layout) {
+              Write-Error "No manifest profile for platform '$platform'"
+              exit 1
+            }
+
+            $sha = (Get-FileHash -Path $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+
+            # 国内镜像排在前面，GitHub 作为境外兜底。
+            $urls = @()
+            if ($mirrorBase) { $urls += "$mirrorBase/$tag/$($file.Name)" }
+            $urls += "$ghBase/$($file.Name)"
+
+            $asset = [ordered]@{
+              platform = $platform
+              kind     = $layout.kind
+              fileName = $file.Name
+              urls     = @($urls)
+              size     = $file.Length
+              sha256   = $sha
+            }
+            if ($layout.exe) { $asset['executable'] = $layout.exe }
+
+            $assets += $asset
+            Write-Host "asset: $platform  $($file.Length) bytes  $sha"
+          }
+
+          if ($assets.Count -eq 0) {
+            Write-Error "No release assets found, refusing to publish an empty manifest."
+            exit 1
+          }
+
+          # 发布说明取上一个 tag 到 HEAD 的提交标题。
+          $previousTag = git tag --list 'v*' --sort=-v:refname |
+                         Where-Object { $_ -ne $tag } |
+                         Select-Object -First 1
+          $range = if ($previousTag) { "$previousTag..HEAD" } else { 'HEAD' }
+          $notes = (git log $range --no-merges --pretty=format:'- %s' -n 30) -join "`n"
+          if (-not $notes) { $notes = "- 版本 $version" }
+
+          $manifest = [ordered]@{
+            schema       = 1
+            version      = $version
+            versionCode  = $versionCode
+            publishedAt  = (Get-Date).ToUniversalTime().ToString('o')
+            mandatory    = $false
+            releaseNotes = $notes
+            assets       = @($assets)
+          }
+
+          $json = $manifest | ConvertTo-Json -Depth 8
+          # 显式写 UTF-8 无 BOM：签名的是文件字节，客户端读回的必须一模一样。
+          $bytes = [Text.UTF8Encoding]::new($false).GetBytes($json)
+          [IO.File]::WriteAllBytes("$PWD/release-assets/latest.json", $bytes)
+          Write-Host $json
+
+          if ([string]::IsNullOrWhiteSpace($env:UPDATE_SIGNING_KEY)) {
+            Write-Error "UPDATE_SIGNING_KEY secret is not set; clients would reject an unsigned manifest."
+            exit 1
+          }
+
+          $ecdsa = [Security.Cryptography.ECDsa]::Create()
+          $ecdsa.ImportPkcs8PrivateKey([Convert]::FromBase64String($env:UPDATE_SIGNING_KEY.Trim()), [ref]$null)
+          $signature = $ecdsa.SignData($bytes, [Security.Cryptography.HashAlgorithmName]::SHA256)
+          $ecdsa.Dispose()
+
+          [IO.File]::WriteAllText(
+            "$PWD/release-assets/latest.json.sig",
+            [Convert]::ToBase64String($signature),
+            [Text.UTF8Encoding]::new($false))
+
+          Write-Host "manifest signed ($($signature.Length) bytes)"
 
       - name: Ensure release tag exists
         shell: pwsh
@@ -331,3 +481,36 @@ jobs:
           files: |
             release-assets/*.zip
             release-assets/*.apk
+            release-assets/latest.json
+            release-assets/latest.json.sig
+
+      - name: Sync assets to China mirror
+        if: ${{ vars.UPDATE_MIRROR_BUCKET != '' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.UPDATE_MIRROR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.UPDATE_MIRROR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ vars.UPDATE_MIRROR_REGION || 'auto' }}
+          MIRROR_ENDPOINT: ${{ vars.UPDATE_MIRROR_ENDPOINT }}
+          MIRROR_BUCKET: ${{ vars.UPDATE_MIRROR_BUCKET }}
+          RELEASE_TAG: ${{ steps.ver.outputs.release_tag }}
+        run: |
+          set -euo pipefail
+
+          # R2 / OSS / COS / Kodo 都兼容 S3 协议，靠 endpoint 区分。
+          # 产物按 tag 分目录，可长期缓存；latest.json 必须 no-cache，
+          # 否则 CDN 会让用户在缓存过期前一直查不到新版本。
+          aws s3 cp release-assets/ "s3://$MIRROR_BUCKET/$RELEASE_TAG/" \
+            --endpoint-url "$MIRROR_ENDPOINT" \
+            --recursive \
+            --exclude "*" --include "*.zip" --include "*.apk" \
+            --cache-control "public, max-age=31536000, immutable"
+
+          for f in latest.json latest.json.sig; do
+            aws s3 cp "release-assets/$f" "s3://$MIRROR_BUCKET/$RELEASE_TAG/$f" \
+              --endpoint-url "$MIRROR_ENDPOINT" \
+              --cache-control "no-cache"
+            # 根目录的副本是客户端的固定入口。
+            aws s3 cp "release-assets/$f" "s3://$MIRROR_BUCKET/$f" \
+              --endpoint-url "$MIRROR_ENDPOINT" \
+              --cache-control "no-cache"
+          done

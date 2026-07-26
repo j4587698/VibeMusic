@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using Avalonia;
 using KuGouMusicAvalonia.Services;
+using KuGouMusicAvalonia.Services.Update;
 #if DEBUG
 using LuminaUI.Diagnostics;
 #endif
@@ -101,6 +102,7 @@ sealed class Program
     public static AppBuilder BuildAvaloniaApp()
     {
         PlatformAudioStorage.Initialize(new FileSystemAudioStorage(() => MusicService.DownloadDirectory));
+        PlatformUpdateInstaller.Initialize(new DesktopUpdateInstaller());
         return AppBuilder.Configure<App>()
             .UsePlatformDetect()
 #if DEBUG

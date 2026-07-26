@@ -6,6 +6,9 @@ using Avalonia;
 using Avalonia.Android;
 using Android.Content;
 using KuGouMusicAvalonia.Services;
+using KuGouMusicAvalonia.Services.Update;
+using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("KuGouMusicAvalonia.Android")]
@@ -28,6 +31,7 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
     {
         PlatformStoragePaths.ExternalDownloadsDirectory = "Music/VibeMusic";
         PlatformAudioStorage.Initialize(new AndroidMediaStoreAudioStorage(this));
+        InitializeUpdateSupport();
 
         base.OnCreate(savedInstanceState);
         PlatformApplicationService.ExitApplication = FinishAndRemoveTask;
@@ -109,4 +113,39 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
         }
     }
 
+    /// <summary>
+    /// 注入 ABI 与 versionCode 供更新清单匹配，并注册 Android 安装器。
+    /// ABI 顺序决定了下载哪个变体：64 位设备优先 arm64-v8a，失败时回退 armeabi-v7a。
+    /// </summary>
+    private void InitializeUpdateSupport()
+    {
+        var abis = Build.SupportedAbis?.Where(abi => !string.IsNullOrWhiteSpace(abi)).ToArray();
+        if (abis is not { Length: > 0 })
+        {
+            abis = [Build.CpuAbi ?? "armeabi-v7a"];
+        }
+
+        UpdatePlatform.Initialize(abis!, ResolveVersionCode());
+        PlatformUpdateInstaller.Initialize(new AndroidUpdateInstaller(this));
+    }
+
+    private long ResolveVersionCode()
+    {
+        try
+        {
+            var info = PackageManager?.GetPackageInfo(PackageName!, PackageInfoFlags.MetaData);
+            if (info is null)
+            {
+                return 0;
+            }
+
+#pragma warning disable CA1422 // VersionCode 在 API 28 以下是唯一可用的读取方式
+            return OperatingSystem.IsAndroidVersionAtLeast(28) ? info.LongVersionCode : info.VersionCode;
+#pragma warning restore CA1422
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
+    }
 }

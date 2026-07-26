@@ -410,6 +410,67 @@
       </Border>
       <Border CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
         <StackPanel Spacing="12">
+          <TextBlock Text="关于与更新" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+          <TextBlock Text="{Binding AppVersionText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+          <TextBlock Text="{Binding UpdateStatusText}"
+                     IsVisible="{Binding UpdateStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                     FontSize="13"
+                     Foreground="{DynamicResource MusicTextSoftBrush}"
+                     TextWrapping="Wrap" />
+
+          <TextBlock Text="{Binding UpdateReleaseNotes}"
+                     IsVisible="{Binding HasUpdate}"
+                     FontSize="13"
+                     Foreground="{DynamicResource MusicTextSoftBrush}"
+                     TextWrapping="Wrap" />
+
+          <ProgressBar Value="{Binding UpdateDownloadProgress}"
+                       Maximum="100"
+                       Height="6"
+                       CornerRadius="3"
+                       IsVisible="{Binding IsUpdateDownloading}" />
+
+          <WrapPanel HorizontalAlignment="Left">
+            <Button Classes="Ghost"
+                    Command="{Binding CheckUpdateCommand}"
+                    IsEnabled="{Binding !IsCheckingUpdate}"
+                    Height="42" CornerRadius="21" Padding="16,0" Margin="0,0,10,0"
+                    Background="{DynamicResource MusicSurfaceHighBrush}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="Update" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
+                <TextBlock Text="检查更新" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+
+            <Button Classes="Ghost"
+                    Command="{Binding DownloadUpdateCommand}"
+                    IsVisible="{Binding HasUpdate}"
+                    IsEnabled="{Binding !IsUpdateDownloading}"
+                    Height="42" CornerRadius="21" Padding="16,0" Margin="0,0,10,0"
+                    Background="{DynamicResource MusicSurfaceHighBrush}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="Download" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
+                <TextBlock Text="立即更新" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+
+            <Button Classes="Ghost"
+                    Command="{Binding OpenReleasePageCommand}"
+                    IsVisible="{Binding HasUpdate}"
+                    Height="42" CornerRadius="21" Padding="16,0"
+                    Background="{DynamicResource MusicSurfaceHighBrush}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <icons:MaterialIcon Kind="OpenInNew" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
+                <TextBlock Text="手动下载" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <Border CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
+        <StackPanel Spacing="12">
           <TextBlock Text="数据管理" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
           <TextBlock Text="管理应用本地数据文件" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
           <WrapPanel HorizontalAlignment="Left">

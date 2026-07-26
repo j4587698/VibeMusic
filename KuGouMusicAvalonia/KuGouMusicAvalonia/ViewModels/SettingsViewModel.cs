@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KuGou.Lite;
 using KuGouMusicAvalonia.Services;
+using KuGouMusicAvalonia.Services.Update;
 using QRCoder;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,33 @@ public partial class SettingsViewModel : ViewModelBase
     private CancellationTokenSource? _qrPollingCts;
     private decimal _lastValidFloatingLyricsFontSize = (decimal)FloatingLyricsService.DefaultFontSize;
     private static readonly TimeSpan ProfileRetryDelay = TimeSpan.FromMilliseconds(1500);
+
+    private UpdateAsset? _pendingUpdate;
+    private string? _pendingUpdateVersion;
+
+    [ObservableProperty]
+    private bool _isCheckingUpdate;
+
+    [ObservableProperty]
+    private bool _isUpdateDownloading;
+
+    [ObservableProperty]
+    private bool _hasUpdate;
+
+    [ObservableProperty]
+    private bool _isUpdateMandatory;
+
+    [ObservableProperty]
+    private double _updateDownloadProgress;
+
+    [ObservableProperty]
+    private string _updateStatusText = string.Empty;
+
+    [ObservableProperty]
+    private string _updateReleaseNotes = string.Empty;
+
+    /// <summary>当前应用版本，展示在「关于」区块。</summary>
+    public string AppVersionText => $"当前版本 {UpdateService.Instance.CurrentVersion}";
 
     [ObservableProperty]
     private bool _isBusy;
@@ -686,6 +714,127 @@ public partial class SettingsViewModel : ViewModelBase
         catch (Exception ex)
         {
             LoginStatus = $"打开数据目录失败：{ex.Message}";
+        }
+
+        return Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task CheckUpdateAsync()
+    {
+        if (IsCheckingUpdate || IsUpdateDownloading)
+        {
+            return;
+        }
+
+        IsCheckingUpdate = true;
+        HasUpdate = false;
+        UpdateStatusText = "正在检查更新…";
+
+        try
+        {
+            var result = await UpdateService.Instance.CheckAsync().ConfigureAwait(true);
+            _pendingUpdate = result.Asset;
+            _pendingUpdateVersion = result.LatestVersion;
+
+            switch (result.Status)
+            {
+                case UpdateCheckStatus.UpdateAvailable:
+                    HasUpdate = true;
+                    IsUpdateMandatory = result.IsMandatory;
+                    UpdateReleaseNotes = result.ReleaseNotes ?? string.Empty;
+                    UpdateStatusText = $"发现新版本 {result.LatestVersion}";
+                    break;
+                case UpdateCheckStatus.UpToDate:
+                    UpdateStatusText = "已是最新版本";
+                    break;
+                default:
+                    UpdateStatusText = result.Message ?? "检查更新失败";
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusText = $"检查更新失败：{ex.GetBaseException().Message}";
+        }
+        finally
+        {
+            IsCheckingUpdate = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task DownloadUpdateAsync()
+    {
+        if (_pendingUpdate is not { } asset || IsUpdateDownloading)
+        {
+            return;
+        }
+
+        // 未配置签名公钥或未注册平台安装器时，不提供应用内安装，改为引导手动下载。
+        if (!UpdateService.Instance.CanUpdateInApp)
+        {
+            await OpenReleasePageAsync().ConfigureAwait(true);
+            return;
+        }
+
+        IsUpdateDownloading = true;
+        UpdateDownloadProgress = 0;
+        UpdateStatusText = "正在下载更新包…";
+
+        try
+        {
+            var version = _pendingUpdateVersion ?? string.Empty;
+            var progress = new Progress<DownloadProgressInfo>(info =>
+            {
+                UpdateDownloadProgress = info.Progress * 100;
+            });
+
+            var file = await UpdateService.Instance
+                .DownloadAsync(asset, version, progress)
+                .ConfigureAwait(true);
+
+            UpdateStatusText = "正在安装…";
+            var started = await PlatformUpdateInstaller
+                .InstallAsync(new UpdateInstallRequest(asset, file, version), CancellationToken.None)
+                .ConfigureAwait(true);
+
+            if (!started)
+            {
+                UpdateStatusText = "安装未能启动，请手动下载安装。";
+            }
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusText = $"更新失败：{ex.GetBaseException().Message}";
+        }
+        finally
+        {
+            IsUpdateDownloading = false;
+        }
+    }
+
+    [RelayCommand]
+    private Task OpenReleasePageAsync()
+    {
+        var url = UpdateEndpoints.ReleasePageUrl;
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            UpdateStatusText = "尚未配置下载页面地址。";
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusText = $"打开下载页面失败：{ex.Message}";
         }
 
         return Task.CompletedTask;

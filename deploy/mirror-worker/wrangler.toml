@@ -1,0 +1,23 @@
+name = "vibemusic-update-mirror"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# 部署：
+#   npx wrangler deploy
+# 绑定自定义域（可选，但强烈建议，*.workers.dev 在国内解析常被污染）：
+#   在 Cloudflare 控制台 Workers -> Settings -> Domains & Routes 添加，
+#   然后把 UPDATE_MIRROR_BASE_URL 与客户端 UpdateEndpoints.MirrorBaseUrl 指向该域名。
+
+[vars]
+# 回源仓库，形如 owner/repo。公开仓库无需任何 token。
+GITHUB_REPOSITORY = "j4587698/VibeMusic"
+
+# 自定义域，部署时自动绑定并签发证书。
+# 要求 4587698.xyz 这个 zone 已经在同一个 Cloudflare 账号下且状态为 Active。
+# 不要用 *.workers.dev：国内解析常被污染。
+[[routes]]
+pattern = "update.4587698.xyz"
+custom_domain = true
+
+[observability]
+enabled = true

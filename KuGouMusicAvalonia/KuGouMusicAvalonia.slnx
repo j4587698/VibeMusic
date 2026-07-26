@@ -7,5 +7,6 @@
   <Project Path="KuGouMusicAvalonia.iOS/KuGouMusicAvalonia.iOS.csproj">
     <Deploy />
   </Project>
+  <Project Path="KuGouMusicAvalonia.Updater/KuGouMusicAvalonia.Updater.csproj" />
   <Project Path="KuGouMusicAvalonia/KuGouMusicAvalonia.csproj" />
 </Solution>

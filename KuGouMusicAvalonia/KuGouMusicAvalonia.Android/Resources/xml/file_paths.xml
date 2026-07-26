@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+  <!-- 更新包下载到应用私有目录，无需任何存储权限；FileProvider 只暴露这些私有路径。 -->
+  <files-path name="internal_files" path="." />
+  <cache-path name="internal_cache" path="." />
+  <external-files-path name="external_files" path="." />
+</paths>

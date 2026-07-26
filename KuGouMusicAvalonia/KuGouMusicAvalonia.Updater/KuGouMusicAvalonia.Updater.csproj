@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- WinExe 让 Windows 下不弹出控制台黑窗；诊断信息一律写入日志文件。 -->
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>VibeMusic.Updater</AssemblyName>
+    <RootNamespace>VibeMusic.Updater</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- 不引用任何 NuGet 包，保持产物最小且无外部依赖。 -->
+  </PropertyGroup>
+</Project>
