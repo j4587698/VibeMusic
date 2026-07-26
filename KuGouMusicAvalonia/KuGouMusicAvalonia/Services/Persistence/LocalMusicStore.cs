@@ -1123,4 +1123,9 @@ internal static class LocalSettingKeys
     public const string FloatingLyricsLocked = "settings.floatingLyrics.locked";
     public const string FloatingLyricsCompactMode = "settings.floatingLyrics.compactMode";
     public const string FloatingLyricsFontSize = "settings.floatingLyrics.fontSize";
+    public const string FloatingLyricsWindowX = "settings.floatingLyrics.window.x";
+    public const string FloatingLyricsWindowY = "settings.floatingLyrics.window.y";
+    public const string FloatingLyricsWindowWidth = "settings.floatingLyrics.window.width";
+    public const string FloatingLyricsOverlayX = "settings.floatingLyrics.overlay.x";
+    public const string FloatingLyricsOverlayY = "settings.floatingLyrics.overlay.y";
 }

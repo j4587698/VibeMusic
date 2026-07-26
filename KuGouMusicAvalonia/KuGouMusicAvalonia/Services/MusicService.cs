@@ -385,6 +385,60 @@ public static class MusicService
         }
     }
 
+    /// <summary>桌面歌词窗口上次的屏幕坐标（物理像素），未记录时为 null。</summary>
+    public static int? FloatingLyricsWindowX
+    {
+        get => GetNullableIntSetting(LocalSettingKeys.FloatingLyricsWindowX);
+        set => SetNullableIntSetting(LocalSettingKeys.FloatingLyricsWindowX, value);
+    }
+
+    public static int? FloatingLyricsWindowY
+    {
+        get => GetNullableIntSetting(LocalSettingKeys.FloatingLyricsWindowY);
+        set => SetNullableIntSetting(LocalSettingKeys.FloatingLyricsWindowY, value);
+    }
+
+    /// <summary>桌面歌词窗口上次的宽度（逻辑像素），未记录时为 null。</summary>
+    public static double? FloatingLyricsWindowWidth
+    {
+        get
+        {
+            var raw = LocalMusicStore.Instance.GetStringSetting(LocalSettingKeys.FloatingLyricsWindowWidth, string.Empty);
+            return double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed) && parsed > 0
+                ? parsed
+                : null;
+        }
+        set => LocalMusicStore.Instance.SetSetting(
+            LocalSettingKeys.FloatingLyricsWindowWidth,
+            value is { } width && width > 0 ? width.ToString(CultureInfo.InvariantCulture) : string.Empty);
+    }
+
+    /// <summary>Android 悬浮歌词上次的位置（物理像素，相对屏幕左上角），未记录时为 null。</summary>
+    public static int? FloatingLyricsOverlayX
+    {
+        get => GetNullableIntSetting(LocalSettingKeys.FloatingLyricsOverlayX);
+        set => SetNullableIntSetting(LocalSettingKeys.FloatingLyricsOverlayX, value);
+    }
+
+    public static int? FloatingLyricsOverlayY
+    {
+        get => GetNullableIntSetting(LocalSettingKeys.FloatingLyricsOverlayY);
+        set => SetNullableIntSetting(LocalSettingKeys.FloatingLyricsOverlayY, value);
+    }
+
+    private static int? GetNullableIntSetting(string key)
+    {
+        var raw = LocalMusicStore.Instance.GetStringSetting(key, string.Empty);
+        return int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : null;
+    }
+
+    private static void SetNullableIntSetting(string key, int? value)
+    {
+        LocalMusicStore.Instance.SetSetting(
+            key,
+            value?.ToString(CultureInfo.InvariantCulture) ?? string.Empty);
+    }
+
     public static string DefaultPlaybackQualityValue => DefaultPlaybackQuality switch
     {
         "标准 128k" => "128",
