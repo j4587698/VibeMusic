@@ -642,6 +642,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
                     player = new AudioPlayer(MusicPlaybackOptions);
                     player.Volume = ToPlayerVolume(Volume);
                     player.PlayCompleted = () => Dispatcher.UIThread.Post(OnPlaybackCompleted);
+                    player.PlaybackFailed = args => Dispatcher.UIThread.Post(() => OnPlaybackFailed(args));
 
                     if (playbackSource.IsLocalFile)
                     {
@@ -1273,6 +1274,24 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         StopProgressTimer();
         StatusMessage = "播放完成";
         LastErrorDetail = string.Empty;
+    }
+
+    private void OnPlaybackFailed(PlaybackFailedEventArgs args)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        IsPlaying = false;
+        StopProgressTimer();
+        StatusMessage = "播放中断";
+
+        var detail = args.Exception is null
+            ? $"播放中断：{args.Result}（{CurrentSong?.Title}）"
+            : $"播放中断：{args.Result} / {FirstLine(args.Exception.GetBaseException().Message)}（{CurrentSong?.Title}）";
+        LastErrorDetail = detail;
+        AppendPlaybackErrorLog(detail);
     }
 
     private void RestorePersistedPlaybackState()
