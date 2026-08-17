@@ -56,6 +56,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     private PlaybackStateSnapshot? _pendingPersistSnapshot;
     private bool _persistRunning;
     private bool _pendingSaveQueue;
+    private bool _pendingSaveSongSnapshot;
 
     // 队列去重索引：按 songKey 维护当前队列成员，使 AppendToQueue 去重为 O(1)。
     private readonly HashSet<string> _queueKeys = new(StringComparer.Ordinal);
@@ -197,7 +198,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
 
         _persistDebounceTimer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromMilliseconds(1500)
+            Interval = TimeSpan.FromSeconds(10)
         };
         _persistDebounceTimer.Tick += OnPersistDebounceTick;
 
@@ -1498,15 +1499,16 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         }
     }
 
-    private void PersistPlaybackState(bool force = false, bool saveQueue = false)
+    private void PersistPlaybackState(bool force = false, bool saveQueue = false, bool saveSongSnapshot = false)
     {
         if (_isRestoringPlaybackState)
         {
             return;
         }
 
-        // 累积“是否需要保存队列”。队列写入开销大（全量重写），去抖期间任意一次要求保存队列即合并保存。
+        // 累积“是否需要保存队列与歌曲元数据”。队列与元数据写入开销相对较大，去抖期间任意一次要求保存即合并保存。
         _pendingSaveQueue |= saveQueue;
+        _pendingSaveSongSnapshot |= saveSongSnapshot || saveQueue || force;
 
         if (force)
         {
@@ -1516,7 +1518,7 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         }
 
         // 固定窗口内合并多次变更。播放进度每 500ms 更新一次，不能反复重启定时器，
-        // 否则 1.5 秒的保存窗口会在持续播放期间永远无法到期。
+        // 否则 10 秒的保存窗口会在持续播放期间永远无法到期。
         if (!_persistDebounceTimer.IsEnabled)
         {
             _persistDebounceTimer.Start();
@@ -1536,7 +1538,9 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         _persistDebounceTimer.Stop();
 
         bool saveQueue = _pendingSaveQueue;
+        bool saveSongSnapshot = _pendingSaveSongSnapshot;
         _pendingSaveQueue = false;
+        _pendingSaveSongSnapshot = false;
         _lastPlaybackStateSaveUtc = DateTime.UtcNow;
 
         // 在 UI 线程一次性取快照（ObservableCollection 非线程安全，禁止在后台线程枚举）。
@@ -1550,7 +1554,8 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
             Progress,
             Duration,
             IsRadioMode,
-            saveQueue);
+            saveQueue,
+            saveSongSnapshot);
 
         QueuePersistWork(snapshot);
     }
@@ -1562,13 +1567,21 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
     {
         lock (_persistGate)
         {
-            // 状态快照可以覆盖旧状态，但不能丢掉尚未写入的队列快照。
+            // 状态快照可以覆盖旧状态，但不能丢掉尚未写入的队列快照与歌曲快照标记。
             if (!snapshot.SaveQueue && _pendingPersistSnapshot is { SaveQueue: true } pendingQueueSnapshot)
             {
                 snapshot = snapshot with
                 {
                     Queue = pendingQueueSnapshot.Queue,
                     SaveQueue = true
+                };
+            }
+
+            if (!snapshot.SaveSongSnapshot && _pendingPersistSnapshot is { SaveSongSnapshot: true })
+            {
+                snapshot = snapshot with
+                {
+                    SaveSongSnapshot = true
                 };
             }
 
@@ -1614,7 +1627,8 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
                     snapshot.Progress,
                     snapshot.Duration,
                     snapshot.IsRadioMode,
-                    snapshot.SaveQueue);
+                    snapshot.SaveQueue,
+                    snapshot.SaveSongSnapshot);
             }
             catch
             {
@@ -1655,7 +1669,8 @@ public sealed partial class PlayerService : ObservableObject, IDisposable
         double Progress,
         double Duration,
         bool IsRadioMode,
-        bool SaveQueue);
+        bool SaveQueue,
+        bool SaveSongSnapshot);
 
 
     private double TakePendingResumeProgress(KugouSong song)

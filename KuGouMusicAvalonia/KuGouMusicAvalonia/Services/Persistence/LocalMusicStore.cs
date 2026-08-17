@@ -547,10 +547,11 @@ internal sealed class LocalMusicStore : IDisposable
         double progressSeconds,
         double durationSeconds,
         bool isRadioMode,
-        bool saveQueue)
+        bool saveQueue,
+        bool saveSongSnapshot = true)
     {
         var currentSongKey = GetSongKey(currentSong);
-        if (currentSong is not null)
+        if (currentSong is not null && saveSongSnapshot)
         {
             SaveSongSnapshot(currentSong);
         }
