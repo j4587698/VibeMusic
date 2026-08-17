@@ -408,64 +408,82 @@
           </Grid>
         </StackPanel>
       </Border>
+      <!-- 关于与更新 -->
       <Border CornerRadius="18" Background="{DynamicResource MusicGlassBrush}" BorderBrush="{DynamicResource MusicOutlineBrush}" BorderThickness="1" Padding="18">
-        <StackPanel Spacing="12">
+        <StackPanel Spacing="16">
           <TextBlock Text="关于与更新" FontSize="22" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
-          <TextBlock Text="{Binding AppVersionText}" FontSize="13" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
 
-          <TextBlock Text="{Binding UpdateStatusText}"
-                     IsVisible="{Binding UpdateStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                     FontSize="13"
-                     Foreground="{DynamicResource MusicTextSoftBrush}"
-                     TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="*,*" ColumnSpacing="16" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
+            <!-- 版本与更新 -->
+            <lumina:LuminaSettingsOption Grid.ColumnSpan="2" Kind="Custom" Header="版本信息" Description="{Binding AppVersionText}" ShowChevron="False">
+              <lumina:LuminaSettingsOption.TrailingContent>
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <Button Classes="Ghost"
+                          Command="{Binding CheckUpdateCommand}"
+                          IsEnabled="{Binding !IsCheckingUpdate}"
+                          Height="36" CornerRadius="18" Padding="14,0"
+                          Background="{DynamicResource MusicSurfaceHighBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <icons:MaterialIcon Kind="Update" Width="18" Height="18" Foreground="{DynamicResource MusicTextBrush}" />
+                      <TextBlock Text="检查更新" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </Button>
 
-          <TextBlock Text="{Binding UpdateReleaseNotes}"
-                     IsVisible="{Binding HasUpdate}"
-                     FontSize="13"
-                     Foreground="{DynamicResource MusicTextSoftBrush}"
-                     TextWrapping="Wrap" />
+                  <Button Classes="Primary"
+                          Command="{Binding DownloadUpdateCommand}"
+                          IsVisible="{Binding HasUpdate}"
+                          IsEnabled="{Binding !IsUpdateDownloading}"
+                          Height="36" CornerRadius="18" Padding="14,0"
+                          Background="{DynamicResource MusicPrimaryGradient}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <icons:MaterialIcon Kind="Download" Width="18" Height="18" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
+                      <TextBlock Text="立即更新" FontSize="13" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </Button>
 
-          <ProgressBar Value="{Binding UpdateDownloadProgress}"
-                       Maximum="100"
-                       Height="6"
-                       CornerRadius="3"
-                       IsVisible="{Binding IsUpdateDownloading}" />
+                  <Button Classes="Ghost"
+                          Command="{Binding OpenReleasePageCommand}"
+                          IsVisible="{Binding HasUpdate}"
+                          Height="36" CornerRadius="18" Padding="14,0"
+                          Background="{DynamicResource MusicSurfaceHighBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                      <icons:MaterialIcon Kind="OpenInNew" Width="18" Height="18" Foreground="{DynamicResource MusicTextBrush}" />
+                      <TextBlock Text="手动下载" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
+                    </StackPanel>
+                  </Button>
+                </StackPanel>
+              </lumina:LuminaSettingsOption.TrailingContent>
+            </lumina:LuminaSettingsOption>
 
-          <WrapPanel HorizontalAlignment="Left">
-            <Button Classes="Ghost"
-                    Command="{Binding CheckUpdateCommand}"
-                    IsEnabled="{Binding !IsCheckingUpdate}"
-                    Height="42" CornerRadius="21" Padding="16,0" Margin="0,0,10,0"
-                    Background="{DynamicResource MusicSurfaceHighBrush}">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="Update" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
-                <TextBlock Text="检查更新" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
-              </StackPanel>
-            </Button>
+            <!-- GitHub 仓库 -->
+            <lumina:LuminaSettingsOption Grid.Row="1" Grid.ColumnSpan="2" Kind="Custom" Header="GitHub 仓库" Description="{Binding ProjectGithubUrl}" ShowChevron="True" Command="{Binding OpenProjectGithubCommand}" />
 
-            <Button Classes="Ghost"
-                    Command="{Binding DownloadUpdateCommand}"
-                    IsVisible="{Binding HasUpdate}"
-                    IsEnabled="{Binding !IsUpdateDownloading}"
-                    Height="42" CornerRadius="21" Padding="16,0" Margin="0,0,10,0"
-                    Background="{DynamicResource MusicSurfaceHighBrush}">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="Download" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
-                <TextBlock Text="立即更新" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
-              </StackPanel>
-            </Button>
+            <!-- 作者主页 -->
+            <lumina:LuminaSettingsOption Grid.Row="2" Grid.ColumnSpan="2" Kind="Custom" Header="作者 GitHub" Description="{Binding AuthorGithubUrl}" ShowChevron="True" Command="{Binding OpenAuthorGithubCommand}" />
 
-            <Button Classes="Ghost"
-                    Command="{Binding OpenReleasePageCommand}"
-                    IsVisible="{Binding HasUpdate}"
-                    Height="42" CornerRadius="21" Padding="16,0"
-                    Background="{DynamicResource MusicSurfaceHighBrush}">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="OpenInNew" Width="22" Height="22" Foreground="{DynamicResource MusicTextBrush}" />
-                <TextBlock Text="手动下载" Foreground="{DynamicResource MusicTextBrush}" FontWeight="Bold" VerticalAlignment="Center" />
-              </StackPanel>
-            </Button>
-          </WrapPanel>
+            <!-- 免责声明 -->
+            <lumina:LuminaSettingsOption Grid.Row="3" Grid.ColumnSpan="2" Kind="Custom" Header="免责声明" Description="开源学习交流、媒体版权归属及法律责任声明" ShowChevron="True" Command="{Binding OpenDisclaimerDialogCommand}" />
+          </Grid>
+
+          <!-- 更新状态与下载进度 -->
+          <StackPanel Spacing="8" IsVisible="{Binding UpdateStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding UpdateStatusText}"
+                       FontSize="13"
+                       Foreground="{DynamicResource MusicTextSoftBrush}"
+                       TextWrapping="Wrap" />
+
+            <TextBlock Text="{Binding UpdateReleaseNotes}"
+                       IsVisible="{Binding HasUpdate}"
+                       FontSize="13"
+                       Foreground="{DynamicResource MusicTextSoftBrush}"
+                       TextWrapping="Wrap" />
+
+            <ProgressBar Value="{Binding UpdateDownloadProgress}"
+                         Maximum="100"
+                         Height="6"
+                         CornerRadius="3"
+                         IsVisible="{Binding IsUpdateDownloading}" />
+          </StackPanel>
         </StackPanel>
       </Border>
 
@@ -604,6 +622,71 @@
             </StackPanel>
           </TabItem>
         </TabControl>
+      </Grid>
+    </Border>
+  </Grid>
+
+  <!-- 免责声明弹窗 -->
+  <Grid IsVisible="{Binding IsDisclaimerDialogOpen}"
+        ZIndex="40"
+        lumina:LuminaBack.IsEnabled="{Binding IsDisclaimerDialogOpen}"
+        lumina:LuminaBack.Command="{Binding CloseDisclaimerDialogCommand}">
+    <Border Background="{DynamicResource MusicFloatingGlassBrush}" lumina:LuminaCommand.TappedCommand="{Binding CloseDisclaimerDialogCommand}" />
+    <Border Width="520"
+            MaxWidth="600"
+            Margin="20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            CornerRadius="22"
+            Background="{DynamicResource MusicSurfaceBrush}"
+            BorderBrush="{DynamicResource MusicOutlineBrush}"
+            BorderThickness="1"
+            BoxShadow="{DynamicResource MusicFloatingShadow}"
+            ClipToBounds="True">
+      <Grid RowDefinitions="Auto,*,Auto">
+        <!-- 弹窗标题栏 -->
+        <Grid Margin="22,18,16,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+          <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <icons:MaterialIcon Kind="ShieldAlertOutline" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
+            <TextBlock Text="免责声明" FontSize="20" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" VerticalAlignment="Center" />
+          </StackPanel>
+          <Button Grid.Column="1" Classes="Ghost Icon" Command="{Binding CloseDisclaimerDialogCommand}" Width="36" Height="36" ToolTip.Tip="关闭" lumina:LuminaButton.IconSize="20">
+            <lumina:LuminaButton.Icon>
+              <icons:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </lumina:LuminaButton.Icon>
+          </Button>
+        </Grid>
+
+        <!-- 弹窗内容 -->
+        <ScrollViewer Grid.Row="1" MaxHeight="380" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="22,6,22,16" Spacing="12">
+            <Border CornerRadius="12" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,12">
+              <TextBlock Text="请在阅读并知悉以下条款后继续使用本软件：" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
+            </Border>
+
+            <TextBlock Text="1. 开源免费声明&#x0a;本项目（VibeMusic）为个人开源项目，完全开源且永久免费，无任何收费项目、会员充值、赞助捐赠或商业推广。任何向您索取费用或转卖本软件的行为均为欺诈。"
+                       FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+            <TextBlock Text="2. 技术学习与研究&#x0a;本软件代码仅供编程技术交流与学习测试使用，严禁任何人用于任何形式的商业牟利、二次转卖或非法用途。"
+                       FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+            <TextBlock Text="3. 内容与媒体版权&#x0a;本软件内检索、试听、播放及缓存的音乐、歌词、专辑封面等所有媒体内容均来源于第三方公开网络接口，版权归原作者及原始版权方所有。本软件不存储、不修改、不上传任何版权音频文件。"
+                       FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+            <TextBlock Text="4. 侵权处理与下架&#x0a;若相关版权方认为本项目或第三方网络接口涉嫌侵犯其合法权益，请联系开发者或在 GitHub 提交 Issue，我们将积极配合核实并移除相关链接。"
+                       FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+            <TextBlock Text="5. 免责条款&#x0a;使用者在使用本软件过程中产生的一切行为及法律后果均由使用者自行承担，开发者不对因使用本软件造成的任何直接或间接损失承担连带责任。"
+                       FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+          </StackPanel>
+        </ScrollViewer>
+
+        <!-- 底部确定按钮 -->
+        <Border Grid.Row="2" Padding="22,12,22,18" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="0,1,0,0">
+          <Button Classes="Primary" Command="{Binding CloseDisclaimerDialogCommand}" Height="40" CornerRadius="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Background="{DynamicResource MusicPrimaryGradient}" HorizontalAlignment="Stretch">
+            <TextBlock Text="我知道了" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Button>
+        </Border>
       </Grid>
     </Border>
   </Grid>

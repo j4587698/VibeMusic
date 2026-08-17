@@ -408,6 +408,72 @@
       </Border>
     </Grid>
 
+    <!-- 首次启动免责声明确认弹窗 -->
+    <Grid IsVisible="{Binding IsFirstLaunchDisclaimerDialogOpen}"
+          ZIndex="100">
+      <Border Background="{DynamicResource MusicFloatingGlassBrush}" />
+      <Border Width="560"
+              MaxWidth="640"
+              Margin="24"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              CornerRadius="22"
+              Background="{DynamicResource MusicSurfaceBrush}"
+              BorderBrush="{DynamicResource MusicOutlineBrush}"
+              BorderThickness="1"
+              BoxShadow="{DynamicResource MusicFloatingShadow}"
+              ClipToBounds="True">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <!-- 弹窗标题栏 -->
+          <Grid Margin="24,20,24,14" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Border Width="40" Height="40" CornerRadius="20" Background="{DynamicResource MusicPrimaryGradient}" VerticalAlignment="Center">
+              <icons:MaterialIcon Kind="ShieldAlertOutline" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+              <TextBlock Text="免责声明与使用条款" FontSize="20" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+              <TextBlock Text="欢迎使用 VibeMusic，请在首次使用前仔细阅读" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+            </StackPanel>
+          </Grid>
+
+          <!-- 弹窗正文 -->
+          <ScrollViewer Grid.Row="1" MaxHeight="360" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24,4,24,16" Spacing="12">
+              <Border CornerRadius="12" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="14,12">
+                <TextBlock Text="请在阅读并知悉以下全部条款后决定是否继续使用本软件：" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" />
+              </Border>
+
+              <TextBlock Text="1. 开源免费声明&#x0a;本项目（VibeMusic）为个人开源项目，完全开源且永久免费，无任何收费项目、会员充值、赞助捐赠或商业推广。任何向您索取费用或转卖本软件的行为均为欺诈。"
+                         FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+              <TextBlock Text="2. 技术学习与研究&#x0a;本软件代码仅供编程技术交流与学习测试使用，严禁任何人用于任何形式的商业牟利、二次转卖或非法用途。"
+                         FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+              <TextBlock Text="3. 内容与媒体版权&#x0a;本软件内检索、试听、播放及缓存的音乐、歌词、专辑封面等所有媒体内容均来源于第三方公开网络接口，版权归原作者及原始版权方所有。本软件不存储、不修改、不上传任何版权音频文件。"
+                         FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+              <TextBlock Text="4. 侵权处理与下架&#x0a;若相关版权方认为本项目或第三方网络接口涉嫌侵犯其合法权益，请联系开发者或在 GitHub 提交 Issue，我们将积极配合核实并移除相关链接。"
+                         FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+
+              <TextBlock Text="5. 免责条款&#x0a;使用者在使用本软件过程中产生的一切行为及法律后果均由使用者自行承担，开发者不对因使用本软件造成的任何直接或间接损失承担连带责任。"
+                         FontSize="13" LineHeight="20" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+          </ScrollViewer>
+
+          <!-- 底部按钮操作栏 -->
+          <Border Grid.Row="2" Padding="24,14,24,20" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+              <Button Classes="Outline" Command="{Binding DeclineFirstLaunchDisclaimerCommand}" Height="42" CornerRadius="21" Padding="16,0" BorderBrush="{DynamicResource LuminaDividerBrush}">
+                <TextBlock Text="不同意并退出" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Button>
+              <Button Grid.Column="1" Classes="Primary" Command="{Binding AcceptFirstLaunchDisclaimerCommand}" Height="42" CornerRadius="21" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Background="{DynamicResource MusicPrimaryGradient}">
+                <TextBlock Text="同意并继续" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+      </Border>
+    </Grid>
+
         </Grid>
       </lumina:LuminaShell.OverlayContent>
   </lumina:LuminaShell>

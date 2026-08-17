@@ -372,6 +372,10 @@ internal sealed class LocalMusicStore : IDisposable
         SetSetting(key, value.ToString());
     }
 
+    public bool DisclaimerAccepted => GetBoolSetting(LocalSettingKeys.DisclaimerAccepted, false);
+
+    public void SetDisclaimerAccepted(bool accepted) => SetSetting(LocalSettingKeys.DisclaimerAccepted, accepted);
+
     public IReadOnlyList<string> LoadFavoriteKeys()
     {
         lock (_gate)
@@ -1129,4 +1133,5 @@ internal static class LocalSettingKeys
     public const string FloatingLyricsWindowWidth = "settings.floatingLyrics.window.width";
     public const string FloatingLyricsOverlayX = "settings.floatingLyrics.overlay.x";
     public const string FloatingLyricsOverlayY = "settings.floatingLyrics.overlay.y";
+    public const string DisclaimerAccepted = "settings.disclaimer.accepted";
 }

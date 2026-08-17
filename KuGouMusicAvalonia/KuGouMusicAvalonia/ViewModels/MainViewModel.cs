@@ -112,9 +112,17 @@ public partial class MainViewModel : ViewModelBase
     public NowPlayingViewModel NowPlayingPage => _nowPlayingViewModel;
     public LyricsViewModel LyricsPage => _lyricsViewModel;
 
+    [ObservableProperty]
+    private bool _isFirstLaunchDisclaimerDialogOpen;
+
     public MainViewModel()
     {
         _ = LyricsService.Instance;
+        if (!MusicService.DisclaimerAccepted)
+        {
+            IsFirstLaunchDisclaimerDialogOpen = true;
+        }
+
         Player.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName is nameof(PlayerService.CurrentSong) or nameof(PlayerService.HasSong))
@@ -126,6 +134,31 @@ public partial class MainViewModel : ViewModelBase
             }
         };
         ShellNavigationService.Instance.QueueToggleRequested += ToggleQueue;
+    }
+
+    [RelayCommand]
+    private void AcceptFirstLaunchDisclaimer()
+    {
+        MusicService.DisclaimerAccepted = true;
+        IsFirstLaunchDisclaimerDialogOpen = false;
+    }
+
+    [RelayCommand]
+    private void DeclineFirstLaunchDisclaimer()
+    {
+        if (PlatformApplicationService.TryExitApplication())
+        {
+            return;
+        }
+
+        if (Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.Shutdown();
+        }
+        else
+        {
+            Environment.Exit(0);
+        }
     }
 
     partial void OnActiveNavigationKeyChanged(string value)
