@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -15,7 +16,7 @@ public partial class DesktopLyricsWindow : LuminaFloatingWindow
     private const double DefaultBottomMargin = 48;
 
     private readonly DispatcherTimer _savePlacementTimer;
-    private bool _placementRestored;
+    private bool _isLoadedAndRestored;
 
     public DesktopLyricsWindow()
     {
@@ -25,8 +26,6 @@ public partial class DesktopLyricsWindow : LuminaFloatingWindow
         _savePlacementTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
         _savePlacementTimer.Tick += OnSavePlacementTick;
 
-        PositionChanged += OnPositionChanged;
-        Resized += OnResized;
         DesktopLyricsWindowService.Instance.StateChanged += OnServiceStateChanged;
     }
 
@@ -41,7 +40,6 @@ public partial class DesktopLyricsWindow : LuminaFloatingWindow
         _savePlacementTimer.Tick -= OnSavePlacementTick;
         PositionChanged -= OnPositionChanged;
         Resized -= OnResized;
-        SavePlacement();
 
         DesktopLyricsWindowService.Instance.StateChanged -= OnServiceStateChanged;
         LyricsService.Instance.EndWordHighlight();
@@ -62,9 +60,32 @@ public partial class DesktopLyricsWindow : LuminaFloatingWindow
 
     private void OnWindowOpened(object? sender, EventArgs e)
     {
-        RestorePlacement();
         IsLocked = DesktopLyricsWindowService.Instance.IsLocked;
         LyricsService.Instance.BeginWordHighlight();
+
+        // 1. 恢复宽度
+        RestoreWidth();
+
+        // 2. 直接读取数据库中保存的位置并精准放上去
+        if (MusicService.FloatingLyricsWindowX is { } x &&
+            MusicService.FloatingLyricsWindowY is { } y)
+        {
+            // 数据库有历史记录：直接原样放置在保存的坐标上
+            Position = new PixelPoint(x, y);
+        }
+        else
+        {
+            // 首次打开无历史记录：放置在当前屏幕工作区底部居中
+            PositionAtDefaultLocation();
+        }
+
+        // 3. 延迟挂载用户移动与尺寸变化监听，确保后续只有用户手动拖动时才保存
+        Dispatcher.UIThread.Post(() =>
+        {
+            _isLoadedAndRestored = true;
+            PositionChanged += OnPositionChanged;
+            Resized += OnResized;
+        }, DispatcherPriority.Loaded);
     }
 
     private void OnPointerEntered(object? sender, PointerEventArgs e)
@@ -83,130 +104,46 @@ public partial class DesktopLyricsWindow : LuminaFloatingWindow
         }
     }
 
-    private void RestorePlacement()
-    {
-        RestoreWidth();
-
-        if (MusicService.FloatingLyricsWindowX is { } x &&
-            MusicService.FloatingLyricsWindowY is { } y &&
-            TryClampToScreen(new PixelPoint(x, y), out var restored))
-        {
-            Position = restored;
-        }
-        else
-        {
-            PositionAtDefaultLocation();
-        }
-
-        _placementRestored = true;
-    }
-
     private void RestoreWidth()
     {
-        if (MusicService.FloatingLyricsWindowWidth is not { } width || double.IsNaN(width) || width <= 0)
+        if (MusicService.FloatingLyricsWindowWidth is { } width && !double.IsNaN(width) && width > 0)
         {
-            return;
+            Width = Math.Clamp(width, 400, 3840);
         }
-
-        var minWidth = double.IsNaN(MinWidth) || MinWidth <= 0 ? 400 : MinWidth;
-        var maxWidth = double.IsNaN(MaxWidth) || double.IsInfinity(MaxWidth) || MaxWidth <= 0
-            ? width
-            : MaxWidth;
-
-        Width = Math.Clamp(width, minWidth, Math.Max(minWidth, maxWidth));
     }
 
     /// <summary>
-    /// 首次打开时把窗口放到当前屏幕工作区（不含任务栏）底部居中。
-    /// 尺寸取显式设置的 Width/Height 再按缩放换算成物理像素，避免布局尚未完成时用 Bounds 算出错误坐标。
+    /// 仅在首次打开（无历史记录）时计算默认位置：屏幕工作区底部居中。
     /// </summary>
     private void PositionAtDefaultLocation()
     {
-        var screen = GetTargetScreen();
+        var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary ?? Screens.All.FirstOrDefault();
         if (screen is null)
         {
-            PositionAtScreenBottom();
             return;
         }
 
         var area = screen.WorkingArea;
-        var size = GetWindowPixelSize();
-        var margin = (int)Math.Round(DefaultBottomMargin * screen.Scaling);
+        var scaling = screen.Scaling > 0 ? screen.Scaling : (RenderScaling > 0 ? RenderScaling : 1.0);
+        var width = (double.IsNaN(Width) || Width <= 0 ? 800 : Width) * scaling;
+        var height = ((DataContext as DesktopLyricsViewModel)?.IsCompactMode == true ? 92 : 160) * scaling;
+        var margin = DefaultBottomMargin * scaling;
 
-        var x = area.X + Math.Max(0, (area.Width - size.Width) / 2);
-        var y = area.Y + Math.Max(0, area.Height - size.Height - margin);
+        var x = (int)Math.Round(area.X + Math.Max(0, (area.Width - width) / 2));
+        var y = (int)Math.Round(area.Y + Math.Max(0, area.Height - height - margin));
         Position = new PixelPoint(x, y);
     }
 
-    private bool TryClampToScreen(PixelPoint position, out PixelPoint result)
+    private void OnPositionChanged(object? sender, PixelPointEventArgs e)
     {
-        result = position;
-
-        var size = GetWindowPixelSize();
-        var screen = Screens.ScreenFromPoint(position)
-            ?? Screens.ScreenFromBounds(new PixelRect(position, size))
-            ?? GetTargetScreen();
-        if (screen is null)
-        {
-            return false;
-        }
-
-        var area = screen.WorkingArea;
-        var maxX = area.X + Math.Max(0, area.Width - size.Width);
-        var maxY = area.Y + Math.Max(0, area.Height - size.Height);
-
-        result = new PixelPoint(
-            Math.Clamp(position.X, area.X, Math.Max(area.X, maxX)),
-            Math.Clamp(position.Y, area.Y, Math.Max(area.Y, maxY)));
-        return true;
+        if (!_isLoadedAndRestored) return;
+        _savePlacementTimer.Stop();
+        _savePlacementTimer.Start();
     }
 
-    private Screen? GetTargetScreen() => Screens.ScreenFromWindow(this) ?? Screens.Primary;
-
-    private double GetScaling()
+    private void OnResized(object? sender, WindowResizedEventArgs e)
     {
-        var scaling = RenderScaling;
-        if (scaling <= 0 || double.IsNaN(scaling))
-        {
-            scaling = GetTargetScreen()?.Scaling ?? 1;
-        }
-
-        return scaling <= 0 || double.IsNaN(scaling) ? 1 : scaling;
-    }
-
-    private PixelSize GetWindowPixelSize()
-    {
-        var scaling = GetScaling();
-
-        var width = double.IsNaN(Width) || Width <= 0 ? Bounds.Width : Width;
-        var height = double.IsNaN(Height) || Height <= 0 ? Bounds.Height : Height;
-
-        if (width <= 0)
-        {
-            width = double.IsNaN(MinWidth) || MinWidth <= 0 ? 400 : MinWidth;
-        }
-
-        if (height <= 0)
-        {
-            height = double.IsNaN(MinHeight) || MinHeight <= 0 ? 120 : MinHeight;
-        }
-
-        return new PixelSize(
-            Math.Max(1, (int)Math.Round(width * scaling)),
-            Math.Max(1, (int)Math.Round(height * scaling)));
-    }
-
-    private void OnPositionChanged(object? sender, PixelPointEventArgs e) => SchedulePlacementSave();
-
-    private void OnResized(object? sender, WindowResizedEventArgs e) => SchedulePlacementSave();
-
-    private void SchedulePlacementSave()
-    {
-        if (!_placementRestored)
-        {
-            return;
-        }
-
+        if (!_isLoadedAndRestored) return;
         _savePlacementTimer.Stop();
         _savePlacementTimer.Start();
     }
@@ -214,19 +151,12 @@ public partial class DesktopLyricsWindow : LuminaFloatingWindow
     private void OnSavePlacementTick(object? sender, EventArgs e)
     {
         _savePlacementTimer.Stop();
-        SavePlacement();
-    }
+        if (!_isLoadedAndRestored || WindowState != WindowState.Normal) return;
 
-    private void SavePlacement()
-    {
-        if (!_placementRestored || WindowState != WindowState.Normal)
-        {
-            return;
-        }
-
-        var position = Position;
-        MusicService.FloatingLyricsWindowX = position.X;
-        MusicService.FloatingLyricsWindowY = position.Y;
+        // 用户拖动停下后，直接把当前坐标写入数据库
+        var pos = Position;
+        MusicService.FloatingLyricsWindowX = pos.X;
+        MusicService.FloatingLyricsWindowY = pos.Y;
 
         var width = Bounds.Width > 0 ? Bounds.Width : Width;
         if (!double.IsNaN(width) && width > 0)
