@@ -55,6 +55,12 @@ public partial class SettingsViewModel : ViewModelBase
     /// <summary>当前应用版本，展示在「关于」区块。</summary>
     public string AppVersionText => $"当前版本 {UpdateService.Instance.CurrentVersion}";
 
+    public string ProjectGithubUrl => "https://github.com/j4587698/VibeMusic";
+    public string AuthorGithubUrl => "https://github.com/j4587698";
+
+    [ObservableProperty]
+    private bool _isDisclaimerDialogOpen;
+
     [ObservableProperty]
     private bool _isBusy;
 
@@ -838,6 +844,46 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         return Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private void OpenProjectGithub()
+    {
+        OpenExternalUrl(ProjectGithubUrl);
+    }
+
+    [RelayCommand]
+    private void OpenAuthorGithub()
+    {
+        OpenExternalUrl(AuthorGithubUrl);
+    }
+
+    [RelayCommand]
+    private void OpenDisclaimerDialog()
+    {
+        IsDisclaimerDialogOpen = true;
+    }
+
+    [RelayCommand]
+    private void CloseDisclaimerDialog()
+    {
+        IsDisclaimerDialogOpen = false;
+    }
+
+    private static void OpenExternalUrl(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+            // 忽略浏览器启动异常
+        }
     }
 
     [RelayCommand]

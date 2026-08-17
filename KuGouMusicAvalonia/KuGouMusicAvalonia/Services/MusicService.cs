@@ -426,6 +426,13 @@ public static class MusicService
         set => SetNullableIntSetting(LocalSettingKeys.FloatingLyricsOverlayY, value);
     }
 
+    /// <summary>是否已同意免责声明。</summary>
+    public static bool DisclaimerAccepted
+    {
+        get => LocalMusicStore.Instance.DisclaimerAccepted;
+        set => LocalMusicStore.Instance.SetDisclaimerAccepted(value);
+    }
+
     private static int? GetNullableIntSetting(string key)
     {
         var raw = LocalMusicStore.Instance.GetStringSetting(key, string.Empty);

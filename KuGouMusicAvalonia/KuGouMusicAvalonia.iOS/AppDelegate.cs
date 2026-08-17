@@ -25,12 +25,14 @@ public partial class AppDelegate : AvaloniaAppDelegate<App>
         PlatformAudioStorage.Initialize(new FileSystemAudioStorage(() => MusicService.DownloadDirectory));
 
         var result = base.FinishedLaunching(application, launchOptions);
+        PlatformApplicationService.ExitApplication = () => Environment.Exit(0);
         IosMediaControlManager.Instance.Initialize();
         return result;
     }
 
     public override void WillTerminate(UIApplication application)
     {
+        PlatformApplicationService.ExitApplication = null;
         IosMediaControlManager.Instance.Dispose();
         base.WillTerminate(application);
     }
