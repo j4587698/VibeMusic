@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!-- Manually maintain unified app version here for all platforms. -->
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
 
     <!--
       必须由 Version 派生，不能各写各的。
@@ -14,6 +14,6 @@
     <InformationalVersion>$(Version)</InformationalVersion>
 
     <!-- Android version code must be an integer and should increase monotonically. -->
-    <AppVersionCode>11</AppVersionCode>
+    <AppVersionCode>12</AppVersionCode>
   </PropertyGroup>
 </Project>
