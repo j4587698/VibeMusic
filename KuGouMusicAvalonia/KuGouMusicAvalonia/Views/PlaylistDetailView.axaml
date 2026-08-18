@@ -47,14 +47,7 @@
 
       <ListBox.DataTemplates>
         <DataTemplate DataType="vm:PlaylistDetailHeaderSection">
-          <StackPanel Margin="12,0,12,16" Spacing="16">
-            <Button Classes="Ghost" Command="{Binding $parent[UserControl].((vm:PlaylistDetailViewModel)DataContext).BackCommand}" HorizontalAlignment="Left" Padding="0" Background="Transparent">
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <icons:MaterialIcon Kind="ArrowLeft" Width="24" Height="24" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <TextBlock Text="返回歌单" FontWeight="Bold" Foreground="{DynamicResource MusicPrimaryBrush}" />
-              </StackPanel>
-            </Button>
-
+          <StackPanel Margin="12,4,12,16" Spacing="16">
             <Border CornerRadius="22" Background="{DynamicResource MusicHeroGradient}" ClipToBounds="True" MinHeight="188" BoxShadow="{DynamicResource MusicFloatingShadow}">
               <Grid Margin="18" ColumnDefinitions="112,*" ColumnSpacing="16">
                 <Border Width="104" Height="104" CornerRadius="18" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True" BoxShadow="{DynamicResource MusicSoftShadow}" VerticalAlignment="Center">

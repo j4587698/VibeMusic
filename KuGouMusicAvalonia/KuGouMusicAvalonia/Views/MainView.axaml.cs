@@ -31,7 +31,10 @@ public partial class MainView : UserControl
     private static readonly HashSet<string> InnerNavigationKeys = new(StringComparer.Ordinal)
     {
         "NavHistory",
-        "NavCloud"
+        "NavCloud",
+        "NavPlaylistDetail",
+        "NavArtistDetail",
+        "NavRankingDetail"
     };
 
     private readonly List<PageContentHost> _pageHosts = new();
@@ -225,12 +228,12 @@ public partial class MainView : UserControl
         return host;
     }
 
-    private LuminaPage CreateShellPage(string navigationKey, object viewModel)
+    private LuminaPage CreateShellPage(string navigationKey, object viewModel, string? shellTitle = null)
     {
         return new LuminaPage
         {
             NavigationKey = navigationKey,
-            ShellTitle = ResolveShellTitle(navigationKey),
+            ShellTitle = shellTitle ?? ResolveShellTitle(navigationKey, viewModel),
             Content = CreatePageHost(viewModel),
             Padding = default
         };
@@ -323,7 +326,8 @@ public partial class MainView : UserControl
         Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
         {
             _isStackOperationRunning = false;
-            await PushPageAsync(new PlaylistDetailViewModel(playlist), "NavPlaylists");
+            var vm = new PlaylistDetailViewModel(playlist);
+            await PushPageAsync(vm, "NavPlaylistDetail", shellTitle: vm.Title);
         });
     }
 
@@ -337,7 +341,8 @@ public partial class MainView : UserControl
         Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
         {
             _isStackOperationRunning = false;
-            await PushPageAsync(new RankingDetailViewModel(rank), "NavRankings");
+            var vm = new RankingDetailViewModel(rank);
+            await PushPageAsync(vm, "NavRankingDetail", shellTitle: vm.Title);
         });
     }
 
@@ -351,11 +356,12 @@ public partial class MainView : UserControl
         Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
         {
             _isStackOperationRunning = false;
-            await PushPageAsync(new ArtistDetailViewModel(artist), "NavArtists");
+            var vm = new ArtistDetailViewModel(artist);
+            await PushPageAsync(vm, "NavArtistDetail", shellTitle: vm.Title);
         });
     }
 
-    private async Task PushPageAsync(object viewModel, string navigationKey, bool fullScreen = false)
+    private async Task PushPageAsync(object viewModel, string navigationKey, string? shellTitle = null, bool fullScreen = false)
     {
         if (_isStackOperationRunning)
         {
@@ -365,7 +371,7 @@ public partial class MainView : UserControl
         _isStackOperationRunning = true;
         try
         {
-            var page = CreateShellPage(navigationKey, viewModel);
+            var page = CreateShellPage(navigationKey, viewModel, shellTitle);
             await AppShell.PushAsync(page, CreatePushOptions(fullScreen));
             SyncActiveNavigationKey(navigationKey);
         }
@@ -463,13 +469,30 @@ public partial class MainView : UserControl
         };
     }
 
-    private static string? ResolveShellTitle(string navigationKey)
+    private static string? ResolveShellTitle(string navigationKey, object? viewModel = null)
     {
+        if (viewModel is PlaylistDetailViewModel playlistVm)
+        {
+            return string.IsNullOrWhiteSpace(playlistVm.Title) ? "歌单详情" : playlistVm.Title;
+        }
+
+        if (viewModel is ArtistDetailViewModel artistVm)
+        {
+            return string.IsNullOrWhiteSpace(artistVm.Title) ? "歌手详情" : artistVm.Title;
+        }
+
+        if (viewModel is RankingDetailViewModel rankVm)
+        {
+            return string.IsNullOrWhiteSpace(rankVm.Title) ? "排行榜" : rankVm.Title;
+        }
+
         return navigationKey switch
         {
-    
             "NavHistory" => "播放记录",
-            "NavCloud" => "云盘",
+            "NavCloud" => "我的云盘",
+            "NavPlaylistDetail" => "歌单详情",
+            "NavArtistDetail" => "歌手详情",
+            "NavRankingDetail" => "排行榜",
             _ => null
         };
     }
