@@ -306,17 +306,22 @@
               Padding="16"
               BoxShadow="{DynamicResource MusicFloatingShadow}">
         <Grid RowDefinitions="Auto,Auto,*" RowSpacing="12">
-          <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+          <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
             <StackPanel Spacing="2">
               <TextBlock Text="播放队列" FontSize="20" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
               <lumina:LuminaAutoScrollText Text="{Binding Player.QueueStatusText}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
             </StackPanel>
-            <Button Grid.Column="1" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding ClearQueueCommand}" IsVisible="{Binding Player.HasQueue}" ToolTip.Tip="清空播放队列" lumina:LuminaButton.IconSize="22">
+            <Button Grid.Column="1" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding OpenCreatePlaylistDialogCommand}" IsVisible="{Binding Player.HasQueue}" ToolTip.Tip="将当前队列保存为歌单" lumina:LuminaButton.IconSize="22">
+              <lumina:LuminaButton.Icon>
+                <icons:MaterialIcon Kind="PlaylistPlus" Width="22" Height="22" Foreground="{DynamicResource MusicPrimaryBrush}" />
+              </lumina:LuminaButton.Icon>
+            </Button>
+            <Button Grid.Column="2" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding ClearQueueCommand}" IsVisible="{Binding Player.HasQueue}" ToolTip.Tip="清空播放队列" lumina:LuminaButton.IconSize="22">
   <lumina:LuminaButton.Icon>
     <icons:MaterialIcon Kind="DeleteOutline" Width="22" Height="22" Foreground="{DynamicResource MusicTextSoftBrush}" />
   </lumina:LuminaButton.Icon>
 </Button>
-            <Button Grid.Column="2" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding CloseQueueCommand}" ToolTip.Tip="关闭播放队列" lumina:LuminaButton.IconSize="22">
+            <Button Grid.Column="3" Classes="Ghost Icon" Width="36" Height="36" Command="{Binding CloseQueueCommand}" ToolTip.Tip="关闭播放队列" lumina:LuminaButton.IconSize="22">
   <lumina:LuminaButton.Icon>
     <icons:MaterialIcon Kind="Close" Width="22" Height="22" Foreground="{DynamicResource MusicTextSoftBrush}" />
   </lumina:LuminaButton.Icon>
@@ -467,6 +472,81 @@
               </Button>
               <Button Grid.Column="1" Classes="Primary" Command="{Binding AcceptFirstLaunchDisclaimerCommand}" Height="42" CornerRadius="21" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Background="{DynamicResource MusicPrimaryGradient}">
                 <TextBlock Text="同意并继续" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- 保存播放队列为歌单弹窗 -->
+    <Grid IsVisible="{Binding IsCreatePlaylistDialogOpen}"
+          ZIndex="90">
+      <Border Background="{DynamicResource MusicFloatingGlassBrush}" />
+      <Border Width="460"
+              MaxWidth="520"
+              Margin="24"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              CornerRadius="20"
+              Background="{DynamicResource MusicSurfaceBrush}"
+              BorderBrush="{DynamicResource MusicOutlineBrush}"
+              BorderThickness="1"
+              BoxShadow="{DynamicResource MusicFloatingShadow}"
+              ClipToBounds="True">
+        <Grid RowDefinitions="Auto,Auto,Auto">
+          <!-- 弹窗标题 -->
+          <Grid Margin="22,18,22,12" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+              <Border Width="36" Height="36" CornerRadius="18" Background="{DynamicResource MusicPrimaryGradient}" VerticalAlignment="Center">
+                <icons:MaterialIcon Kind="PlaylistPlus" Width="20" Height="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <StackPanel VerticalAlignment="Center" Spacing="1">
+                <TextBlock Text="保存为歌单" FontSize="18" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" />
+                <TextBlock Text="{Binding Player.QueueCountText, StringFormat='将当前队列中的 {0} 首歌曲生成新歌单'}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              </StackPanel>
+            </StackPanel>
+            <Button Grid.Column="1" Classes="Ghost Icon" Command="{Binding CloseCreatePlaylistDialogCommand}" Width="32" Height="32" ToolTip.Tip="关闭" lumina:LuminaButton.IconSize="18">
+              <lumina:LuminaButton.Icon>
+                <icons:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              </lumina:LuminaButton.Icon>
+            </Button>
+          </Grid>
+
+          <!-- 弹窗表单 -->
+          <StackPanel Grid.Row="1" Margin="22,6,22,18" Spacing="14">
+            <StackPanel Spacing="6">
+              <TextBlock Text="歌单名称" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
+              <TextBox Text="{Binding CreatePlaylistName, Mode=TwoWay}"
+                       PlaceholderText="输入歌单名称"
+                       CornerRadius="12"
+                       Height="40"
+                       VerticalContentAlignment="Center"
+                       Padding="12,0" />
+            </StackPanel>
+
+            <CheckBox IsChecked="{Binding CreatePlaylistIsPrivate, Mode=TwoWay}"
+                      Content="设为隐私歌单（仅自己可见）"
+                      Foreground="{DynamicResource MusicTextBrush}"
+                      FontSize="13" />
+
+            <!-- 错误信息提示 -->
+            <Border IsVisible="{Binding HasCreatePlaylistError}"
+                    CornerRadius="10"
+                    Background="{DynamicResource LuminaSystemErrorAlphaBrush}"
+                    Padding="12,8">
+              <TextBlock Text="{Binding CreatePlaylistErrorText}" Foreground="{DynamicResource LuminaSystemErrorBrush}" FontSize="12" TextWrapping="Wrap" />
+            </Border>
+          </StackPanel>
+
+          <!-- 底部按钮 -->
+          <Border Grid.Row="2" Padding="22,12,22,18" BorderBrush="{DynamicResource LuminaDividerBrush}" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+              <Button Classes="Outline" Command="{Binding CloseCreatePlaylistDialogCommand}" Height="40" CornerRadius="20" Padding="14,0" BorderBrush="{DynamicResource LuminaDividerBrush}">
+                <TextBlock Text="取消" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Button>
+              <Button Grid.Column="1" Classes="Primary" Command="{Binding ConfirmCreatePlaylistCommand}" Height="40" CornerRadius="20" lumina:LuminaButton.IsLoading="{Binding IsSavingPlaylist}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Background="{DynamicResource MusicPrimaryGradient}">
+                <TextBlock Text="确定生成" FontWeight="Black" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
               </Button>
             </Grid>
           </Border>

@@ -47,6 +47,8 @@ public sealed partial class UserLibraryCacheItemRecord
     public string Title { get; set; } = string.Empty;
     public string Subtitle { get; set; } = string.Empty;
     public string CoverUrl { get; set; } = string.Empty;
+    public int ListId { get; set; }
+    public string GlobalCollectionId { get; set; } = string.Empty;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
 

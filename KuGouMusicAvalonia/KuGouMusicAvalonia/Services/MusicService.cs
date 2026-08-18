@@ -153,26 +153,38 @@ public static class MusicService
         return Client.RawGatewayAsync("/cloudlist.service/v5/add_list", HttpMethod.Post, parameters, body, cancellationToken: cancellationToken);
     }
 
+
+
     public static Task<KugouResponse> AddSongsToPlaylistAsync(int listId, IEnumerable<KugouSong> songs, CancellationToken cancellationToken = default)
     {
         var userId = Client.CookieStore.Get("userid") ?? "0";
         var token = Client.CookieStore.Get("token") ?? string.Empty;
         var clientTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var resources = songs
+        var songList = songs
             .Where(song => song is not null && !string.IsNullOrWhiteSpace(song.Hash))
-            .Select(song => new Dictionary<string, object?>(StringComparer.Ordinal)
+            .ToList();
+
+        var resources = new List<Dictionary<string, object?>>();
+        for (int i = 0; i < songList.Count; i++)
+        {
+            var song = songList[i];
+            var fullName = !string.IsNullOrWhiteSpace(song.Artist) && !song.Title.Contains(song.Artist, StringComparison.OrdinalIgnoreCase)
+                ? $"{song.Artist} - {song.Title}"
+                : song.Title;
+
+            resources.Add(new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 ["number"] = 1,
-                ["name"] = song.Title,
+                ["name"] = fullName,
                 ["hash"] = song.Hash,
                 ["size"] = 0,
-                ["sort"] = 0,
-                ["timelen"] = 0,
+                ["sort"] = i + 1,
+                ["timelen"] = song.Duration,
                 ["bitrate"] = 0,
                 ["album_id"] = ParseLongOrZero(song.AlbumId),
-                ["mixsongid"] = song.MixSongId
-            })
-            .ToArray();
+                ["mixsongid"] = song.MixSongId > 0 ? song.MixSongId : ParseLongOrZero(song.SongId)
+            });
+        }
 
         var body = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
@@ -183,7 +195,7 @@ public static class MusicService
             ["type"] = 0,
             ["slow_upload"] = 1,
             ["scene"] = "false;null",
-            ["data"] = resources
+            ["data"] = resources.ToArray()
         };
         var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
@@ -503,6 +515,69 @@ public static class MusicService
         return playlist.IsDefault == true ||
             playlist.Name.Contains("我喜欢", StringComparison.OrdinalIgnoreCase) ||
             playlist.Name.Contains("喜欢", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool TryParsePlaylistId(KugouResponse response, out int listId)
+    {
+        listId = 0;
+        using var doc = response.TryParseJson();
+        if (doc is null) return false;
+
+        var root = doc.RootElement;
+        if (root.ValueKind != JsonValueKind.Object) return false;
+
+        if (TryExtractListId(root, out listId)) return true;
+
+        if (root.TryGetProperty("data", out var data))
+        {
+            if (data.ValueKind == JsonValueKind.Object)
+            {
+                if (TryExtractListId(data, out listId)) return true;
+                if (data.TryGetProperty("info", out var dataInfo) && dataInfo.ValueKind == JsonValueKind.Object && TryExtractListId(dataInfo, out listId))
+                    return true;
+                if (data.TryGetProperty("list", out var listNode) && listNode.ValueKind == JsonValueKind.Array && listNode.GetArrayLength() > 0)
+                {
+                    var first = listNode[0];
+                    if (first.ValueKind == JsonValueKind.Object && TryExtractListId(first, out listId))
+                        return true;
+                }
+            }
+            if (data.ValueKind == JsonValueKind.Number && data.TryGetInt32(out listId) && listId > 0)
+                return true;
+            if (data.ValueKind == JsonValueKind.String && int.TryParse(data.GetString(), out listId) && listId > 0)
+                return true;
+        }
+
+        if (root.TryGetProperty("info", out var info) && info.ValueKind == JsonValueKind.Object && TryExtractListId(info, out listId))
+            return true;
+
+        return false;
+    }
+
+    private static bool TryExtractListId(JsonElement element, out int listId)
+    {
+        listId = 0;
+        if (element.TryGetProperty("listid", out var p1))
+        {
+            if (p1.ValueKind == JsonValueKind.Number && p1.TryGetInt32(out listId) && listId > 0) return true;
+            if (p1.ValueKind == JsonValueKind.String && int.TryParse(p1.GetString(), out listId) && listId > 0) return true;
+        }
+        if (element.TryGetProperty("list_id", out var p2))
+        {
+            if (p2.ValueKind == JsonValueKind.Number && p2.TryGetInt32(out listId) && listId > 0) return true;
+            if (p2.ValueKind == JsonValueKind.String && int.TryParse(p2.GetString(), out listId) && listId > 0) return true;
+        }
+        if (element.TryGetProperty("global_collection_id", out var p3))
+        {
+            if (p3.ValueKind == JsonValueKind.Number && p3.TryGetInt32(out listId) && listId > 0) return true;
+            if (p3.ValueKind == JsonValueKind.String && int.TryParse(p3.GetString(), out listId) && listId > 0) return true;
+        }
+        if (element.TryGetProperty("id", out var p4))
+        {
+            if (p4.ValueKind == JsonValueKind.Number && p4.TryGetInt32(out listId) && listId > 0) return true;
+            if (p4.ValueKind == JsonValueKind.String && int.TryParse(p4.GetString(), out listId) && listId > 0) return true;
+        }
+        return false;
     }
 
     private static int ResolvePlaylistListId(KugouPlaylist? playlist)

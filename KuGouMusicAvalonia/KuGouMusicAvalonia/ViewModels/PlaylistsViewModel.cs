@@ -83,6 +83,10 @@ public partial class PlaylistsViewModel : ViewModelBase
     {
         RebuildPageItems();
         _ = LoadDataAsync();
+        ShellNavigationService.Instance.PlaylistsRefreshRequested += () =>
+        {
+            _ = LoadUserPlaylistsAsync();
+        };
     }
 
     public void SetPlaylistCardsPerRow(int cardsPerRow)
@@ -337,14 +341,17 @@ public partial class PlaylistsViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task LoadUserPlaylistsAsync()
+    public async Task LoadUserPlaylistsAsync()
     {
         if (IsUserPlaylistsLoading) return;
-        UserPlaylists.Clear();
 
         if (!MusicService.IsLoggedIn)
         {
-            UserPlaylistStatusMessage = "登录后可查看和创建自己的歌单";
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                UserPlaylists.Clear();
+                UserPlaylistStatusMessage = "登录后可查看和创建自己的歌单";
+            });
             return;
         }
 
@@ -354,16 +361,23 @@ public partial class PlaylistsViewModel : ViewModelBase
         try
         {
             var result = await MusicService.Client.GetUserPlaylistsTypedAsync(page: 1, pageSize: 40);
-            foreach (var playlist in result.Items)
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
-                UserPlaylists.Add(playlist);
-            }
+                UserPlaylists.Clear();
+                foreach (var playlist in result.Items)
+                {
+                    UserPlaylists.Add(playlist);
+                }
 
-            UserPlaylistStatusMessage = UserPlaylists.Count > 0 ? $"已同步 {UserPlaylists.Count} 个歌单" : "还没有同步到自己的歌单";
+                UserPlaylistStatusMessage = UserPlaylists.Count > 0 ? $"已同步 {UserPlaylists.Count} 个歌单" : "还没有同步到自己的歌单";
+            });
         }
         catch (System.Exception ex)
         {
-            UserPlaylistStatusMessage = $"我的歌单同步失败：{ex.Message}";
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                UserPlaylistStatusMessage = $"我的歌单同步失败：{ex.Message}";
+            });
         }
         finally
         {
@@ -391,11 +405,16 @@ public partial class PlaylistsViewModel : ViewModelBase
 
         try
         {
-            await MusicService.CreatePlaylistAsync(name);
-            await LoadUserPlaylistsAsync();
+            var response = await MusicService.CreatePlaylistAsync(name);
+            int listId = 0;
+            if (!MusicService.TryParsePlaylistId(response, out listId) || listId <= 0)
+            {
+                var userPlaylists = await MusicService.Client.GetUserPlaylistsTypedAsync(page: 1, pageSize: 40);
+                var found = userPlaylists.Items.FirstOrDefault(playlist => playlist.Name == name);
+                listId = found?.Listid ?? found?.OriginalId ?? found?.Id ?? 0;
+            }
 
-            var created = UserPlaylists.FirstOrDefault(playlist => playlist.Name == name && playlist.Listid is int);
-            if (CreatePlaylistFromQueue && created?.Listid is int listId && PlayerService.Instance.Queue.Count > 0)
+            if (CreatePlaylistFromQueue && listId > 0 && PlayerService.Instance.Queue.Count > 0)
             {
                 await MusicService.AddSongsToPlaylistAsync(listId, PlayerService.Instance.Queue.ToList());
                 UserPlaylistStatusMessage = $"已创建歌单，并保存当前队列 {PlayerService.Instance.Queue.Count} 首";
@@ -406,6 +425,8 @@ public partial class PlaylistsViewModel : ViewModelBase
             }
 
             NewPlaylistName = string.Empty;
+            await LoadUserPlaylistsAsync();
+            ShellNavigationService.Instance.RefreshPlaylists();
         }
         catch (System.Exception ex)
         {

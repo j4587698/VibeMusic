@@ -118,38 +118,59 @@
           </Grid>
 
           <UniformGrid Columns="3">
-            <Border Classes="UserLibraryMetric"
+            <Button HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Padding="0"
                     Margin="0,0,10,0"
-                    Padding="12,10"
-                    CornerRadius="12"
+                    Background="Transparent"
+                    BorderThickness="0"
                     Cursor="Hand"
-                    lumina:LuminaCommand.TappedCommand="{Binding OpenUserPlaylistsCommand}">
-              <StackPanel Spacing="3" MinWidth="0">
-                <TextBlock Text="{Binding UserPlaylistCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <TextBlock Text="歌单" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
-              </StackPanel>
-            </Border>
-            <Border Classes="UserLibraryMetric"
+                    Command="{Binding OpenUserPlaylistsCommand}">
+              <Border Classes="UserLibraryMetric"
+                      Padding="12,10"
+                      CornerRadius="12"
+                      IsHitTestVisible="False">
+                <StackPanel Spacing="3" MinWidth="0">
+                  <TextBlock Text="{Binding UserPlaylistCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                  <TextBlock Text="歌单" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                </StackPanel>
+              </Border>
+            </Button>
+            <Button HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Padding="0"
                     Margin="0,0,10,0"
-                    Padding="12,10"
-                    CornerRadius="12"
+                    Background="Transparent"
+                    BorderThickness="0"
                     Cursor="Hand"
-                    lumina:LuminaCommand.TappedCommand="{Binding OpenUserCloudCommand}">
-              <StackPanel Spacing="3" MinWidth="0">
-                <TextBlock Text="{Binding UserCollectionCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <TextBlock Text="云盘/收藏" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
-              </StackPanel>
-            </Border>
-            <Border Classes="UserLibraryMetric"
-                    Padding="12,10"
-                    CornerRadius="12"
+                    Command="{Binding OpenUserCloudCommand}">
+              <Border Classes="UserLibraryMetric"
+                      Padding="12,10"
+                      CornerRadius="12"
+                      IsHitTestVisible="False">
+                <StackPanel Spacing="3" MinWidth="0">
+                  <TextBlock Text="{Binding UserCollectionCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                  <TextBlock Text="云盘/收藏" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                </StackPanel>
+              </Border>
+            </Button>
+            <Button HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    Padding="0"
+                    Background="Transparent"
+                    BorderThickness="0"
                     Cursor="Hand"
-                    lumina:LuminaCommand.TappedCommand="{Binding OpenUserHistoryCommand}">
-              <StackPanel Spacing="3" MinWidth="0">
-                <TextBlock Text="{Binding UserHistoryCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
-                <TextBlock Text="最近播放" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
-              </StackPanel>
-            </Border>
+                    Command="{Binding OpenUserHistoryCommand}">
+              <Border Classes="UserLibraryMetric"
+                      Padding="12,10"
+                      CornerRadius="12"
+                      IsHitTestVisible="False">
+                <StackPanel Spacing="3" MinWidth="0">
+                  <TextBlock Text="{Binding UserHistoryCountText}" FontSize="24" FontWeight="Black" Foreground="{DynamicResource MusicPrimaryBrush}" />
+                  <TextBlock Text="最近播放" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                </StackPanel>
+              </Border>
+            </Button>
           </UniformGrid>
 
           <StackPanel IsVisible="{Binding IsCompactLayout}" Spacing="10">
@@ -157,32 +178,37 @@
             <ItemsControl ItemsSource="{Binding UserLibraryPreview}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:UserLibraryItem">
-                  <Grid ColumnDefinitions="42,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
-                    <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True">
+                  <Grid ColumnDefinitions="42,*,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,8">
+                    <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True"
+                            Cursor="Hand"
+                            lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).OpenUserLibraryItemCommand}"
+                            lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                       <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                     </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0"
+                                Cursor="Hand"
+                                lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).OpenUserLibraryItemCommand}"
+                                lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                       <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
                       <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
                     </StackPanel>
                     <Border Grid.Column="2" CornerRadius="10" Background="{DynamicResource MusicSurfaceHighBrush}" Padding="8,3" VerticalAlignment="Center">
                       <TextBlock Text="{Binding Category}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource MusicTextSoftBrush}" />
                     </Border>
+                    <Button Grid.Column="3" Classes="Primary Icon" Width="32" Height="32" CornerRadius="16" ToolTip.Tip="播放"
+                            Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).PlayUserLibraryItemCommand}"
+                            CommandParameter="{Binding}"
+                            Background="{DynamicResource MusicPrimaryGradient}"
+                            VerticalAlignment="Center">
+                      <icons:MaterialIcon Kind="Play" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="20" Height="20" />
+                    </Button>
                   </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
           </StackPanel>
 
-          <WrapPanel HorizontalAlignment="Right">
-            <Button Classes="Ghost Icon" Command="{Binding ShowDeviceListCommand}" Height="36" CornerRadius="18" Padding="12,0" Margin="0,0,8,0" Background="{DynamicResource MusicSurfaceHighBrush}">
-              <StackPanel Orientation="Horizontal" Spacing="6">
-                <icons:MaterialIcon Kind="Devices" Width="18" Height="18" Foreground="{DynamicResource MusicTextBrush}" />
-                <TextBlock Text="设备管理" FontWeight="Bold" VerticalAlignment="Center" />
-              </StackPanel>
-            </Button>
 
-          </WrapPanel>
 
           <Grid IsVisible="{Binding IsWideLayout}" ColumnDefinitions="*,*,*" ColumnSpacing="14">
             <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
@@ -194,14 +220,27 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:UserLibraryItem">
-                    <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
-                      <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True">
+                    <Grid ColumnDefinitions="42,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
+                      <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True"
+                              Cursor="Hand"
+                              lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).OpenUserLibraryItemCommand}"
+                              lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                         <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                       </Border>
-                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0"
+                                  Cursor="Hand"
+                                  lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).OpenUserLibraryItemCommand}"
+                                  lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                         <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
                         <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
                       </StackPanel>
+                      <Button Grid.Column="2" Classes="Primary Icon" Width="32" Height="32" CornerRadius="16" ToolTip.Tip="播放歌单"
+                              Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).PlayUserLibraryItemCommand}"
+                              CommandParameter="{Binding}"
+                              Background="{DynamicResource MusicPrimaryGradient}"
+                              VerticalAlignment="Center">
+                        <icons:MaterialIcon Kind="Play" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="20" Height="20" />
+                      </Button>
                     </Grid>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -217,14 +256,27 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="vm:UserLibraryItem">
-                    <Grid ColumnDefinitions="42,*" ColumnSpacing="10" Margin="0,0,0,8">
-                      <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True">
+                    <Grid ColumnDefinitions="42,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
+                      <Border Width="42" Height="42" CornerRadius="8" Background="{DynamicResource MusicSurfaceHighBrush}" ClipToBounds="True"
+                              Cursor="Hand"
+                              lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).OpenUserLibraryItemCommand}"
+                              lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                         <lumina:LuminaImage Source="{Binding CoverUrl, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
                       </Border>
-                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0">
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" MinWidth="0"
+                                  Cursor="Hand"
+                                  lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).OpenUserLibraryItemCommand}"
+                                  lumina:LuminaCommand.TappedCommandParameter="{Binding}">
                         <lumina:LuminaAutoScrollText Text="{Binding Title}" FontWeight="Bold" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
                         <lumina:LuminaAutoScrollText Text="{Binding Subtitle}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" HorizontalAlignment="Stretch" />
                       </StackPanel>
+                      <Button Grid.Column="2" Classes="Primary Icon" Width="32" Height="32" CornerRadius="16" ToolTip.Tip="播放"
+                              Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).PlayUserLibraryItemCommand}"
+                              CommandParameter="{Binding}"
+                              Background="{DynamicResource MusicPrimaryGradient}"
+                              VerticalAlignment="Center">
+                        <icons:MaterialIcon Kind="Play" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Width="20" Height="20" />
+                      </Button>
                     </Grid>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
