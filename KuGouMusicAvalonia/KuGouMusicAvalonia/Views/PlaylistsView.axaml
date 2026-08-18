@@ -104,28 +104,20 @@
               </ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="kugou:KugouPlaylist">
-                  <Button HorizontalAlignment="Stretch"
-                          HorizontalContentAlignment="Stretch"
-                          Padding="0"
-                          Margin="0,0,12,16"
-                          Background="Transparent"
-                          BorderThickness="0"
-                          Cursor="Hand"
-                          Command="{Binding $parent[UserControl].((vm:PlaylistsViewModel)DataContext).OpenPlaylistCommand}"
-                          CommandParameter="{Binding}">
-                    <lumina:LuminaCard Width="188" Height="88" Padding="10" Classes="Interactive" CornerRadius="14" IsHitTestVisible="False">
-                      <Grid ColumnDefinitions="64,*" ColumnSpacing="10">
-                        <Border Width="62" Height="62" CornerRadius="12" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
-                          <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
-                        </Border>
-                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
-                          <lumina:LuminaAutoScrollText Text="{Binding Name}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-                          <TextBlock Text="{Binding Count, StringFormat='{}{0} 首'}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
-                          <TextBlock Text="我的歌单" FontSize="11" Foreground="{DynamicResource MusicTextMutedBrush}" />
-                        </StackPanel>
-                      </Grid>
-                    </lumina:LuminaCard>
-                  </Button>
+                  <lumina:LuminaCard Width="188" Height="88" Margin="0,0,12,16" Padding="10" Classes="Interactive" CornerRadius="14" Cursor="Hand"
+                                     lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:PlaylistsViewModel)DataContext).OpenPlaylistCommand}"
+                                     lumina:LuminaCommand.TappedCommandParameter="{Binding}">
+                    <Grid ColumnDefinitions="64,*" ColumnSpacing="10">
+                      <Border Width="62" Height="62" CornerRadius="12" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+                        <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                      </Border>
+                      <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                        <lumina:LuminaAutoScrollText Text="{Binding Name}" IsRunning="{Binding $parent[lumina:LuminaCard].IsPointerOver}" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                        <TextBlock Text="{Binding Count, StringFormat='{}{0} 首'}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" />
+                        <TextBlock Text="我的歌单" FontSize="11" Foreground="{DynamicResource MusicTextMutedBrush}" />
+                      </StackPanel>
+                    </Grid>
+                  </lumina:LuminaCard>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -209,28 +201,20 @@
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate DataType="kugou:KugouPlaylist">
-              <Button HorizontalAlignment="Stretch"
-                      HorizontalContentAlignment="Stretch"
-                      Padding="0"
-                      Margin="0,0,10,12"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      Cursor="Hand"
-                      Command="{Binding $parent[UserControl].((vm:PlaylistsViewModel)DataContext).OpenPlaylistCommand}"
-                      CommandParameter="{Binding}">
-                <lumina:LuminaCard Width="144" Height="214" Padding="8" Classes="Interactive" CornerRadius="14" IsHitTestVisible="False">
-                  <StackPanel Spacing="12">
-                    <Border Width="128" Height="128" CornerRadius="13" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
-                      <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
-                    </Border>
-                    <StackPanel Spacing="6">
-                      <lumina:LuminaAutoScrollText Text="{Binding Name}" FontWeight="Black" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
-                      <lumina:LuminaAutoScrollText Text="{Binding Nickname}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
-                      <TextBlock Text="{Binding PlayCount, StringFormat='播放 {0}'}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
-                    </StackPanel>
+              <lumina:LuminaCard Width="144" Height="214" Margin="0,0,10,12" Padding="8" Classes="Interactive" CornerRadius="14" Cursor="Hand"
+                                 lumina:LuminaCommand.TappedCommand="{Binding $parent[UserControl].((vm:PlaylistsViewModel)DataContext).OpenPlaylistCommand}"
+                                 lumina:LuminaCommand.TappedCommandParameter="{Binding}">
+                <StackPanel Spacing="12">
+                  <Border Width="128" Height="128" CornerRadius="13" Background="{DynamicResource MusicCoverFallbackBrush}" ClipToBounds="True">
+                    <lumina:LuminaImage Source="{Binding Pic, Converter={StaticResource EmptyStringToNullConverter}}" PlaceholderContent=" " ErrorContent=" " />
+                  </Border>
+                  <StackPanel Spacing="6">
+                    <lumina:LuminaAutoScrollText Text="{Binding Name}" IsRunning="{Binding $parent[lumina:LuminaCard].IsPointerOver}" FontWeight="Black" FontSize="13" Foreground="{DynamicResource MusicTextBrush}" HorizontalAlignment="Stretch" />
+                    <lumina:LuminaAutoScrollText Text="{Binding Nickname}" IsRunning="{Binding $parent[lumina:LuminaCard].IsPointerOver}" FontSize="12" Foreground="{DynamicResource MusicTextSoftBrush}" HorizontalAlignment="Stretch" />
+                    <TextBlock Text="{Binding PlayCount, StringFormat='播放 {0}'}" FontSize="12" Foreground="{DynamicResource MusicTextMutedBrush}" TextTrimming="CharacterEllipsis" MaxLines="1" />
                   </StackPanel>
-                </lumina:LuminaCard>
-              </Button>
+                </StackPanel>
+              </lumina:LuminaCard>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
