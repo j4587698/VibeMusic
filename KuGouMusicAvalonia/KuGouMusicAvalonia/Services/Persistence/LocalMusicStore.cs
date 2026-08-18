@@ -1080,7 +1080,7 @@ internal sealed class LocalMusicStore : IDisposable
 
     private static UserLibraryCacheItem ToCacheItem(UserLibraryCacheItemRecord record)
     {
-        return new UserLibraryCacheItem(record.Title, record.Subtitle, record.CoverUrl);
+        return new UserLibraryCacheItem(record.Title, record.Subtitle, record.CoverUrl, record.ListId, record.GlobalCollectionId);
     }
 
     private static UserLibraryCacheItemRecord ToCacheRecord(string category, int position, UserLibraryCacheItem item, DateTime updatedAtUtc)
@@ -1093,6 +1093,8 @@ internal sealed class LocalMusicStore : IDisposable
             Title = item.Title,
             Subtitle = item.Subtitle,
             CoverUrl = item.CoverUrl,
+            ListId = item.ListId,
+            GlobalCollectionId = item.GlobalCollectionId,
             UpdatedAtUtc = updatedAtUtc
         };
     }
@@ -1108,7 +1110,7 @@ internal sealed record UserProfileCacheSnapshot(
     IReadOnlyList<UserLibraryCacheItem> Collections,
     DateTime UpdatedAtUtc);
 
-internal sealed record UserLibraryCacheItem(string Title, string Subtitle, string CoverUrl);
+internal sealed record UserLibraryCacheItem(string Title, string Subtitle, string CoverUrl, int ListId = 0, string GlobalCollectionId = "");
 
 internal static class UserLibraryCacheCategories
 {

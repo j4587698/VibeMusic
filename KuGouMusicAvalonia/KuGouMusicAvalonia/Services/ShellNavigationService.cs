@@ -20,6 +20,8 @@ public sealed class ShellNavigationService
     public event Action<KugouPlaylist>? PlaylistDetailRequested;
     public event Action<KugouRank>? RankingDetailRequested;
     public event Action<KugouArtist>? ArtistDetailRequested;
+    public event Action<string, TimeSpan?>? ToastRequested;
+    public event Action? PlaylistsRefreshRequested;
 
     public void Navigate(string key)
     {
@@ -67,5 +69,18 @@ public sealed class ShellNavigationService
     public void OpenArtistDetail(KugouArtist artist)
     {
         ArtistDetailRequested?.Invoke(artist);
+    }
+
+    public void ShowToast(string message, TimeSpan? duration = null)
+    {
+        if (!string.IsNullOrWhiteSpace(message))
+        {
+            ToastRequested?.Invoke(message, duration);
+        }
+    }
+
+    public void RefreshPlaylists()
+    {
+        PlaylistsRefreshRequested?.Invoke();
     }
 }

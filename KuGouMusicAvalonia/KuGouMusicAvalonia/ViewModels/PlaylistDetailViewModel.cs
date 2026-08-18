@@ -104,7 +104,10 @@ public partial class PlaylistDetailViewModel : ViewModelBase
 
     private async Task FetchPageAsync()
     {
-        var listIdStr = (Playlist.Listid as int?)?.ToString();
+        var listId = Playlist.Listid is > 0 ? Playlist.Listid :
+                     Playlist.OriginalId is > 0 ? Playlist.OriginalId :
+                     Playlist.Id > 0 ? (int?)Playlist.Id : null;
+        var listIdStr = listId?.ToString();
         var globalId = !string.IsNullOrWhiteSpace(Playlist.GlobalCollectionId) ? Playlist.GlobalCollectionId! : Playlist.Id.ToString();
         
         KugouListResult<KugouSong>? result = null;

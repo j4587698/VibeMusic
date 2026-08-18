@@ -274,9 +274,12 @@ public partial class SettingsViewModel : ViewModelBase
         DownloadDirectory = MusicService.DownloadDirectory;
         DefaultPlaybackQuality = MusicService.DefaultPlaybackQuality;
         PreferKrc = MusicService.PreferKrc;
-        _lastValidFloatingLyricsFontSize = (decimal)FloatingLyricsService.Instance.FontSize;
         FloatingLyricsFontSize = _lastValidFloatingLyricsFontSize;
         FloatingLyricsService.Instance.StateChanged += OnFloatingLyricsStateChanged;
+        ShellNavigationService.Instance.PlaylistsRefreshRequested += () =>
+        {
+            _ = RefreshUserDataAsync();
+        };
         ApplyThemeMode(ThemeMode);
         RefreshLoginState();
     }
@@ -291,11 +294,9 @@ public partial class SettingsViewModel : ViewModelBase
         }
 
         RefreshLocalHistory();
+        ApplyUserProfileCache();
         RebuildUserLibraryPreview();
-        if (!ApplyUserProfileCache())
-        {
-            await RefreshUserDataAsync();
-        }
+        _ = RefreshUserDataAsync();
     }
 
     partial void OnAutoReceiveVipBeforePlaybackChanged(bool value)
@@ -1005,7 +1006,7 @@ public partial class SettingsViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task RefreshUserDataAsync()
+    public async Task RefreshUserDataAsync()
     {
         if (IsProfileBusy) return;
         if (!IsLoggedIn)
@@ -1075,8 +1076,15 @@ public partial class SettingsViewModel : ViewModelBase
             var playlists = await MusicService.Client.GetUserPlaylistsTypedAsync(page: 1, pageSize: 40);
             ApplyProfileFallbackFromPlaylists(playlists.Items);
             var playlistItems = playlists.Items
-                .Take(4)
-                .Select(playlist => new UserLibraryItem(playlist.Name, $"{playlist.Count} 首 · {playlist.PlayCount} 播放", playlist.Pic, "歌单"))
+                .Take(6)
+                .Select(playlist => new UserLibraryItem(
+                    playlist.Name,
+                    $"{playlist.Count} 首 · {playlist.PlayCount} 播放",
+                    playlist.Pic,
+                    "歌单",
+                    playlist,
+                    playlist.Listid ?? playlist.OriginalId ?? playlist.Id,
+                    playlist.GlobalCollectionId ?? string.Empty))
                 .ToList();
             UserPlaylistCountText = CountText(playlists.Total, playlists.Items.Count);
             ReplaceUserLibraryItems(UserPlaylists, playlistItems);
@@ -1094,8 +1102,8 @@ public partial class SettingsViewModel : ViewModelBase
         {
             var cloud = await MusicService.Client.GetUserCloudTypedAsync(page: 1, pageSize: 8);
             var collectionItems = cloud.Items
-                .Take(4)
-                .Select(song => new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "云盘/收藏"))
+                .Take(6)
+                .Select(song => new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "云盘/收藏", Song: song))
                 .ToList();
             UserCollectionCountText = CountText(cloud.Total, cloud.Items.Count);
             ReplaceUserLibraryItems(UserCollections, collectionItems);
@@ -1223,7 +1231,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
         foreach (var song in UserHistory.Take(2))
         {
-            UserLibraryPreview.Add(new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "最近播放"));
+            UserLibraryPreview.Add(new UserLibraryItem(song.Title, song.Artist, song.CoverUrl, "最近播放", Song: song));
         }
     }
 
@@ -1238,12 +1246,25 @@ public partial class SettingsViewModel : ViewModelBase
 
     private static UserLibraryItem ToUserLibraryItem(UserLibraryCacheItem item, string category)
     {
-        return new UserLibraryItem(item.Title, item.Subtitle, item.CoverUrl, category);
+        var playlist = category == "歌单" || item.ListId > 0 || !string.IsNullOrWhiteSpace(item.GlobalCollectionId)
+            ? new KugouPlaylist
+            {
+                Name = item.Title,
+                Pic = item.CoverUrl,
+                Listid = item.ListId > 0 ? item.ListId : null,
+                Id = item.ListId,
+                GlobalCollectionId = string.IsNullOrWhiteSpace(item.GlobalCollectionId) ? null : item.GlobalCollectionId
+            }
+            : null;
+
+        return new UserLibraryItem(item.Title, item.Subtitle, item.CoverUrl, category, playlist, item.ListId, item.GlobalCollectionId);
     }
 
     private static UserLibraryCacheItem ToCacheItem(UserLibraryItem item)
     {
-        return new UserLibraryCacheItem(item.Title, item.Subtitle, item.CoverUrl);
+        var listId = item.Playlist?.Listid ?? item.Playlist?.OriginalId ?? (item.Playlist?.Id > 0 ? item.Playlist.Id : item.ListId);
+        var globalId = item.Playlist?.GlobalCollectionId ?? item.GlobalCollectionId;
+        return new UserLibraryCacheItem(item.Title, item.Subtitle, item.CoverUrl, listId, globalId);
     }
 
     private void NotifyLoginStateChanged()
@@ -1354,6 +1375,13 @@ public partial class SettingsViewModel : ViewModelBase
         }
         var index = UserHistory.IndexOf(song);
         await PlayerService.Instance.PlayQueueAsync(UserHistory.ToList(), index < 0 ? 0 : index, "最近播放", replaceQueue: true);
+    }
+
+    [RelayCommand]
+    private void AddHistorySongToQueue(KugouSong song)
+    {
+        if (song is null) return;
+        PlayerService.Instance.AppendToQueue(new[] { song });
     }
 
     [RelayCommand]
@@ -1472,11 +1500,104 @@ public partial class SettingsViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private Task SubmitCaptchaAsync()
+    private async Task OpenUserLibraryItemAsync(UserLibraryItem? item)
     {
-        return Task.CompletedTask;
+        if (item == null) return;
+
+        if (item.Song is not null)
+        {
+            await PlayerService.Instance.PlaySongAsync(item.Song);
+            return;
+        }
+
+        if (item.Playlist is not null)
+        {
+            ShellNavigationService.Instance.OpenPlaylistDetail(item.Playlist);
+            return;
+        }
+
+        if (item.Category == "歌单" || item.ListId > 0 || !string.IsNullOrWhiteSpace(item.GlobalCollectionId))
+        {
+            var playlist = new KugouPlaylist
+            {
+                Name = item.Title,
+                Pic = item.CoverUrl,
+                Listid = item.ListId > 0 ? item.ListId : null,
+                Id = item.ListId,
+                GlobalCollectionId = string.IsNullOrWhiteSpace(item.GlobalCollectionId) ? null : item.GlobalCollectionId
+            };
+            ShellNavigationService.Instance.OpenPlaylistDetail(playlist);
+            return;
+        }
+
+        if (item.Category == "云盘/收藏")
+        {
+            ShellNavigationService.Instance.Navigate("NavCloud");
+            return;
+        }
+
+        if (item.Category == "最近播放")
+        {
+            ShellNavigationService.Instance.Navigate("NavHistory");
+            return;
+        }
     }
 
+    [RelayCommand]
+    private async Task PlayUserLibraryItemAsync(UserLibraryItem? item)
+    {
+        if (item == null) return;
+
+        if (item.Song is not null)
+        {
+            if (PlayerService.IsSameSong(item.Song, PlayerService.Instance.CurrentSong))
+            {
+                PlayerService.Instance.TogglePlayPause();
+                return;
+            }
+            PlayerService.Instance.AppendToQueue(new[] { item.Song });
+            await PlayerService.Instance.PlayQueueSongAsync(item.Song);
+            return;
+        }
+
+        var listId = item.Playlist?.Listid ?? item.Playlist?.OriginalId ?? (item.Playlist?.Id > 0 ? item.Playlist.Id : item.ListId);
+        var globalCollectionId = item.Playlist?.GlobalCollectionId ?? item.GlobalCollectionId;
+
+        if (listId > 0 || !string.IsNullOrWhiteSpace(globalCollectionId))
+        {
+            try
+            {
+                IReadOnlyList<KugouSong> songs = Array.Empty<KugouSong>();
+                if (listId > 0)
+                {
+                    var result = await MusicService.Client.GetPlaylistTracksNewTypedAsync(listId.ToString(), page: 1, pageSize: 100);
+                    songs = result.Items;
+                }
+                else if (!string.IsNullOrWhiteSpace(globalCollectionId))
+                {
+                    var result = await MusicService.Client.GetPlaylistTracksTypedAsync(globalCollectionId, page: 1, pageSize: 100);
+                    songs = result.Items;
+                }
+
+                if (songs.Count > 0)
+                {
+                    await PlayerService.Instance.PlayQueueAsync(songs.ToList(), 0, item.Title, replaceQueue: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SettingsViewModel] Play playlist failed: {ex.Message}");
+            }
+        }
+    }
 }
 
-public sealed record UserLibraryItem(string Title, string Subtitle, string CoverUrl, string Category = "");
+public sealed record UserLibraryItem(
+    string Title,
+    string Subtitle,
+    string CoverUrl,
+    string Category = "",
+    KugouPlaylist? Playlist = null,
+    int ListId = 0,
+    string GlobalCollectionId = "",
+    KugouSong? Song = null);

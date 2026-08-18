@@ -94,6 +94,7 @@ public partial class MainView : UserControl
         navigation.PlaylistDetailRequested += OnPlaylistDetailRequested;
         navigation.RankingDetailRequested += OnRankingDetailRequested;
         navigation.ArtistDetailRequested += OnArtistDetailRequested;
+        navigation.ToastRequested += OnToastRequested;
 
         RegisterShellRoutes();
         if (_viewModel != null)
@@ -116,8 +117,17 @@ public partial class MainView : UserControl
         navigation.PlaylistDetailRequested -= OnPlaylistDetailRequested;
         navigation.RankingDetailRequested -= OnRankingDetailRequested;
         navigation.ArtistDetailRequested -= OnArtistDetailRequested;
+        navigation.ToastRequested -= OnToastRequested;
 
         base.OnDetachedFromVisualTree(e);
+    }
+
+    private void OnToastRequested(string message, TimeSpan? duration)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            AppShell.ShowToast(message, duration ?? TimeSpan.FromSeconds(2.5));
+        });
     }
 
     private void OnUnhandledBackRequested(object? sender, LuminaBackRequestedEventArgs e)
@@ -303,34 +313,46 @@ public partial class MainView : UserControl
         await PushPageAsync(pageViewModel, navigationKey);
     }
 
-    private async void OnPlaylistDetailRequested(KugouPlaylist playlist)
+    private void OnPlaylistDetailRequested(KugouPlaylist playlist)
     {
         if (playlist == null)
         {
             return;
         }
 
-        await PushPageAsync(new PlaylistDetailViewModel(playlist), "NavPlaylists");
+        Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
+        {
+            _isStackOperationRunning = false;
+            await PushPageAsync(new PlaylistDetailViewModel(playlist), "NavPlaylists");
+        });
     }
 
-    private async void OnRankingDetailRequested(KugouRank rank)
+    private void OnRankingDetailRequested(KugouRank rank)
     {
         if (rank == null)
         {
             return;
         }
 
-        await PushPageAsync(new RankingDetailViewModel(rank), "NavRankings");
+        Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
+        {
+            _isStackOperationRunning = false;
+            await PushPageAsync(new RankingDetailViewModel(rank), "NavRankings");
+        });
     }
 
-    private async void OnArtistDetailRequested(KugouArtist artist)
+    private void OnArtistDetailRequested(KugouArtist artist)
     {
         if (artist == null)
         {
             return;
         }
 
-        await PushPageAsync(new ArtistDetailViewModel(artist), "NavArtists");
+        Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
+        {
+            _isStackOperationRunning = false;
+            await PushPageAsync(new ArtistDetailViewModel(artist), "NavArtists");
+        });
     }
 
     private async Task PushPageAsync(object viewModel, string navigationKey, bool fullScreen = false)

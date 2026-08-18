@@ -17,7 +17,7 @@ namespace KuGouMusicAvalonia.iOS;
 public partial class AppDelegate : AvaloniaAppDelegate<App>
 #pragma warning restore CA1711 // Identifiers should not have incorrect suffix
 {
-    public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
+    public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
         var docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         PlatformStoragePaths.ExternalDownloadsDirectory = Path.Combine(docPath, "VibeMusic");
@@ -30,11 +30,11 @@ public partial class AppDelegate : AvaloniaAppDelegate<App>
         return result;
     }
 
-    public override void WillTerminate(UIApplication application)
+    [Export("applicationWillTerminate:")]
+    public void WillTerminate(UIApplication application)
     {
         PlatformApplicationService.ExitApplication = null;
         IosMediaControlManager.Instance.Dispose();
-        base.WillTerminate(application);
     }
 
     protected override AppBuilder CustomizeAppBuilder(AppBuilder builder)
