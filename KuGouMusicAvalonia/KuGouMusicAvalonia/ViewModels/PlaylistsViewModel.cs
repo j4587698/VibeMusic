@@ -273,7 +273,8 @@ public partial class PlaylistsViewModel : ViewModelBase
         if (channel is null || string.IsNullOrWhiteSpace(channel.Id)) return;
         try
         {
-            await MusicService.Client.YouthChannelSubscribeAsync(channel.Id);
+            var response = await MusicService.Client.YouthChannelSubscribeAsync(channel.Id);
+            MusicService.EnsureResponseSuccess(response, "酷狗接口返回错误");
             channel.IsSubscribed = true;
             ChannelsStatus = $"已订阅「{channel.Name}」";
         }
@@ -289,7 +290,8 @@ public partial class PlaylistsViewModel : ViewModelBase
         if (channel is null || string.IsNullOrWhiteSpace(channel.Id)) return;
         try
         {
-            await MusicService.Client.YouthChannelUnsubscribeAsync(channel.Id);
+            var response = await MusicService.Client.YouthChannelUnsubscribeAsync(channel.Id);
+            MusicService.EnsureResponseSuccess(response, "酷狗接口返回错误");
             channel.IsSubscribed = false;
             YouthChannels.Remove(channel);
             ChannelsStatus = $"已取消订阅「{channel.Name}」";
@@ -406,6 +408,7 @@ public partial class PlaylistsViewModel : ViewModelBase
         try
         {
             var response = await MusicService.CreatePlaylistAsync(name);
+            MusicService.EnsureResponseSuccess(response, "酷狗接口返回错误");
             int listId = 0;
             if (!MusicService.TryParsePlaylistId(response, out listId) || listId <= 0)
             {
@@ -416,8 +419,10 @@ public partial class PlaylistsViewModel : ViewModelBase
 
             if (CreatePlaylistFromQueue && listId > 0 && PlayerService.Instance.Queue.Count > 0)
             {
-                await MusicService.AddSongsToPlaylistAsync(listId, PlayerService.Instance.Queue.ToList());
-                UserPlaylistStatusMessage = $"已创建歌单，并保存当前队列 {PlayerService.Instance.Queue.Count} 首";
+                var addResponse = await MusicService.AddSongsToPlaylistAsync(listId, PlayerService.Instance.Queue.ToList());
+                UserPlaylistStatusMessage = MusicService.TryGetResponseError(addResponse, out var addError, out _, out _)
+                    ? $"歌单已创建，但保存当前队列失败：{addError}"
+                    : $"已创建歌单，并保存当前队列 {PlayerService.Instance.Queue.Count} 首";
             }
             else
             {

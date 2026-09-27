@@ -109,6 +109,14 @@ public partial class SettingsViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsLoginPromptVisible))]
     private string _loginStatus = "正在检查登录态";
 
+    private const string DefaultLoginPromptText = "登录后同步头像、歌单、云盘和最近播放";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSessionExpiredNoticeVisible))]
+    private string _loginPromptText = DefaultLoginPromptText;
+
+    public bool IsSessionExpiredNoticeVisible => !string.Equals(LoginPromptText, DefaultLoginPromptText, StringComparison.Ordinal);
+
     [ObservableProperty]
     private bool _isProfileBusy;
 
@@ -402,7 +410,31 @@ public partial class SettingsViewModel : ViewModelBase
         if (IsLoggedIn)
         {
             IsLoginDialogOpen = false;
+            LoginPromptText = DefaultLoginPromptText;
         }
+        else if (AuthSessionService.Instance.LastExpiredMessage is { Length: > 0 } expiredMessage)
+        {
+            LoginPromptText = expiredMessage;
+        }
+    }
+
+    /// <summary>
+    /// 由 <see cref="AuthSessionService.SessionExpired"/> 触发：服务端确认登录失效，本地登录态已清除。
+    /// </summary>
+    public void HandleSessionExpired(string message)
+    {
+        LoginStatus = message;
+        LoginPromptText = message;
+        VipStatus = "VIP状态：登录已失效";
+        VipDetail = string.Empty;
+        ClearUserProfile();
+        UserProfileStatus = message;
+        NotifyLoginStateChanged();
+    }
+
+    public void OpenLoginDialog()
+    {
+        StartLogin();
     }
 
     [RelayCommand]
@@ -542,6 +574,7 @@ public partial class SettingsViewModel : ViewModelBase
             if (isSuccess)
             {
                 MusicService.SaveSession();
+                AuthSessionService.Instance.MarkSessionValid();
                 LoginStatus = "已登录，登录态已保存";
                 VipPrivilegeService.Instance.ResetSessionState();
                 RefreshLoginState();
@@ -589,6 +622,7 @@ public partial class SettingsViewModel : ViewModelBase
             if (isSuccess)
             {
                 MusicService.SaveSession();
+                AuthSessionService.Instance.MarkSessionValid();
                 LoginStatus = "已登录，登录态已保存";
                 VipPrivilegeService.Instance.ResetSessionState();
                 RefreshLoginState();
@@ -631,6 +665,7 @@ public partial class SettingsViewModel : ViewModelBase
             if (isSuccess)
             {
                 MusicService.SaveSession();
+                AuthSessionService.Instance.MarkSessionValid();
                 LoginStatus = "已登录，登录态已保存";
                 VipPrivilegeService.Instance.ResetSessionState();
                 RefreshLoginState();
@@ -667,6 +702,7 @@ public partial class SettingsViewModel : ViewModelBase
             if (isSuccess)
             {
                 MusicService.SaveSession();
+                AuthSessionService.Instance.MarkSessionValid();
                 LoginStatus = "登录态已刷新";
                 RefreshLoginState();
                 if (IsLoggedIn)
@@ -695,6 +731,7 @@ public partial class SettingsViewModel : ViewModelBase
     {
         CancelQrPolling("已清除扫码状态");
         MusicService.ClearSession();
+        AuthSessionService.Instance.Reset();
         VipPrivilegeService.Instance.ResetSessionState();
         QrCodeImage = null;
         QrUrl = string.Empty;
@@ -971,6 +1008,7 @@ public partial class SettingsViewModel : ViewModelBase
             if (status == KugouLoginQrStatus.Success)
             {
                 MusicService.SaveSession();
+                AuthSessionService.Instance.MarkSessionValid();
                 VipPrivilegeService.Instance.ResetSessionState();
                 RefreshLoginState();
                 IsLoginDialogOpen = false;
@@ -1020,8 +1058,15 @@ public partial class SettingsViewModel : ViewModelBase
 
         try
         {
-            await VipPrivilegeService.Instance.EnsureLoginFreshAsync();
+            var loginFresh = await VipPrivilegeService.Instance.EnsureLoginFreshAsync();
             RefreshLoginState();
+            if (!loginFresh)
+            {
+                // 确认失效时 AuthSessionService 会清理登录态并通知 UI，这里不再用失效 token 继续请求。
+                UserProfileStatus = AuthSessionService.Instance.LastExpiredMessage ?? "登录已过期，请重新登录";
+                return;
+            }
+
             await LoadProfileWithRetryAsync();
             var assetsSynced = await LoadUserAssetsAsync();
             await SyncFavoriteStateAsync();

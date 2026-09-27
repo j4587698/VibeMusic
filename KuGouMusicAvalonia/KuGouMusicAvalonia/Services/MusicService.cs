@@ -83,9 +83,12 @@ public static class MusicService
 
         errorMessage = !string.IsNullOrWhiteSpace(message)
             ? message
-            : errorCode == 20002
-                ? "请先登录或重新登录"
-                : $"API 错误 {errorCode}";
+            : errorCode switch
+            {
+                20002 => "请先登录或重新登录",
+                20018 => "登录已过期",
+                _ => $"API 错误 {errorCode}"
+            };
         return true;
     }
 
@@ -250,6 +253,7 @@ public static class MusicService
         }
 
         var result = await Client.GetUserPlaylistsTypedAsync(page: 1, pageSize: 80, cancellationToken: cancellationToken).ConfigureAwait(false);
+        EnsureResponseSuccess(result.Raw, "获取酷狗歌单失败");
         return result.Items.FirstOrDefault(IsFavoritePlaylist) ?? result.Items.FirstOrDefault(playlist => playlist.IsDefault == true);
     }
 
@@ -259,7 +263,8 @@ public static class MusicService
         var listId = ResolvePlaylistListId(playlist);
         if (listId <= 0)
         {
-            return Array.Empty<KugouSong>();
+            // 每个酷狗账号都有默认的“我喜欢”歌单，找不到说明数据异常，不能当作“没有收藏”处理。
+            throw new InvalidOperationException("没有找到酷狗账号的我喜欢歌单");
         }
 
         var songs = new List<KugouSong>();
@@ -267,6 +272,17 @@ public static class MusicService
         for (var page = 1; page <= 20; page++)
         {
             var result = await Client.GetPlaylistTracksNewTypedAsync(listId.ToString(), page, pageSize, cancellationToken).ConfigureAwait(false);
+            if (TryGetResponseError(result.Raw, out var pageError, out _, out _))
+            {
+                // 第一页失败说明整体同步失败；后续页失败时保留已拿到的数据。
+                if (page == 1)
+                {
+                    throw new InvalidOperationException($"获取我喜欢歌曲失败：{pageError}");
+                }
+
+                break;
+            }
+
             if (result.Items.Count == 0)
             {
                 break;
@@ -291,7 +307,8 @@ public static class MusicService
             throw new InvalidOperationException("没有找到酷狗账号的我喜欢歌单");
         }
 
-        await AddSongsToPlaylistAsync(listId, new[] { song }, cancellationToken).ConfigureAwait(false);
+        var response = await AddSongsToPlaylistAsync(listId, new[] { song }, cancellationToken).ConfigureAwait(false);
+        EnsureResponseSuccess(response, "添加到我喜欢失败");
     }
 
     public static async Task RemoveSongFromFavoritePlaylistAsync(KugouSong song, CancellationToken cancellationToken = default)
@@ -309,7 +326,8 @@ public static class MusicService
             return;
         }
 
-        await DeleteSongsFromPlaylistAsync(listId, new[] { fileId }, cancellationToken).ConfigureAwait(false);
+        var response = await DeleteSongsFromPlaylistAsync(listId, new[] { fileId }, cancellationToken).ConfigureAwait(false);
+        EnsureResponseSuccess(response, "从我喜欢移除失败");
     }
 
     public static bool AutoReceiveVipBeforePlayback
@@ -471,16 +489,36 @@ public static class MusicService
     {
         LocalMusicStore.Instance.ClearCookies();
         LocalMusicStore.Instance.ClearUserProfileCache();
-        _client?.Dispose();
-        _client = CreateClient(loadSavedCookies: false);
+        ReplaceClient();
     }
 
     public static void ClearAllData()
     {
         LocalMusicStore.Instance.ClearAllData();
-        _client?.Dispose();
-        _client = CreateClient(loadSavedCookies: false);
+        ReplaceClient();
         PlayerService.Instance.ClearQueue();
+    }
+
+    private static void ReplaceClient()
+    {
+        if (_client is not null)
+        {
+            AuthSessionService.Instance.Detach(_client);
+            _client.Dispose();
+        }
+
+        _client = CreateClient(loadSavedCookies: false);
+    }
+
+    /// <summary>
+    /// 接口返回错误（HTTP 非 2xx、status=0、error_code≠0）时抛出异常，避免把失败当成功或当成空数据。
+    /// </summary>
+    public static void EnsureResponseSuccess(KugouResponse response, string action)
+    {
+        if (TryGetResponseError(response, out var errorMessage, out _, out _))
+        {
+            throw new InvalidOperationException($"{action}：{errorMessage}");
+        }
     }
 
 
@@ -495,6 +533,11 @@ public static class MusicService
         for (var page = 1; page <= 20; page++)
         {
             var result = await Client.GetPlaylistTracksNewTypedAsync(listId.ToString(), page, pageSize, cancellationToken).ConfigureAwait(false);
+            if (page == 1)
+            {
+                EnsureResponseSuccess(result.Raw, "获取我喜欢歌曲失败");
+            }
+
             var match = result.Items.FirstOrDefault(song => IsSameSong(song, target));
             if (match is not null)
             {
@@ -603,6 +646,7 @@ public static class MusicService
     private static KugouLiteClient CreateClient(bool loadSavedCookies = true)
     {
         var client = new KugouLiteClient();
+        AuthSessionService.Instance.Attach(client);
         if (!loadSavedCookies)
         {
             return client;

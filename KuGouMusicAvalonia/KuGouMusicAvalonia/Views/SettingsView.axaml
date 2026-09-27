@@ -31,7 +31,8 @@
           <lumina:LuminaAvatar Content="K" Size="80" Background="{DynamicResource MusicPrimaryGradient}" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" FontSize="28" FontWeight="Black" />
           <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="8" MinWidth="0">
             <TextBlock Text="酷狗账号" FontSize="26" FontWeight="Black" Foreground="{DynamicResource MusicTextBrush}" TextWrapping="Wrap" MaxLines="2" />
-            <TextBlock Text="登录后同步头像、歌单、云盘和最近播放" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding LoginPromptText}" FontSize="14" Foreground="{DynamicResource MusicTextSoftBrush}" TextWrapping="Wrap" IsVisible="{Binding !IsSessionExpiredNoticeVisible}" />
+            <TextBlock Text="{Binding LoginPromptText}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource LuminaDangerBrush}" TextWrapping="Wrap" IsVisible="{Binding IsSessionExpiredNoticeVisible}" />
             <Button Classes="Primary Icon" Command="{Binding StartLoginCommand}" Width="40" Height="40" CornerRadius="20" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" Padding="0" HorizontalAlignment="Left" Background="{DynamicResource MusicPrimaryGradient}" ToolTip.Tip="登录" lumina:LuminaButton.IconSize="22">
               <icons:MaterialIcon Kind="Login" Width="22" Height="22" Foreground="{DynamicResource LuminaPrimaryForegroundBrush}" />
             </Button>
