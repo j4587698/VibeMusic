@@ -68,6 +68,9 @@ public partial class App : Application
         FloatingLyricsService.Instance.StateChanged += OnFloatingLyricsStateChanged;
         UpdateTrayFloatingLyricsMenuItems();
         base.OnFrameworkInitializationCompleted();
+
+        // 启动后在后台向服务端确认一次登录态，失效时由 AuthSessionService 统一提示。
+        Dispatcher.UIThread.Post(AuthSessionService.Instance.ValidateOnStartup, DispatcherPriority.Background);
     }
 
     private void TrayIcon_OnClicked(object? sender, EventArgs e)

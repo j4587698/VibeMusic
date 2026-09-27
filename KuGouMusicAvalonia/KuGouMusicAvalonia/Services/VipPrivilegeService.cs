@@ -131,31 +131,28 @@ public sealed class VipPrivilegeService
     public async Task<bool> EnsureLoginFreshAsync(CancellationToken cancellationToken = default)
     {
         var state = MusicService.Client.GetLoginState();
-        if (!state.IsLoggedIn || state.IsExpired)
+        if (!state.IsLoggedIn)
         {
             return false;
         }
 
-        if (!state.ShouldRefresh)
+        if (!state.IsExpired && !state.ShouldRefresh)
         {
             return true;
         }
 
-        try
-        {
-            var response = await MusicService.Client.RefreshTokenAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            MusicService.SaveSession();
-            if (KugouLiteClient.IsAuthExpiredResponse(response))
-            {
-                return false;
-            }
+        // 统一交给 AuthSessionService：带冷却、并发合并，确认失效时会清理登录态并通知 UI。
+        var result = await AuthSessionService.Instance
+            .VerifyAsync(definiteSignal: state.IsExpired, cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
-            return !MusicService.Client.GetLoginState().IsExpired;
-        }
-        catch (Exception) when (!cancellationToken.IsCancellationRequested)
+        return result switch
         {
-            return true;
-        }
+            AuthVerifyResult.Valid => true,
+            AuthVerifyResult.Expired or AuthVerifyResult.NotLoggedIn => false,
+            // 无法确认（网络异常等）：不再盲目视为有效，而是按本地到期时间判断。
+            _ => !MusicService.Client.GetLoginState().IsExpired
+        };
     }
 
     private VipPrivilegeStatus UpdateFromResponse(KugouResponse? response)

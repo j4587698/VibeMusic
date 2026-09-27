@@ -11,6 +11,7 @@ using KuGouMusicAvalonia.Controls;
 using KuGouMusicAvalonia.Services;
 using KuGouMusicAvalonia.ViewModels;
 using LuminaUI.Controls;
+using LuminaUI.Services;
 
 namespace KuGouMusicAvalonia.Views;
 
@@ -98,6 +99,7 @@ public partial class MainView : UserControl
         navigation.RankingDetailRequested += OnRankingDetailRequested;
         navigation.ArtistDetailRequested += OnArtistDetailRequested;
         navigation.ToastRequested += OnToastRequested;
+        AuthSessionService.Instance.SessionExpired += OnSessionExpired;
 
         RegisterShellRoutes();
         if (_viewModel != null)
@@ -121,6 +123,7 @@ public partial class MainView : UserControl
         navigation.RankingDetailRequested -= OnRankingDetailRequested;
         navigation.ArtistDetailRequested -= OnArtistDetailRequested;
         navigation.ToastRequested -= OnToastRequested;
+        AuthSessionService.Instance.SessionExpired -= OnSessionExpired;
 
         base.OnDetachedFromVisualTree(e);
     }
@@ -131,6 +134,51 @@ public partial class MainView : UserControl
         {
             AppShell.ShowToast(message, duration ?? TimeSpan.FromSeconds(2.5));
         });
+    }
+
+    private bool _isSessionExpiredDialogOpen;
+
+    private async void OnSessionExpired(object? sender, AuthSessionExpiredEventArgs e)
+    {
+        if (_viewModel == null)
+        {
+            return;
+        }
+
+        _viewModel.HandleSessionExpired(e.Message);
+
+        if (TopLevel.GetTopLevel(this) is not Window window)
+        {
+            // 移动端：没有窗口级对话框，用 Toast 提示，并直接跳到“我的”页面。
+            AppShell.ShowToast("登录已失效，请在“我的”页面重新登录", TimeSpan.FromSeconds(4));
+            ShellNavigationService.Instance.Navigate("NavSettings");
+            return;
+        }
+
+        if (_isSessionExpiredDialogOpen)
+        {
+            return;
+        }
+
+        _isSessionExpiredDialogOpen = true;
+        try
+        {
+            var relogin = await LuminaDialogService.Instance.ShowConfirmAsync(
+                window,
+                "登录已失效",
+                $"{e.Message}\n\n在线歌单、云盘、我喜欢和 VIP 权益需要重新登录后才能使用。",
+                confirmText: "重新登录",
+                cancelText: "稍后");
+
+            if (relogin)
+            {
+                _viewModel.OpenLoginCommand.Execute(null);
+            }
+        }
+        finally
+        {
+            _isSessionExpiredDialogOpen = false;
+        }
     }
 
     private void OnUnhandledBackRequested(object? sender, LuminaBackRequestedEventArgs e)

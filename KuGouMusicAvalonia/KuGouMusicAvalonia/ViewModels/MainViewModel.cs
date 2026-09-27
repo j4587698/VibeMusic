@@ -255,6 +255,21 @@ public partial class MainViewModel : ViewModelBase
         return _settingsViewModel;
     }
 
+    /// <summary>登录失效后同步各页面状态。</summary>
+    public void HandleSessionExpired(string message)
+    {
+        _settingsViewModel.HandleSessionExpired(message);
+        Player.StatusMessage = message;
+    }
+
+    /// <summary>跳转到“我的”页面并打开登录弹窗。</summary>
+    [RelayCommand]
+    private void OpenLogin()
+    {
+        ShellNavigationService.Instance.Navigate("NavSettings");
+        _settingsViewModel.OpenLoginDialog();
+    }
+
     [RelayCommand]
     private void Navigate(string key)
     {

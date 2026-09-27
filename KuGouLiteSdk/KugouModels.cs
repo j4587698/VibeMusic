@@ -72,6 +72,18 @@ public sealed class KugouRequest
     public bool IncludeCookieHeader { get; set; }
 }
 
+public sealed class KugouResponseReceivedEventArgs : EventArgs
+{
+    public KugouResponseReceivedEventArgs(KugouRequest request, KugouResponse response)
+    {
+        Request = request;
+        Response = response;
+    }
+
+    public KugouRequest Request { get; }
+    public KugouResponse Response { get; }
+}
+
 public sealed class KugouResponse
 {
     internal KugouResponse(HttpStatusCode statusCode, byte[] rawBody, IReadOnlyList<string> cookies, IReadOnlyDictionary<string, string> headers)

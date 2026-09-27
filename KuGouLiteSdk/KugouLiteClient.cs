@@ -166,7 +166,32 @@ public sealed partial class KugouLiteClient : IDisposable
             CookieStore.ApplySetCookieHeaders(cookies);
         }
 
+        RaiseResponseReceived(request, result);
         return result;
+    }
+
+    /// <summary>
+    /// 每个经过 <see cref="SendAsync"/> 的响应都会触发，便于上层统一识别登录失效等全局错误。
+    /// 订阅方抛出的异常会被吞掉，不影响请求本身。
+    /// </summary>
+    public event EventHandler<KugouResponseReceivedEventArgs>? ResponseReceived;
+
+    private void RaiseResponseReceived(KugouRequest request, KugouResponse response)
+    {
+        var handler = ResponseReceived;
+        if (handler is null)
+        {
+            return;
+        }
+
+        try
+        {
+            handler(this, new KugouResponseReceivedEventArgs(request, response));
+        }
+        catch
+        {
+            // 观察者异常不能影响正常请求。
+        }
     }
 
     private static Dictionary<string, object?> BuildParameters(
