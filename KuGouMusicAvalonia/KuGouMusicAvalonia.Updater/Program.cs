@@ -227,7 +227,7 @@ internal static class Program
             Process.Start(new ProcessStartInfo
             {
                 FileName = executable,
-                Arguments = failureReason is null ? string.Empty : $"--update-failed \"{failureReason}\"",
+                Arguments = failureReason is null ? "--restart" : $"--update-failed \"{failureReason}\"",
                 WorkingDirectory = options.TargetDirectory,
                 UseShellExecute = false
             });

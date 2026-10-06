@@ -45,6 +45,11 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            PlatformApplicationService.ExitApplication = () =>
+            {
+                MainWindow.IsShuttingDown = true;
+                Dispatcher.UIThread.Post(() => desktop.Shutdown());
+            };
             _mainViewModel = new MainViewModel();
             desktop.MainWindow = new MainWindow
             {
@@ -96,6 +101,7 @@ public partial class App : Application
 
     private void ExitApp_OnClick(object? sender, EventArgs e)
     {
+        MainWindow.IsShuttingDown = true;
         Dispatcher.UIThread.Post(() =>
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)

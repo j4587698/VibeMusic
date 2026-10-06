@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Avalonia;
 using KuGouMusicAvalonia.Services;
@@ -25,7 +26,7 @@ sealed class Program
             WriteCrashLog(e.ExceptionObject?.ToString() ?? "Unknown exception");
         };
 
-        var isRestart = args is ["--restart"];
+        var isRestart = args.Contains("--restart", StringComparer.OrdinalIgnoreCase);
 
         using var singleInstanceMutex = new Mutex(false, SingleInstanceMutexName);
         var hasSingleInstance = false;
