@@ -18,6 +18,7 @@ public partial class MainWindow : LuminaWindow
     }
 
     private bool _isRealClosing;
+    public static bool IsShuttingDown { get; set; }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
@@ -56,7 +57,7 @@ public partial class MainWindow : LuminaWindow
     protected override async void OnClosing(WindowClosingEventArgs e)
     {
         // 1. 如果是真正的彻底退出阶段，直接交给基类处理并放行
-        if (_isRealClosing)
+        if (_isRealClosing || IsShuttingDown)
         {
             base.OnClosing(e);
             return;

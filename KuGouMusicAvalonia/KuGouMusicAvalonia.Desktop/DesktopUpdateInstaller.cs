@@ -65,7 +65,10 @@ internal sealed class DesktopUpdateInstaller : IUpdateInstaller
         });
 
         // updater 会等待本进程退出后才动手。
-        PlatformApplicationService.TryExitApplication();
+        if (!PlatformApplicationService.TryExitApplication())
+        {
+            Environment.Exit(0);
+        }
         return true;
     }
 
