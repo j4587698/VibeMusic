@@ -87,8 +87,27 @@ internal sealed class AndroidUpdateInstaller(Activity activity) : IUpdateInstall
                 ? PackageInfoFlags.SigningCertificates
                 : PackageInfoFlags.Signatures;
 
-            var current = GetSignatureHashes(packageManager.GetPackageInfo(_activity.PackageName!, flags));
-            var candidate = GetSignatureHashes(packageManager.GetPackageArchiveInfo(apkPath, flags));
+            var currentPkg = packageManager.GetPackageInfo(_activity.PackageName!, flags);
+            var current = GetSignatureHashes(currentPkg);
+            if (current.Length == 0 && OperatingSystem.IsAndroidVersionAtLeast(28))
+            {
+#pragma warning disable CA1422
+                currentPkg = packageManager.GetPackageInfo(_activity.PackageName!, PackageInfoFlags.Signatures);
+                current = GetSignatureHashes(currentPkg);
+#pragma warning restore CA1422
+            }
+
+            // 对未安装的 APK，getPackageArchiveInfo 在多数 Android 版本上传入 SigningCertificates
+            // 往往不会填充 SigningInfo，此时需回退使用 Signatures 标志重新解析。
+            var candidatePkg = packageManager.GetPackageArchiveInfo(apkPath, flags);
+            var candidate = GetSignatureHashes(candidatePkg);
+            if (candidate.Length == 0 && OperatingSystem.IsAndroidVersionAtLeast(28))
+            {
+#pragma warning disable CA1422
+                candidatePkg = packageManager.GetPackageArchiveInfo(apkPath, PackageInfoFlags.Signatures);
+                candidate = GetSignatureHashes(candidatePkg);
+#pragma warning restore CA1422
+            }
 
             return current.Length > 0
                 && candidate.Length > 0

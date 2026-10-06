@@ -280,8 +280,15 @@ jobs:
 
       - name: Decode Android keystore
         shell: pwsh
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          $bytes = [Convert]::FromBase64String("${{ secrets.ANDROID_KEYSTORE_BASE64 }}")
+          if ([string]::IsNullOrWhiteSpace($env:ANDROID_KEYSTORE_BASE64)) {
+            Write-Error "ANDROID_KEYSTORE_BASE64 secret is not set!"
+            exit 1
+          }
+          $normalized = ($env:ANDROID_KEYSTORE_BASE64 -replace '-----[^-]+-----', '') -replace '\s', ''
+          $bytes = [Convert]::FromBase64String($normalized)
           [IO.File]::WriteAllBytes("$env:RUNNER_TEMP/vibemusic.jks", $bytes)
 
       - name: Publish Android APK (${{ matrix.abi }})
@@ -293,6 +300,7 @@ jobs:
             -c Release `
             -p:Version=$version `
             -p:AndroidAbi=$abi `
+            -p:AndroidKeyStore=true `
             -p:AndroidSigningKeyStore="$env:RUNNER_TEMP/vibemusic.jks" `
             -p:AndroidSigningStorePass="${{ secrets.ANDROID_KEYSTORE_PASS }}" `
             -p:AndroidSigningKeyAlias="${{ secrets.ANDROID_KEY_ALIAS }}" `
