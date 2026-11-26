@@ -10,6 +10,7 @@ using KuGouMusicAvalonia.Services.Update;
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 [assembly: InternalsVisibleTo("KuGouMusicAvalonia.Android")]
 
@@ -122,7 +123,18 @@ public class MainActivity : AvaloniaMainActivity, IServiceConnection
         var abis = Build.SupportedAbis?.Where(abi => !string.IsNullOrWhiteSpace(abi)).ToArray();
         if (abis is not { Length: > 0 })
         {
-            abis = [Build.CpuAbi ?? "armeabi-v7a"];
+            abis =
+            [
+                RuntimeInformation.ProcessArchitecture switch
+                {
+                    Architecture.Arm64 => "arm64-v8a",
+                    Architecture.Arm => "armeabi-v7a",
+                    Architecture.X64 => "x86_64",
+                    Architecture.X86 => "x86",
+                    var architecture => throw new PlatformNotSupportedException(
+                        $"Unsupported Android process architecture '{architecture}'.")
+                }
+            ];
         }
 
         UpdatePlatform.Initialize(abis!, ResolveVersionCode());

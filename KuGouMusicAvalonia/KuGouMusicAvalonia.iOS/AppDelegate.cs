@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.iOS;
 using Avalonia.Media;
 using KuGouMusicAvalonia.Services;
+using System;
 using System.IO;
 
 namespace KuGouMusicAvalonia.iOS;
@@ -17,18 +18,19 @@ namespace KuGouMusicAvalonia.iOS;
 public partial class AppDelegate : AvaloniaAppDelegate<App>
 #pragma warning restore CA1711 // Identifiers should not have incorrect suffix
 {
-    public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
-    {
-        var docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        PlatformStoragePaths.ExternalDownloadsDirectory = Path.Combine(docPath, "VibeMusic");
-        Directory.CreateDirectory(PlatformStoragePaths.ExternalDownloadsDirectory);
-        PlatformAudioStorage.Initialize(new FileSystemAudioStorage(() => MusicService.DownloadDirectory));
+[Export("application:didFinishLaunchingWithOptions:")]
+public new bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
+{
+    var docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+    PlatformStoragePaths.ExternalDownloadsDirectory = Path.Combine(docPath, "VibeMusic");
+    Directory.CreateDirectory(PlatformStoragePaths.ExternalDownloadsDirectory);
+    PlatformAudioStorage.Initialize(new FileSystemAudioStorage(() => MusicService.DownloadDirectory));
 
-        var result = base.FinishedLaunching(application, launchOptions);
-        PlatformApplicationService.ExitApplication = () => Environment.Exit(0);
-        IosMediaControlManager.Instance.Initialize();
-        return result;
-    }
+    var result = base.FinishedLaunching(application, launchOptions);
+    PlatformApplicationService.ExitApplication = () => Environment.Exit(0);
+    IosMediaControlManager.Instance.Initialize();
+    return result;
+}
 
     [Export("applicationWillTerminate:")]
     public void WillTerminate(UIApplication application)

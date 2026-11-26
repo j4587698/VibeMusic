@@ -65,7 +65,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: "11.0.x"
 
       - name: Resolve version from project
         id: ver
@@ -255,9 +255,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        abi:
-          - arm64-v8a
-          - armeabi-v7a
+        include:
+          - abi: arm64-v8a
+            rid: android-arm64
+          - abi: armeabi-v7a
+            rid: android-arm
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -266,7 +268,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: "11.0.x"
 
       - name: Install Android workload
         run: dotnet workload install android
@@ -296,10 +298,15 @@ jobs:
         run: |
           $version = "${{ steps.ver.outputs.version }}"
           $abi = "${{ matrix.abi }}"
+          $rid = "${{ matrix.rid }}"
+          # Work around ILC scan-DGML failure; Java wrapper trimming is disabled and APKs may grow.
           dotnet publish ./KuGouMusicAvalonia/KuGouMusicAvalonia.Android/KuGouMusicAvalonia.Android.csproj `
             -c Release `
+            -r $rid `
             -p:Version=$version `
-            -p:AndroidAbi=$abi `
+            -p:PublishAot=true `
+            -p:PublishTrimmed=true `
+            -p:_AndroidTrimmableTypemapTrimJavaCode=false `
             -p:AndroidKeyStore=true `
             -p:AndroidSigningKeyStore="$env:RUNNER_TEMP/vibemusic.jks" `
             -p:AndroidSigningStorePass="${{ secrets.ANDROID_KEYSTORE_PASS }}" `

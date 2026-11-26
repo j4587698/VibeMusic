@@ -49,7 +49,7 @@ internal sealed class IosMediaControlManager : IDisposable
     private static void ConfigureAudioSession()
     {
         var session = AVAudioSession.SharedInstance();
-        session.SetCategory(AVAudioSession.CategoryPlayback);
+        session.SetCategory(AVAudioSessionCategory.Playback);
         session.SetActive(true);
         UIApplication.SharedApplication.BeginReceivingRemoteControlEvents();
     }
@@ -90,13 +90,13 @@ internal sealed class IosMediaControlManager : IDisposable
             return MPRemoteCommandHandlerStatus.Success;
         });
 
-        _nextHandler = commandCenter.NextTrackCommand.AddTarget(_ =>
+        _nextHandler = commandCenter.NextTrackCommand.AddTarget(commandEvent =>
         {
             _ = PlayerService.Instance.SkipNextAsync();
             return MPRemoteCommandHandlerStatus.Success;
         });
 
-        _previousHandler = commandCenter.PreviousTrackCommand.AddTarget(_ =>
+        _previousHandler = commandCenter.PreviousTrackCommand.AddTarget(commandEvent =>
         {
             _ = PlayerService.Instance.SkipPreviousAsync();
             return MPRemoteCommandHandlerStatus.Success;
@@ -126,22 +126,23 @@ internal sealed class IosMediaControlManager : IDisposable
         var player = PlayerService.Instance;
         if (!player.HasSong)
         {
-            MPNowPlayingInfoCenter.DefaultCenter.NowPlaying = null;
+            // Objective-C accepts nil here to clear the now-playing metadata.
+            MPNowPlayingInfoCenter.DefaultCenter.NowPlaying = null!;
             return;
         }
 
-        var nowPlaying = new NSMutableDictionary
+        var nowPlaying = new MPNowPlayingInfo
         {
-            [MPMediaItemProperty.Title] = new NSString(player.CurrentTitle),
-            [MPMediaItemProperty.Artist] = new NSString(player.CurrentArtist),
-            [MPMediaItemProperty.PlaybackDuration] = NSNumber.FromDouble(Math.Max(0, player.Duration)),
-            [MPNowPlayingInfoProperty.ElapsedPlaybackTime] = NSNumber.FromDouble(Math.Max(0, player.Progress)),
-            [MPNowPlayingInfoProperty.PlaybackRate] = NSNumber.FromDouble(player.IsPlaying ? 1.0 : 0.0)
+            Title = player.CurrentTitle,
+            Artist = player.CurrentArtist,
+            PlaybackDuration = Math.Max(0, player.Duration),
+            ElapsedPlaybackTime = Math.Max(0, player.Progress),
+            PlaybackRate = player.IsPlaying ? 1.0 : 0.0
         };
 
         if (_cachedArtwork is not null)
         {
-            nowPlaying[MPMediaItemProperty.Artwork] = _cachedArtwork;
+            nowPlaying.Artwork = _cachedArtwork;
         }
 
         MPNowPlayingInfoCenter.DefaultCenter.NowPlaying = nowPlaying;
@@ -178,7 +179,7 @@ internal sealed class IosMediaControlManager : IDisposable
                 return;
             }
 
-            _cachedArtwork = new MPMediaItemArtwork(image);
+            _cachedArtwork = new MPMediaItemArtwork(image.Size, _ => image);
             _cachedCoverUrl = coverUrl;
             UIApplication.SharedApplication.BeginInvokeOnMainThread(UpdateNowPlayingInfo);
         }
