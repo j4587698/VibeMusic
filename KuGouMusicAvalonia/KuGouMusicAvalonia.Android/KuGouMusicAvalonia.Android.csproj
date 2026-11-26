@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0-android</TargetFramework>
-    <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+    <TargetFramework>net11.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ApplicationId>com.jvxiang.VibeMusic</ApplicationId>
     <ApplicationVersion>$(AppVersionCode)</ApplicationVersion>
@@ -19,6 +19,14 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" />
     <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" />
+    <!-- Align AndroidX with Avalonia 12.2 to avoid duplicate classes and version-range conflicts. -->
+    <PackageReference Include="Xamarin.AndroidX.Core.Core.Ktx" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Jvm" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData.Core" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModelSavedState" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModelSavedState.Android" />
   </ItemGroup>
 
   <ItemGroup>

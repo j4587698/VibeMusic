@@ -204,7 +204,7 @@ internal sealed class AndroidMediaStoreAudioStorage : IPlatformAudioStorage
         var selection = $"{MediaStore.IMediaColumns.RelativePath} = ? AND {MediaStore.IMediaColumns.DisplayName} = ?";
         using var cursor = _contentResolver.Query(
             collection,
-            new[] { MediaStore.MediaColumns.Id },
+            new[] { IBaseColumns.Id },
             selection,
             new[] { relativePath, displayName },
             null);

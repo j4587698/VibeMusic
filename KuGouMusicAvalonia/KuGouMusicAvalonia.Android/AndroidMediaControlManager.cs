@@ -3,6 +3,7 @@ using Android;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.Media;
 using Android.Media.Session;
 using Android.OS;
@@ -53,14 +54,15 @@ internal sealed class AndroidMediaControlManager : IDisposable
             return;
         }
 
-        _context = context.ApplicationContext;
+        _context = context.ApplicationContext ?? context;
         _notificationManager = (NotificationManager?)_context.GetSystemService(Context.NotificationService);
         EnsureNotificationChannel();
 
-        _mediaSession = new MediaSession(_context, "KuGouMusicPlaybackSession");
-        _mediaSession.SetCallback(new SessionCallback());
-        _mediaSession.SetFlags(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls);
-        _mediaSession.Active = true;
+        var mediaSession = new MediaSession(_context, "KuGouMusicPlaybackSession");
+        _mediaSession = mediaSession;
+        mediaSession.SetCallback(new SessionCallback());
+        mediaSession.SetFlags(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls);
+        mediaSession.Active = true;
 
         PlayerService.Instance.PropertyChanged += OnPlayerPropertyChanged;
         _initialized = true;
@@ -109,7 +111,10 @@ internal sealed class AndroidMediaControlManager : IDisposable
 
     private async Task UpdateNowPlayingNotificationAsync()
     {
-        if (!_initialized || _context is null || _notificationManager is null || _mediaSession is null)
+        var context = _context;
+        var notificationManager = _notificationManager;
+        var mediaSession = _mediaSession;
+        if (!_initialized || context is null || notificationManager is null || mediaSession is null)
         {
             return;
         }
@@ -120,15 +125,15 @@ internal sealed class AndroidMediaControlManager : IDisposable
             var player = PlayerService.Instance;
             if (!player.HasSong)
             {
-                _notificationManager.Cancel(NotificationId);
-                PlaybackNotificationService.RequestStop(_context);
+                notificationManager.Cancel(NotificationId);
+                PlaybackNotificationService.RequestStop(context);
                 return;
             }
 
             if (!HasNotificationPermission())
             {
-                _notificationManager.Cancel(NotificationId);
-                PlaybackNotificationService.RequestStop(_context);
+                notificationManager.Cancel(NotificationId);
+                PlaybackNotificationService.RequestStop(context);
                 return;
             }
 
@@ -137,9 +142,9 @@ internal sealed class AndroidMediaControlManager : IDisposable
             UpdatePlaybackState(player);
             UpdateMetadata(player, coverBitmap);
 
-            var notification = BuildNotification(player, coverBitmap);
-            _notificationManager.Notify(NotificationId, notification);
-            PlaybackNotificationService.RequestSync(_context);
+            var notification = BuildNotification(player, coverBitmap, context, mediaSession);
+            notificationManager.Notify(NotificationId, notification);
+            PlaybackNotificationService.RequestSync(context);
         }
         finally
         {
@@ -160,7 +165,9 @@ internal sealed class AndroidMediaControlManager : IDisposable
             return null;
         }
 
-        return BuildNotification(player, _cachedCoverBitmap);
+        var context = _context ?? throw new InvalidOperationException("Android media control manager is not initialized.");
+        var mediaSession = _mediaSession ?? throw new InvalidOperationException("Android media control manager is not initialized.");
+        return BuildNotification(player, _cachedCoverBitmap, context, mediaSession);
     }
 
     private bool HasNotificationPermission()
@@ -170,27 +177,29 @@ internal sealed class AndroidMediaControlManager : IDisposable
                 || _context.CheckSelfPermission(Manifest.Permission.PostNotifications) == Permission.Granted);
     }
 
-    private Notification BuildNotification(PlayerService player, Bitmap? coverBitmap)
+    private Notification BuildNotification(PlayerService player, Bitmap? coverBitmap, Context context, MediaSession mediaSession)
     {
-        if (_context is null || _mediaSession is null)
-        {
-            throw new InvalidOperationException("Android media control manager is not initialized.");
-        }
-
-        var launchIntent = _context.PackageManager?.GetLaunchIntentForPackage(_context.PackageName!);
+        var launchIntent = context.PackageManager?.GetLaunchIntentForPackage(context.PackageName!);
         var contentIntent = launchIntent is null
             ? null
             : PendingIntent.GetActivity(
-                _context,
+                context,
                 0,
                 launchIntent,
                 PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
-        var previousIntent = BuildActionPendingIntent(ActionPrevious, 1);
-        var toggleIntent = BuildActionPendingIntent(ActionTogglePlayPause, 2);
-        var nextIntent = BuildActionPendingIntent(ActionNext, 3);
+        var previousIntent = BuildActionPendingIntent(context, ActionPrevious, 1);
+        var toggleIntent = BuildActionPendingIntent(context, ActionTogglePlayPause, 2);
+        var nextIntent = BuildActionPendingIntent(context, ActionNext, 3);
 
-        var builder = new Notification.Builder(_context, ChannelId)
+        var builder = OperatingSystem.IsAndroidVersionAtLeast(26)
+            ? new Notification.Builder(context, ChannelId)
+            : new Notification.Builder(context);
+        var mediaStyle = new Notification.MediaStyle();
+        mediaStyle.SetMediaSession(mediaSession.SessionToken);
+        mediaStyle.SetShowActionsInCompactView(0, 1, 2);
+
+        builder
             .SetContentTitle(player.CurrentTitle)
             .SetContentText(player.CurrentArtist)
             .SetSmallIcon(Resource.Drawable.Icon)
@@ -198,10 +207,23 @@ internal sealed class AndroidMediaControlManager : IDisposable
             .SetOnlyAlertOnce(true)
             .SetOngoing(player.IsPlaying)
             .SetVisibility(NotificationVisibility.Public)
-            .SetStyle(new Notification.MediaStyle().SetMediaSession(_mediaSession.SessionToken).SetShowActionsInCompactView(0, 1, 2))
-            .AddAction(new Notification.Action.Builder(global::Android.Resource.Drawable.IcMediaPrevious, ToCharSequence("上一首"), previousIntent).Build())
-            .AddAction(new Notification.Action.Builder(player.IsPlaying ? global::Android.Resource.Drawable.IcMediaPause : global::Android.Resource.Drawable.IcMediaPlay, ToCharSequence(player.IsPlaying ? "暂停" : "播放"), toggleIntent).Build())
-            .AddAction(new Notification.Action.Builder(global::Android.Resource.Drawable.IcMediaNext, ToCharSequence("下一首"), nextIntent).Build());
+            .SetStyle(mediaStyle)
+            .AddAction(new Notification.Action.Builder(
+                Icon.CreateWithResource(context, global::Android.Resource.Drawable.IcMediaPrevious),
+                ToCharSequence("上一首"),
+                previousIntent).Build())
+            .AddAction(new Notification.Action.Builder(
+                Icon.CreateWithResource(
+                    context,
+                    player.IsPlaying
+                        ? global::Android.Resource.Drawable.IcMediaPause
+                        : global::Android.Resource.Drawable.IcMediaPlay),
+                ToCharSequence(player.IsPlaying ? "暂停" : "播放"),
+                toggleIntent).Build())
+            .AddAction(new Notification.Action.Builder(
+                Icon.CreateWithResource(context, global::Android.Resource.Drawable.IcMediaNext),
+                ToCharSequence("下一首"),
+                nextIntent).Build());
 
         if (coverBitmap is not null)
         {
@@ -216,20 +238,16 @@ internal sealed class AndroidMediaControlManager : IDisposable
         return builder.Build();
     }
 
-    private PendingIntent BuildActionPendingIntent(string action, int requestCode)
+    private static PendingIntent BuildActionPendingIntent(Context context, string action, int requestCode)
     {
-        if (_context is null)
-        {
-            throw new InvalidOperationException("Android media control manager is not initialized.");
-        }
-
-        var intent = new Intent(_context, typeof(MediaControlBroadcastReceiver));
+        var intent = new Intent(context, typeof(MediaControlBroadcastReceiver));
         intent.SetAction(action);
         return PendingIntent.GetBroadcast(
-            _context,
+            context,
             requestCode,
             intent,
-            PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+            PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable)
+            ?? throw new InvalidOperationException("Failed to create a media control PendingIntent.");
     }
 
     private void EnsureNotificationChannel()
@@ -249,7 +267,8 @@ internal sealed class AndroidMediaControlManager : IDisposable
 
     private void UpdatePlaybackState(PlayerService player)
     {
-        if (_mediaSession is null)
+        var mediaSession = _mediaSession;
+        if (mediaSession is null)
         {
             return;
         }
@@ -266,25 +285,30 @@ internal sealed class AndroidMediaControlManager : IDisposable
             state = PlaybackStateCode.Buffering;
         }
 
-        var playbackState = new PlaybackState.Builder()
-            .SetActions((long)actions)
-            .SetState(state, (long)(player.Progress * 1000), player.IsPlaying ? 1f : 0f, SystemClock.ElapsedRealtime())
-            .Build();
+        var playbackStateBuilder = new PlaybackState.Builder();
+        playbackStateBuilder.SetActions((long)actions);
+        playbackStateBuilder.SetState(
+            state,
+            (long)(player.Progress * 1000),
+            player.IsPlaying ? 1f : 0f,
+            SystemClock.ElapsedRealtime());
+        var playbackState = playbackStateBuilder.Build();
 
-        _mediaSession.SetPlaybackState(playbackState);
+        mediaSession.SetPlaybackState(playbackState);
     }
 
     private void UpdateMetadata(PlayerService player, Bitmap? coverBitmap)
     {
-        if (_mediaSession is null)
+        var mediaSession = _mediaSession;
+        if (mediaSession is null)
         {
             return;
         }
 
-        var metadataBuilder = new MediaMetadata.Builder()
-            .PutString(MediaMetadata.MetadataKeyTitle, player.CurrentTitle)
-            .PutString(MediaMetadata.MetadataKeyArtist, player.CurrentArtist)
-            .PutLong(MediaMetadata.MetadataKeyDuration, (long)(player.Duration * 1000));
+        var metadataBuilder = new MediaMetadata.Builder();
+        metadataBuilder.PutString(MediaMetadata.MetadataKeyTitle, player.CurrentTitle);
+        metadataBuilder.PutString(MediaMetadata.MetadataKeyArtist, player.CurrentArtist);
+        metadataBuilder.PutLong(MediaMetadata.MetadataKeyDuration, (long)(player.Duration * 1000));
 
         if (coverBitmap is not null)
         {
@@ -293,7 +317,7 @@ internal sealed class AndroidMediaControlManager : IDisposable
 
         var metadata = metadataBuilder.Build();
 
-        _mediaSession.SetMetadata(metadata);
+        mediaSession.SetMetadata(metadata);
     }
 
     private async Task<Bitmap?> EnsureCoverBitmapAsync(string? coverUrl)
